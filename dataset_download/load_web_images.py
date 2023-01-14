@@ -4,6 +4,7 @@ import os
 import logging
 import sys
 from tqdm import tqdm
+import argparse
 
 
 CURRENT_PATH = os.path.dirname(os.path.abspath('__file__'))
@@ -11,9 +12,8 @@ CURRENT_PATH = os.path.dirname(os.path.abspath('__file__'))
 # CREATE FOLDER
 def folder_create(images, opt):
     try:
-        folder_name = input("Enter Folder Name:-> ")
         # folder creation
-        os.mkdir(os.path.join(CURRENT_PATH, folder_name))
+        os.mkdir(os.path.join(CURRENT_PATH, opt.output_folder))
  
     # if folder exists with that name, ask another name
     except FileExistsError:
@@ -22,11 +22,11 @@ def folder_create(images, opt):
             sys.exit()
  
     # image downloading start
-    download_images(images, folder_name)
+    download_images(images, opt.output_folder)
  
  
 # DOWNLOAD ALL IMAGES FROM THAT URL
-def download_images(images, folder_name):
+def download_images(images, opt):
    
     # initial count is zero
     count = 0
@@ -36,7 +36,7 @@ def download_images(images, folder_name):
  
     # checking if images is not zero
     if len(images) != 0:
-        for i, image in enumerate(images):
+        for i, image in tqdm(enumerate(images), total=len(images), unit='%', bar_format='{percentage:3.0f}%|{bar}|'):
             # From image tag ,Fetch image Source URL
  
                         # 1.data-srcset
@@ -82,7 +82,7 @@ def download_images(images, folder_name):
                 except UnicodeDecodeError:
  
                     # After checking above condition, Image Download start
-                    with open(f"{folder_name}/images{i+1}.jpg", "wb+") as f:
+                    with open(f"{opt.output_folder}/images{i+1}." + opt.expansion, "wb+") as f:
                         f.write(r)
  
                     # counting number of image downloaded
@@ -101,10 +101,10 @@ def download_images(images, folder_name):
             print(f"Total {count} Images Downloaded Out of {len(images)}")
  
 # MAIN FUNCTION START
-def main(url):
+def main(opt):
    
     # content of URL
-    r = requests.get(url)
+    r = requests.get(opt.url)
  
     # Parse HTML Code
     soup = BeautifulSoup(r.text, 'html.parser')
@@ -113,13 +113,28 @@ def main(url):
     images = soup.findAll('img')
  
     # Call folder create function
-    folder_create(images)
+    folder_create(images, opt)
+
+# ADD ARGUMENTS 
+def get_arguments(known=True):
+    parser = argparse.ArgumentParser(description='Download via the GBIF platform')
+    parser.add_argument('--url', type=str, default='', help='input (txt) file path')
+    parser.add_argument('--output_folder', type=str, default='lulu', help='images stacking folder path')
+    parser.add_argument('--expansion', type=str, default='jpg', help='image expansion during recording')
+
+    
+    # Python < 3.9
+    parser.add_argument('--crush', dest='crush', action='store_true')
+    parser.add_argument('--no-crush', dest='crush', action='store_false')
+    parser.set_defaults(crush=False)
+    return parser.parse_known_args()[0] if known else parser.parse_args()
+
  
 
 # MAIN PROGRAM
 if __name__ =='__main__':
     # take url
-    url = input("Enter URL:- ")
+    opt = get_arguments()
     
     # CALL MAIN FUNCTION
-    main(url)
+    main(opt)

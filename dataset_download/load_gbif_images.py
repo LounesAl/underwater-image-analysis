@@ -11,19 +11,19 @@ import logging
 CURRENT_PATH = os.path.dirname(os.path.abspath('__file__'))
 
 logging.basicConfig(level=logging.DEBUG, 
-                    filename='dataset_download/logFile.log',
+                    filename=os.path.join(CURRENT_PATH, 'logFile.log'),
                     filemode='w',
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 def main(opt):
-    logging.info('Start converting to CSV')
-    assert opt.output_file[-4:] == '.csv', "The output file must be in (.csv) format."
+    logging.info('Start converting to CSV file ...')
+    # assert opt.output_file[-4:] == '.csv', "The output file must be in (.csv) format."
     with open(opt.input_file, 'r', encoding='utf-8') as input_file, \
-         open(opt.output_file, 'w', encoding='utf-8', newline='') as output_file:
+         open(opt.output_file + '.csv', 'w', encoding='utf-8', newline='') as output_file:
         lignes = input_file.readlines()
         [output_file.write(re.sub(r' ', '-', re.sub(r'\t+', ',', ligne))) for ligne in lignes] 
 
-    links = pd.read_csv(opt.output_file, delimiter=",", usecols=['identifier']).iloc[:, 0]
+    links = pd.read_csv(opt.output_file + '.csv', delimiter=",", usecols=['identifier']).iloc[:, 0]
     if opt.img_max > len(links) : opt.img_max = len(links)
     
     try:
@@ -44,17 +44,17 @@ def main(opt):
                                                           opt.images_stacking + '_' + id_no + "_{:05d}".format(i) + '.' + opt.expansion))
         except Exception as e:
             nm_unloaded_images += 1
-            # logging.warning(f"the image under this link:'{link}' can not be downloaded")
+            logging.info(f"the image under this link:'{link}' can not be downloaded.")
             continue
 
-    logging.info(f"Number of unloaded images :  {nm_unloaded_images}")
-    logging.info(f"Number of loaded images   : {i+1-nm_unloaded_images}")
+    logging.info(f"Number of unloaded images :  {nm_unloaded_images}.")
+    logging.info(f"Number of loaded images   : {i+1-nm_unloaded_images}.")
 
 
 def get_arguments(known=True):
     parser = argparse.ArgumentParser(description='Download via the GBIF platform')
-    parser.add_argument('--input_file', type=str, default='dataset_download/multimedia.txt', help='input (txt) file path')
-    parser.add_argument('--output_file', type=str, default='dataset_download/multimedia.csv', help='output (csv) file path')
+    parser.add_argument('--input_file', type=str, default=os.path.join(CURRENT_PATH, 'multimedia.txt'), help='input (txt) file path')
+    parser.add_argument('--output_file', type=str, default='multimedia', help='output (csv) file path')
     parser.add_argument('--images_stacking', type=str, default='GIBBULA', help='images stacking folder path')
     parser.add_argument('--expansion', type=str, default='jpeg', help='image expansion during recording')
     parser.add_argument('--img_max', type=int, default='100000000000', help='number of images to store')
