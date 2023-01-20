@@ -5,6 +5,7 @@ import sys
 import numpy as np
 from scipy import linalg
 import cv2
+import matplotlib.pyplot as plt
 
 def start_message(image, text):
 
@@ -62,3 +63,63 @@ def DLT(P1, P2, point1, point2):
     #print(Vh[3,0:3]/Vh[3,3])
     return Vh[3,0:3]/Vh[3,3]
 
+def transforme_to_3D(P1, P2, uvs1, uvs2):
+        p3ds = []
+        for uv1, uv2 in zip(uvs1, uvs2):
+                _p3d = DLT(P1, P2, uv1, uv2)
+        p3ds.append(_p3d)
+        p3ds = np.array(p3ds)
+        return p3ds
+    
+    
+def get_projection_matrix(mtx1, mtx2, R, T):
+        # RT matrix for C1 is identity.
+        RT1 = np.concatenate([np.eye(3), [[0],[0],[0]]], axis = -1)
+        P1 = mtx1 @ RT1 #projection matrix for C1
+        # RT matrix for C2 is the R and T obtained from stereo calibration.
+        RT2 = np.concatenate([R, T], axis = -1)
+        P2 = mtx2 @ RT2 #projection matrix for C2
+        return  P1, P2  
+
+def show_scatter_2D(frame1, frame2, uvs1, uvs2):
+        plt.imshow(frame1[:,:,[2,1,0]])
+        plt.scatter(uvs1[:,0], uvs1[:,1])
+        plt.show()
+        
+        plt.imshow(frame2[:,:,[2,1,0]])
+        plt.scatter(uvs2[:,0], uvs2[:,1])
+        plt.show()
+        
+def show_scatter_3D(p3ds):
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        ax.set_xlim3d(-15, 5)
+        ax.set_ylim3d(-10, 10)
+        ax.set_zlim3d(10, 30)
+        
+        connections = [[0,1], [1,2], [2,3], [3,4], [1,5], [5,6], [6,7], [1,8], [1,9], [2,8], [5,9], [8,9], [0, 10], [0, 11]]
+        for _c in connections:
+                print(p3ds[_c[0]])
+                print(p3ds[_c[1]])
+                ax.plot(xs = [p3ds[_c[0],0], p3ds[_c[1],0]], ys = [p3ds[_c[0],1], p3ds[_c[1],1]], zs = [p3ds[_c[0],2], p3ds[_c[1],2]], c = 'red')
+        plt.show()
+        
+def get_points_mouse(img_path):
+        points = []
+
+        def on_mouse(event, x, y, flags, param):
+                if event == cv2.EVENT_LBUTTONDOWN:
+                        points.append((x, y))
+
+        img = cv2.imread(img_path)
+        cv2.namedWindow("image")
+        cv2.setMouseCallback("image", on_mouse)
+
+        while True:
+                cv2.imshow("image", img)
+                if cv2.waitKey(1) & 0xFF == ord("q"):
+                        break
+
+        cv2.destroyAllWindows()
+
+        return np.array(points), img
