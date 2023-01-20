@@ -20,7 +20,7 @@ calibration_settings = parse_calibration_settings_file(r'./calibration_settings.
 
 # Create logging
 logging.basicConfig(level=logging.DEBUG, 
-                    filename=os.path.join(CURRENT_PATH, 'logFile.log'),
+                    filename=os.path.join('./logFile.log'),
                     filemode='w',
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
