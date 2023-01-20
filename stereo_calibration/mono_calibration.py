@@ -184,6 +184,6 @@ if __name__ == '__main__':
         os.mkdir(os.path.join(CURRENT_PATH, 'camera_parameters'))
         
     # this will write cmtx, dist and ret to disk in numpy file 
-    np.save(os.path.join(CURRENT_PATH, "mono_params.npy"), (cmtx0, cmtx1, dist0, dist1, ret0, ret1))
+    np.save(os.path.join(CURRENT_PATH, 'camera_parameters', 'mono_params.npy'), [cmtx0, cmtx1, dist0, dist1, ret0, ret1])
 
 
