@@ -1,4 +1,4 @@
-camera0: "http://192.168.137.22:8080/shot.jpg"
+camera0: "http://10.51.1.62:8080/shot.jpg"
 camera1: "http://192.168.137.104:8080/shot.jpg"
 frame_width: 1280
 frame_height: 720

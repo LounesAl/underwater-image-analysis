@@ -574,9 +574,9 @@ if __name__ == '__main__':
     parse_calibration_settings_file(sys.argv[1])
 
 
-    # """Step1. Save calibration frames for single cameras"""
-    # save_frames_single_camera('camera0') #save frames for camera0
-    # save_frames_single_camera('camera1') #save frames for camera1
+    """Step1. Save calibration frames for single cameras"""
+    save_frames_single_camera('camera0') #save frames for camera0
+    save_frames_single_camera('camera1') #save frames for camera1
 
 
     """Step2. Obtain camera intrinsic matrices and save them"""
