@@ -95,7 +95,7 @@ def show_scatter_3D(p3ds):
         ax.set_xlim3d(-15, 5)
         ax.set_ylim3d(-10, 10)
         ax.set_zlim3d(10, 30)
-        connections = [[0,1], [1,2], [2,3], [3,4], [1,5], [5,6], [6,7], [1,8], [1,9], [2,8], [5,9], [8,9], [0, 10], [0, 11]]
+        connections = [[0,2], [1,3]]
         for _c in connections:
                 print(p3ds[_c[0]])
                 print(p3ds[_c[1]])
