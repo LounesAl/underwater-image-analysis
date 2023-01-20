@@ -85,7 +85,6 @@ def show_scatter_2D(frame1, frame2, uvs1, uvs2):
         plt.imshow(frame1[:,:,[2,1,0]])
         plt.scatter(uvs1[:,0], uvs1[:,1])
         plt.show()
-        
         plt.imshow(frame2[:,:,[2,1,0]])
         plt.scatter(uvs2[:,0], uvs2[:,1])
         plt.show()
@@ -96,7 +95,6 @@ def show_scatter_3D(p3ds):
         ax.set_xlim3d(-15, 5)
         ax.set_ylim3d(-10, 10)
         ax.set_zlim3d(10, 30)
-        
         connections = [[0,1], [1,2], [2,3], [3,4], [1,5], [5,6], [6,7], [1,8], [1,9], [2,8], [5,9], [8,9], [0, 10], [0, 11]]
         for _c in connections:
                 print(p3ds[_c[0]])
@@ -106,20 +104,15 @@ def show_scatter_3D(p3ds):
         
 def get_points_mouse(img_path):
         points = []
-
         def on_mouse(event, x, y, flags, param):
                 if event == cv2.EVENT_LBUTTONDOWN:
                         points.append((x, y))
-
         img = cv2.imread(img_path)
         cv2.namedWindow("image")
         cv2.setMouseCallback("image", on_mouse)
-
         while True:
                 cv2.imshow("image", img)
                 if cv2.waitKey(1) & 0xFF == ord("q"):
                         break
-
         cv2.destroyAllWindows()
-
         return np.array(points), img
