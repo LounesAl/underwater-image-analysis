@@ -179,7 +179,7 @@ def stereo_calibrate(mtx0, dist0, mtx1, dist1, frames_prefix_c0, frames_prefix_c
 
 if __name__ == '__main__':
 
-    cmtx0, dist0, cmtx1, dist1, _, _= np.load(os.path.join(CURRENT_PATH, 'camera_parameters', 'mono_params.npy'), allow_pickle=True)
+    cmtx0, cmtx1, dist0, dist1, _, _= np.load(os.path.join(CURRENT_PATH, 'camera_parameters', 'mono_params.npy'), allow_pickle=True)
     """Step3. Save calibration frames for both cameras simultaneously"""
     save_frames_two_cams('camera0', 'camera1') #save simultaneous frames
 
