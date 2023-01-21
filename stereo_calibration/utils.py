@@ -66,8 +66,8 @@ def DLT(P1, P2, point1, point2):
 def transforme_to_3D(P1, P2, uvs1, uvs2):
         p3ds = []
         for uv1, uv2 in zip(uvs1, uvs2):
-                _p3d = DLT(P1, P2, uv1, uv2)
-        p3ds.append(_p3d)
+            _p3d = DLT(P1, P2, uv1, uv2)
+            p3ds.append(_p3d)
         p3ds = np.array(p3ds)
         return p3ds
     
@@ -90,17 +90,22 @@ def show_scatter_2D(frame1, frame2, uvs1, uvs2):
         plt.show()
         
 def show_scatter_3D(p3ds):
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
-        ax.set_xlim3d(-15, 5)
-        ax.set_ylim3d(-10, 10)
-        ax.set_zlim3d(10, 30)
-        connections = [[0,2], [1,3]]
-        for _c in connections:
-                print(p3ds[_c[0]])
-                print(p3ds[_c[1]])
-                ax.plot(xs = [p3ds[_c[0],0], p3ds[_c[1],0]], ys = [p3ds[_c[0],1], p3ds[_c[1],1]], zs = [p3ds[_c[0],2], p3ds[_c[1],2]], c = 'red')
-        plt.show()
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d', proj_type = 'ortho')
+    connections = [[0,1], [1,2],[2,3], [3,0], [0,2], [1,3]]
+    for _c in connections:
+        point1 = p3ds[_c[0]]
+        point2 = p3ds[_c[1]]
+        distance = np.linalg.norm(point2 - point1)
+        print("Distance entre les points {} et {}: {:.2f} cm".format(_c[0],_c[1], distance))
+        mid_point = (point1 + point2)/2
+        ax.text(mid_point[0], mid_point[1], mid_point[2], "Distance: {:.2f} cm".format(distance))
+        ax.view_init(elev=20, azim=30)
+        ax.plot(xs = [point1[0], point2[0]], ys = [point1[1], point2[1]], zs = [point1[2], point2[2]], c = 'red', linewidth=2)#, linestyle='dotted')
+        vectors = point2 - point1
+        ax.quiver(point1[0], point1[1], point1[2], vectors[0], vectors[1], vectors[2], color='red', arrow_length_ratio=0.1)
+    plt.show()
+
         
 def get_points_mouse(img_path):
         points = []
