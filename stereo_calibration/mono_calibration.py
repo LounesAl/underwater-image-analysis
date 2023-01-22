@@ -1,3 +1,4 @@
+import pickle
 import cv2
 import imutils
 import numpy as np
@@ -183,7 +184,10 @@ if __name__ == '__main__':
     if not os.path.exists(os.path.join(CURRENT_PATH, 'camera_parameters')):
         os.mkdir(os.path.join(CURRENT_PATH, 'camera_parameters'))
         
-    # this will write cmtx, dist and ret to disk in numpy file 
-    np.save(os.path.join(CURRENT_PATH, 'camera_parameters', 'mono_params.npy'), [cmtx0, cmtx1, dist0, dist1, ret0, ret1])
+    # Open a file to save the dictionary contane cmtx, dist and ret to disk in pkl file
+    with open(os.path.join(CURRENT_PATH, 'camera_parameters', 'mono_params.pkl'), 'wb') as f:
+        # Save the dictionary to the file
+        pickle.dump({'cmtx0': cmtx0, 'cmtx1': cmtx1, 'dist0': dist0, 'dist1': dist1, 'ret0': ret0, 'ret1': ret1}, f)
+
 
 

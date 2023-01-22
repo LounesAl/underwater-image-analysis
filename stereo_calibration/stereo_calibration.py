@@ -1,3 +1,4 @@
+import pickle
 import cv2
 import imutils
 import numpy as np
@@ -194,9 +195,11 @@ if __name__ == '__main__':
     #camera0 rotation and translation is identity matrix and zeros vector
     R0 = np.eye(3, dtype=np.float32)
     T0 = np.array([0., 0., 0.]).reshape((3, 1))
-
-    # this will write cmtx, dist and ret to disk in numpy file 
-    np.save(os.path.join(CURRENT_PATH, 'camera_parameters', 'stereo_params.npy'), {'cmtx0': cmtx0, 'cmtx1': cmtx1, 'R': R, 'T': T})
+ 
+    # Open a file to save the dictionary contane cmtx, dist and ret to disk in pkl file
+    with open(os.path.join(CURRENT_PATH, 'camera_parameters', 'stereo_params.pkl'), 'wb') as f:
+        # Save the dictionary to the file
+        pickle.dump({'cmtx0': cmtx0, 'cmtx1': cmtx1, 'R': R, 'T': T}, f)
 
 
     # save_extrinsic_calibration_parameters(R0, T0, R, T) #this will write R and T to disk

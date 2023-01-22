@@ -1,4 +1,5 @@
 import numpy as np
+import pickle
 import cv2 as cv
 from utils import *
 import matplotlib
@@ -29,24 +30,28 @@ uvs2 = np.array([[654, 354],
 
 # Load the result of the calibration
 
-mtx1 = np.array([[936.33696472,   0.        , 614.70026792],
-       [  0.        , 940.48690607, 324.3100667 ],
-       [  0.        ,   0.        ,   1.        ]])
+# mtx1 = np.array([[936.33696472,   0.        , 614.70026792],
+#        [  0.        , 940.48690607, 324.3100667 ],
+#        [  0.        ,   0.        ,   1.        ]])
 
-mtx2 = np.array([[1.40338287e+03, 0.00000000e+00, 8.23978654e+02],
-       [0.00000000e+00, 1.36075117e+03, 1.81336100e+02],
-       [0.00000000e+00, 0.00000000e+00, 1.00000000e+00]])
+# mtx2 = np.array([[1.40338287e+03, 0.00000000e+00, 8.23978654e+02],
+#        [0.00000000e+00, 1.36075117e+03, 1.81336100e+02],
+#        [0.00000000e+00, 0.00000000e+00, 1.00000000e+00]])
 
-R = np.array([[ 0.9889639 ,  0.14572227,  0.02674749],
-       [-0.1342602 ,  0.80513959,  0.57768888],
-       [ 0.06264667, -0.57490457,  0.81581869]])
+# R = np.array([[ 0.9889639 ,  0.14572227,  0.02674749],
+#        [-0.1342602 ,  0.80513959,  0.57768888],
+#        [ 0.06264667, -0.57490457,  0.81581869]])
 
-T = np.array([[-30.3484974 ],
-       [-14.70076729],
-       [ 25.45162356]])
+# T = np.array([[-30.3484974 ],
+#        [-14.70076729],
+#        [ 25.45162356]])
 
-# dict_ = np.load('stereo_calibration/camera_parameters/stereo_params.npy', allow_pickle=True)
-# mtx1, mtx2, R, T = dict_['mtx1'], dict_['mtx2'], dict_['R'], dict_['T']
+# Open the file containing the saved dictionary
+with open("data.pkl", "rb") as f:
+    # Load the dictionary from the file
+    loaded_data = pickle.load(f)
+loaded_data = np.load('stereo_calibration/camera_parameters/stereo_params.pkl', allow_pickle=True)
+mtx1, mtx2, R, T = loaded_data['mtx1'], loaded_data['mtx2'], loaded_data['R'], loaded_data['T']
 
 # Calculate the projection martrix
 P1, P2 = get_projection_matrix(mtx1, mtx2, R, T)
@@ -57,4 +62,4 @@ p3ds = transforme_to_3D(P1, P2, uvs1, uvs2)
 # Show the 3D points
 show_scatter_3D(p3ds)
 
-print('OK')
+print('OK')  

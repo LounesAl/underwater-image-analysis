@@ -16,3 +16,4 @@
 /stereo_calibration/frames_camera0
 /stereo_calibration/frames_camera1
 /stereo_calibration/frames_pair
+/stereo_calibration/__pycache__
