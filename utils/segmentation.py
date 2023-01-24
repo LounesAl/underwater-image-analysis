@@ -5,6 +5,7 @@ from detectron2.config import get_cfg
 from detectron2.utils.visualizer import Visualizer
 from detectron2.data import MetadataCatalog
 from detectron2 import model_zoo
+import torch
 
 def visualiser(outputs, cfg, im):
     v = Visualizer(im[:, :, ::-1], MetadataCatalog.get(cfg.DATASETS.TEST[0]), scale=1.2)
@@ -18,7 +19,11 @@ def inference(path_model, path_img, show=True):
     cfg.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml"))
     cfg.DATASETS.TEST = (f"PFE_valid",)
     cfg.MODEL.ROI_HEADS.NUM_CLASSES = 4
-    cfg.MODEL.DEVICE='cpu'
+
+    # Additional Info when using cuda
+    if not torch.cuda.is_available():
+        cfg.MODEL.DEVICE = 'cpu'
+    
     cfg.MODEL.WEIGHTS = path_model # Let training initialize from model zoo
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.8
     predictor = DefaultPredictor(cfg)

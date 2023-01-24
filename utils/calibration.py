@@ -59,9 +59,7 @@ def DLT(P1, P2, point1, point2):
 
     B = A.transpose() @ A
     U, s, Vh = linalg.svd(B, full_matrices = False)
-
-    #print('Triangulated point: ')
-    #print(Vh[3,0:3]/Vh[3,3])
+    
     return Vh[3,0:3]/Vh[3,3]
 
 def transforme_to_3D(P1, P2, uvs1, uvs2):
@@ -90,14 +88,24 @@ def show_scatter_2D(frame1, frame2, uvs1, uvs2):
         plt.scatter(uvs2[:,0], uvs2[:,1])
         plt.show()
         
-def show_scatter_3D(p3ds):
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d', proj_type = 'ortho')
-    connections = [[0,1], [1,2],[2,3], [3,0], [0,2], [1,3]]
+def get_3D_distances(p3ds, connections = [[0,2], [1,3]]):
+    distances = []
     for _c in connections:
         point1 = p3ds[_c[0]]
         point2 = p3ds[_c[1]]
-        distance = np.linalg.norm(point2 - point1)
+        distance = np.linalg.norm(point2 - point1) # Euclidian default
+        distances.append(distance)
+        
+    return distances, connections
+    
+def show_scatter_3D(p3ds, connections = [[0,2], [1,3]]):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d', proj_type = 'ortho')
+    
+    for _c in connections:
+        point1 = p3ds[_c[0]]
+        point2 = p3ds[_c[1]]
+        distance = np.linalg.norm(point2 - point1) # Euclidian default
         print("Distance entre les points {} et {}: {:.2f} cm".format(_c[0],_c[1], distance))
         mid_point = (point1 + point2)/2
         ax.text(mid_point[0], mid_point[1], mid_point[2], "Distance: {:.2f} cm".format(distance))
