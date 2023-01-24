@@ -26,8 +26,8 @@ P1, P2 = get_projection_matrix(mtx1, mtx2, R, T)
 
 path_model = './models/model_final.pth'
 
-images_c1 = glob.glob('dataset_download/test/imgs_c1/*.{jpg,jpeg,png,gif}', recursive=True)
-images_c2 = glob.glob('dataset_download/test/imgs_c2/*.{jpg,jpeg,png,gif}', recursive=True)
+images_c1 = glob.glob('dataset_download/test/imgs_c1/*.jpg', recursive=True)
+images_c2 = glob.glob('dataset_download/test/imgs_c2/*.jpg', recursive=True)
 
 show = True
 
@@ -40,6 +40,9 @@ for i, img_c1, img_c2 in zip(range(len(images_c1)), images_c1, images_c2):
     # Get segmentation points " A optimiser "
     uvs1, seg1 = get_segment_points(output1, 0, show=show)
     uvs2, seg2 = get_segment_points(output2, 0, show=show)
+    if uvs1 == None or uvs2 == None :
+        print("Probleme")
+        continue
     
     # transforme the 2D points in the images to 3D points in the exit()world
     p3ds = transforme_to_3D(P1, P2, uvs1, uvs2)
@@ -49,7 +52,7 @@ for i, img_c1, img_c2 in zip(range(len(images_c1)), images_c1, images_c2):
         show_scatter_3D(p3ds)
     
     distances, connections = get_3D_distances(p3ds, connections = [[0,2], [1,3]])
-    
+
     if i == 2:
         break
         

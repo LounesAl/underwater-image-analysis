@@ -51,6 +51,8 @@ def get_segment_points(outputs, ind_img, show = True):
   white_image = np.zeros((mask_seg.shape[1],mask_seg.shape[2],3), dtype=np.uint8)
 
   #Convertir les coordonnées en un tableau numpy
+  if coord == []:
+      return None, None
   coords = np.array(coord[ind_img])
 
   # Dessiner un contour autour des points
