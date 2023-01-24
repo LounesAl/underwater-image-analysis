@@ -4,6 +4,7 @@ import logging
 import sys
 import numpy as np
 from scipy import linalg
+import pickle
 import cv2
 import matplotlib.pyplot as plt
 
@@ -121,3 +122,12 @@ def get_points_mouse(img_path):
                         break
         cv2.destroyAllWindows()
         return np.array(points), img
+    
+def load_calibration(path_calib):
+    # Open the file containing the saved dictionary
+    with open("data.pkl", "rb") as f:
+        # Load the dictionary from the file
+        loaded_data = pickle.load(f)
+    loaded_data = np.load(path_calib, allow_pickle=True)
+    mtx1, mtx2, R, T = loaded_data['mtx1'], loaded_data['mtx2'], loaded_data['R'], loaded_data['T']
+    return mtx1, mtx2, R, T
