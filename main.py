@@ -31,7 +31,7 @@ images_c2 = glob.glob('dataset_download/test/imgs_c2/*.{jpg,jpeg,png,gif}', recu
 
 show = True
 
-for img_c1, img_c2 in zip(images_c1, images_c2):
+for i, img_c1, img_c2 in zip(range(len(images_c1)), images_c1, images_c2):
 
     # Inferred with the images of each camera
     output1 = inference(path_model, img_c1, show=show)
@@ -49,6 +49,9 @@ for img_c1, img_c2 in zip(images_c1, images_c2):
         show_scatter_3D(p3ds)
     
     distances, connections = get_3D_distances(p3ds, connections = [[0,2], [1,3]])
+    
+    if i == 2:
+        break
         
         
 
