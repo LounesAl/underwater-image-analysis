@@ -26,8 +26,6 @@ P1, P2 = get_projection_matrix(mtx1, mtx2, R, T)
 
 path_model = './models/model_final.pth'
 
-
-
 images_c1 = glob.glob('dataset_download/test/imgs_c1/*.{jpg,jpeg,png,gif}', recursive=True)
 images_c2 = glob.glob('dataset_download/test/imgs_c2/*.{jpg,jpeg,png,gif}', recursive=True)
 
