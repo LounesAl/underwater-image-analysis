@@ -1,13 +1,8 @@
-/dataset_download/BRAN
-/GIBBULA
-/dataset_download/BRAN_
-/dataset_download/GIBBULA_
-/dataset_download/test.ipynb
 # /dataset_download/multimedia.txt
-# /dataset_download/multimedia.csv
+/dataset_download/multimedia.csv
 /dataset_download/multimedia_save.txt
-/multimedia.csv
-/multimedia.txt
+/detectron2
+#/dataset_download/test
 /calibration_cameraPhone/frames_camera0
 /calibration_cameraPhone/frames_camera1
 /calibration_cameraPhone/frames_pair
@@ -17,3 +12,5 @@
 /stereo_calibration/frames_camera1
 /stereo_calibration/frames_pair
 /stereo_calibration/__pycache__
+/Sementation/model
+/Sementation/__pycache__

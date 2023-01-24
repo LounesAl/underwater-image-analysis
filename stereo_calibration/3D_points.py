@@ -1,10 +1,8 @@
 import numpy as np
-import pickle
-import cv2 as cv
 from utils import *
 import matplotlib
 matplotlib.use("TkAgg")
-from mpl_toolkits.mplot3d import Axes3D
+
 
 uvs1 = np.array([[408, 358],
        [681, 336],
@@ -28,8 +26,6 @@ uvs2 = np.array([[654, 354],
 
 """ The next step is to obtain the projection matrices. This is done simply by multiplying the camera matrix by the rotation and translation matrix. """
 
-# Load the result of the calibration
-
 # mtx1 = np.array([[936.33696472,   0.        , 614.70026792],
 #        [  0.        , 940.48690607, 324.3100667 ],
 #        [  0.        ,   0.        ,   1.        ]])
@@ -46,12 +42,9 @@ uvs2 = np.array([[654, 354],
 #        [-14.70076729],
 #        [ 25.45162356]])
 
-# Open the file containing the saved dictionary
-with open("data.pkl", "rb") as f:
-    # Load the dictionary from the file
-    loaded_data = pickle.load(f)
-loaded_data = np.load('stereo_calibration/camera_parameters/stereo_params.pkl', allow_pickle=True)
-mtx1, mtx2, R, T = loaded_data['mtx1'], loaded_data['mtx2'], loaded_data['R'], loaded_data['T']
+# Load the result of the calibration
+path_calib = 'stereo_calibration/camera_parameters/stereo_params.pkl'
+mtx1, mtx2, R, T = load_calibration(path_calib)
 
 # Calculate the projection martrix
 P1, P2 = get_projection_matrix(mtx1, mtx2, R, T)
