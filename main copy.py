@@ -31,7 +31,7 @@ uvs2, seg2, white_img2, im2_seg = get_segment_points(output2, im2, show=visualiz
 if len(uvs1) == len(uvs2):
     p3dss = transforme_to_3D(P1, P2, uvs1, uvs2)
 else:
-    pass #contninu
+    pass
     
 ######################
 ## len(p3dss) = 2   ## => car il y'a deux espces detectées
