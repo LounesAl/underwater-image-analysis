@@ -128,24 +128,30 @@ def run(
                     (save_dir / 'results').mkdir(parents=True, exist_ok=True)
                 cv2.imwrite(str(Path(save_dir / f'results/img{i}.jpg')), im1)
                 
-            # else:  # 'video' or 'stream'
-            #     save_path = Path(save_dir / f'results_c1/img{i}.jpg')
-            #     if vid_path[i] != save_path :  # new video
-            #         vid_path[i] = save_path
-            #         if isinstance(vid_writer[i], cv2.VideoWriter):
-            #             vid_writer[i].release()  # release previous video writer
-            #         if vid_cap1 and vid_cap2:  # video
-            #             fps = vid_cap.get(cv2.CAP_PROP_FPS)
-            #             w = int(vid_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-            #             h = int(vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            else:  # 'video' or 'stream'
+                if not os.path.exists(str(save_dir / 'results')):
+                    (save_dir / 'results').mkdir(parents=True, exist_ok=True)
+                
+                fourcc = cv2.VideoWriter_fourcc(*'XVID')
+                out = cv2.VideoWriter('output.avi', fourcc, 20.0, (640, 480))
+                save_path = Path(save_dir / f'results_c1/img{i}.jpg')
+                
+                # if vid_path[i] != save_path :  # new video
+                #     vid_path[i] = save_path
+                #     if isinstance(vid_writer[i], cv2.VideoWriter):
+                #         vid_writer[i].release()  # release previous video writer
+                #     if vid_cap1 and vid_cap2:  # video
+                #         fps = vid_cap.get(cv2.CAP_PROP_FPS)
+                #         w = int(vid_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+                #         h = int(vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
                         
-            #         else:  # stream
-            #             fps, w, h = 30, im0.shape[1], im0.shape[0]
+                #     else:  # stream
+                #         fps, w, h = 30, im0.shape[1], im0.shape[0]
                         
-            #         save_path = str(Path(save_path).with_suffix('.mp4'))  # force *.mp4 suffix on results videos
-            #         vid_writer[i] = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps1, (w1, h1))
-            #         vid_writer[i] = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps1, (w1, h1))
-            #     vid_writer[i].write(im0)
+                #     save_path = str(Path(save_path).with_suffix('.mp4'))  # force *.mp4 suffix on results videos
+                #     vid_writer[i] = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps1, (w1, h1))
+                #     vid_writer[i] = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps1, (w1, h1))
+                # vid_writer[i].write(im0)
         
         # if i==3: break
            
