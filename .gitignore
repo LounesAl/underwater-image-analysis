@@ -15,6 +15,6 @@
 /Sementation/model
 /sementation/__pycache__
 /utils/__pycache__
-/models
+/models/model_final.pth
 /sementation/segmentation.py
-utils/__pycache__
+/utils/__pycache__

@@ -13,8 +13,7 @@ def visualiser(outputs, cfg, im):
     cv2.imshow("Inference", v.get_image()[:, :, ::-1])
     cv2.waitKey(0)
 
-def inference(path_model, path_img, show=True):
-    im = cv2.imread(path_img)
+def inference(path_model, im, show=True):
     cfg = get_cfg()
     cfg.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml"))
     cfg.DATASETS.TEST = (f"PFE_valid",)
