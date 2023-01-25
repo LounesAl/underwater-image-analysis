@@ -28,7 +28,7 @@ uvs2, seg2, boxes2 = get_segment_points(output2)
 
 # transforme the 2D points in the images to 3D points in the exit()world
 # Il faut avoir le meme nombre de pairs de points dans les deux images
-if len(uvs1) == len(uvs2):
+if len(uvs1) == len(uvs2) or uvs1!=None:
     p3dss = transforme_to_3D(P1, P2, uvs1, uvs2)
 else:
     pass #contninu
