@@ -106,11 +106,12 @@ def run(
         output2 = inference(str(weights), im2, show=visualize)
 
         # Get segmentation points " A optimiser "
-        uvs1, seg1 = get_segment_points(output1, 0, show=visualize)
-        uvs2, seg2 = get_segment_points(output2, 0, show=visualize)
-        if uvs1 == None or uvs2 == None :
-            continue
+        uvs1, seg1, white_img1, im1_seg = get_segment_points(output1, im1, show=visualize)
+        uvs2, seg2, white_img2, im2_seg = get_segment_points(output2, im2, show=visualize)
         
+        if (uvs1 == None or uvs2 == None) or (len(uvs1) != len(uvs2)):
+            continue
+                
         # transforme the 2D points in the images to 3D points in the exit()world
         p3ds = transforme_to_3D(P1, P2, uvs1, uvs2)
         
@@ -127,30 +128,41 @@ def run(
                     (save_dir / 'results').mkdir(parents=True, exist_ok=True)
                 cv2.imwrite(str(Path(save_dir / f'results/img{i}.jpg')), im1)
                 
-            else:  # 'video' or 'stream'
-                save_path = Path(save_dir / f'results_c1/img{i}.jpg')
-                if vid_path[i] != save_path :  # new video
-                    vid_path[i] = save_path
-                    if isinstance(vid_writer[i], cv2.VideoWriter):
-                        vid_writer[i].release()  # release previous video writer
-                    if vid_cap1 and vid_cap2:  # video
-                        fps = vid_cap.get(cv2.CAP_PROP_FPS)
-                        w = int(vid_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-                        h = int(vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            # else:  # 'video' or 'stream'
+            #     save_path = Path(save_dir / f'results_c1/img{i}.jpg')
+            #     if vid_path[i] != save_path :  # new video
+            #         vid_path[i] = save_path
+            #         if isinstance(vid_writer[i], cv2.VideoWriter):
+            #             vid_writer[i].release()  # release previous video writer
+            #         if vid_cap1 and vid_cap2:  # video
+            #             fps = vid_cap.get(cv2.CAP_PROP_FPS)
+            #             w = int(vid_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+            #             h = int(vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
                         
-                    else:  # stream
-                        fps, w, h = 30, im0.shape[1], im0.shape[0]
+            #         else:  # stream
+            #             fps, w, h = 30, im0.shape[1], im0.shape[0]
                         
-                    save_path = str(Path(save_path).with_suffix('.mp4'))  # force *.mp4 suffix on results videos
-                    vid_writer[i] = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps1, (w1, h1))
-                    vid_writer[i] = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps1, (w1, h1))
-                vid_writer[i].write(im0)
+            #         save_path = str(Path(save_path).with_suffix('.mp4'))  # force *.mp4 suffix on results videos
+            #         vid_writer[i] = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps1, (w1, h1))
+            #         vid_writer[i] = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps1, (w1, h1))
+            #     vid_writer[i].write(im0)
         
         # if i==3: break
            
 
 if __name__ == '__main__':
     run(src1 = './data/imgs_c1', src2 = './data/imgs_c2')
+    
+    
+    
+"""
+ * Gérer le cas ou l'on met deux webcam/url
+ * S'assurer que les deux sources sont de même type image/dissier/webcam/cameras/url..
+ * S'assurer que les deux sources ont le même contenu.
+ * Récuperer les information aquise extraite dans un dataframe.
+    - nombre de chaque espèce pour chaque image.
+    - mosiner les dimensions de chaque espèce (taille longueur).
+"""
         
         
 

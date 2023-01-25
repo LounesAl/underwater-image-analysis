@@ -32,7 +32,7 @@ if len(uvs1) == len(uvs2):
     p3dss = transforme_to_3D(P1, P2, uvs1, uvs2)
 else:
     pass #contninu
-
+    
 ######################
 ## len(p3dss) = 2   ## => car il y'a deux espces detectées
 ## p3dss[0].shape = ## 
