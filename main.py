@@ -94,7 +94,8 @@ def run(
     # Calculate the projection martrix
     P1, P2 = get_projection_matrix(mtx1, mtx2, R, T)
     
-    for (path1, im1, im0s1, vid_cap1, s), (path2, im2, im0s2, vid_cap2, s2) in tqdm(zip(dataset_1, dataset_2), unit='%', bar_format='{percentage:3.0f}%|{bar}|'):
+    for (path1, im1, im0s1, vid_cap1, s), (path2, im2, im0s2, vid_cap2, s2) in tqdm(zip(dataset_1, dataset_2), unit='%', 
+                                                                                        bar_format='{percentage:3.0f}%|{bar}|'):
         i += 1
         if i >= 3 : visualize = False
         im1 = np.transpose(im1, (1, 2, 0))[:,:,::-1]
