@@ -63,12 +63,18 @@ def DLT(P1, P2, point1, point2):
     return Vh[3,0:3]/Vh[3,3]
 
 def transforme_to_3D(P1, P2, uvs1, uvs2):
-        p3ds = []
+        p3dss = []
+        # pour chaque especes dans l'image. len(p3dss) sera egale à 2 si y'a 2 gibbula
         for uv1, uv2 in zip(uvs1, uvs2):
-            _p3d = DLT(P1, P2, uv1, uv2)
-            p3ds.append(_p3d)
-        p3ds = np.array(p3ds)
-        return p3ds
+            p3ds = []
+            # pour pairs de points (un point dans chaque image). boucler 4 fois. len(p3ds) = 4
+            for u1, u2 in zip(uv1, uv2):
+                p3d = DLT(P1, P2, u1, u2)
+                p3ds.append(p3d)
+            p3ds = np.array(p3ds)
+            p3dss.append(p3ds)
+        # au total on renvoie 8 points, dans le cas où on a 2 especes detectées
+        return p3dss
     
     
 def get_projection_matrix(mtx1, mtx2, R, T):
@@ -88,31 +94,35 @@ def show_scatter_2D(frame1, frame2, uvs1, uvs2):
         plt.scatter(uvs2[:,0], uvs2[:,1])
         plt.show()
         
-def get_3D_distances(p3ds, connections = [[0,2], [1,3]]):
+def get_3D_distances(p3dss, connections = [[0,2], [1,3]]):
     distances = []
-    for _c in connections:
-        point1 = p3ds[_c[0]]
-        point2 = p3ds[_c[1]]
-        distance = np.linalg.norm(point2 - point1) # Euclidian default
-        distances.append(distance)
-        
+    for p3ds in p3dss:
+        dists = []
+        for _c in connections:
+            point1 = p3ds[_c[0]]
+            point2 = p3ds[_c[1]]
+            dist = np.linalg.norm(point2 - point1) # Euclidian default
+            dists.append(dist)
+        distances.append(dists)
+            
     return distances, connections
     
-def show_scatter_3D(p3ds, connections = [[0,2], [1,3]]):
+def show_scatter_3D(p3dss, connections = [[0,2], [1,3]]):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d', proj_type = 'ortho')
     
-    for _c in connections:
-        point1 = p3ds[_c[0]]
-        point2 = p3ds[_c[1]]
-        distance = np.linalg.norm(point2 - point1) # Euclidian default
-        print("Distance entre les points {} et {}: {:.2f} cm".format(_c[0],_c[1], distance))
-        mid_point = (point1 + point2)/2
-        ax.text(mid_point[0], mid_point[1], mid_point[2], "Distance: {:.2f} cm".format(distance))
-        ax.view_init(elev=20, azim=30)
-        ax.plot(xs = [point1[0], point2[0]], ys = [point1[1], point2[1]], zs = [point1[2], point2[2]], c = 'red', linewidth=2)#, linestyle='dotted')
-        vectors = point2 - point1
-        ax.quiver(point1[0], point1[1], point1[2], vectors[0], vectors[1], vectors[2], color='red', arrow_length_ratio=0.1)
+    for p3ds in p3dss:
+        for _c in connections:
+            point1 = p3ds[_c[0]]
+            point2 = p3ds[_c[1]]
+            distance = np.linalg.norm(point2 - point1) # Euclidian default
+            print("Distance entre les points {} et {}: {:.2f} cm".format(_c[0],_c[1], distance))
+            mid_point = (point1 + point2)/2
+            ax.text(mid_point[0], mid_point[1], mid_point[2], "Distance: {:.2f} cm".format(distance))
+            ax.view_init(elev=20, azim=30)
+            ax.plot(xs = [point1[0], point2[0]], ys = [point1[1], point2[1]], zs = [point1[2], point2[2]], c = 'red', linewidth=2)#, linestyle='dotted')
+            vectors = point2 - point1
+            ax.quiver(point1[0], point1[1], point1[2], vectors[0], vectors[1], vectors[2], color='red', arrow_length_ratio=0.1)
     plt.show()
 
         

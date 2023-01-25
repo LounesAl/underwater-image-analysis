@@ -40,14 +40,6 @@ def get_segmentation(mask_array):
         coordinates.append([(y, x) for x, y in indices])
     return coordinates
 
-def np_to_cv2(pred_masks):
-    masks = []
-    for i in range(pred_masks.shape[0]):
-        mask = pred_masks[i, 1, :, :] # assuming you want to use the mask for class 1
-        mask = (mask > 0.5).astype(np.uint8) # threshold to convert float to binary
-        masks.append(mask)
-    return masks
-
 def get_segment_points(outputs, im, show = True):
     # Creer une sauvegarde
     img = im.copy()
