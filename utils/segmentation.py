@@ -50,7 +50,7 @@ def get_segment_points(outputs, im, show = True):
 
     #Convertir les coordonnées en un tableau numpy
     if coordonnes == []:
-        return None, None
+        return None, None, None, None
     coords = np.array(coordonnes)
     
     # convertir au format de cv2
