@@ -86,18 +86,18 @@ def run(
     else:
         dataset_1 = LoadImages(src1, img_size=imgsz) # , stride=stride, auto=pt, vid_stride=vid_stride
         dataset_2 = LoadImages(src2, img_size=imgsz)
+    
+    assert len(dataset_1) == len(dataset_2), 'The size of the two datasets must be equal.'
             
     vid_path, vid_writer = [None] * bs, [None] * bs
     
-    i = 0
     mtx1, mtx2, R, T = load_calibration(calib_cam)
     # Calculate the projection martrix
     P1, P2 = get_projection_matrix(mtx1, mtx2, R, T)
     
-    for (path1, im1, im0s1, vid_cap1, s), (path2, im2, im0s2, vid_cap2, s2) in tqdm(zip(dataset_1, dataset_2), unit='%', 
+    for i, (path1, im1, im0s1, vid_cap1, s), (path2, im2, im0s2, vid_cap2, s2) in tqdm(zip(range(len(dataset_1)),dataset_1, dataset_2), unit='%', total=len(dataset_1),
                                                                                         bar_format='{percentage:3.0f}%|{bar}|'):
-        i += 1
-        if i >= 3 : visualize = False
+        
         im1 = np.transpose(im1, (1, 2, 0))[:,:,::-1]
         im2 = np.transpose(im2, (1, 2, 0))[:,:,::-1]
         
@@ -109,7 +109,6 @@ def run(
         uvs1, seg1 = get_segment_points(output1, 0, show=visualize)
         uvs2, seg2 = get_segment_points(output2, 0, show=visualize)
         if uvs1 == None or uvs2 == None :
-            print("Probleme")
             continue
         
         # transforme the 2D points in the images to 3D points in the exit()world
@@ -121,11 +120,35 @@ def run(
         
         distances, connections = get_3D_distances(p3ds, connections = [[0,2], [1,3]])
         
+        # Save results (image with detections)
+        if save_img:
+            if dataset_1.mode == 'image':
+                cv2.imwrite(str(Path(save_dir / f'results/img{i}.jpg')), im1)
+                
+            # else:  # 'video' or 'stream'
+            #     save_path = Path(save_dir / f'results_c1/img{i}.jpg')
+            #     if vid_path[i] != save_path :  # new video
+            #         vid_path[i] = save_path
+            #         if isinstance(vid_writer[i], cv2.VideoWriter):
+            #             vid_writer[i].release()  # release previous video writer
+            #         if vid_cap1 and vid_cap2:  # video
+            #             fps = vid_cap.get(cv2.CAP_PROP_FPS)
+            #             w = int(vid_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+            #             h = int(vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                        
+            #         else:  # stream
+            #             fps, w, h = 30, im0.shape[1], im0.shape[0]
+                        
+            #         save_path = str(Path(save_path).with_suffix('.mp4'))  # force *.mp4 suffix on results videos
+            #         vid_writer[i] = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps1, (w1, h1))
+            #         vid_writer[i] = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps1, (w1, h1))
+            #     vid_writer[i].write(im0)
+        
         # if i==3: break
            
 
 if __name__ == '__main__':
-    run(src1 = './data/video_c1', src2 = './data/video_c2')
+    run(src1 = './data/imgs_c1', src2 = './data/imgs_c2')
         
         
 
