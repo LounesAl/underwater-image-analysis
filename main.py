@@ -106,8 +106,8 @@ def run(
         output2 = inference(str(weights), im2, show=visualize)
 
         # Get segmentation points " A optimiser "
-        uvs1, seg1, white_img1, im1_seg = get_segment_points(output1, im1, show=visualize)
-        uvs2, seg2, white_img2, im2_seg = get_segment_points(output2, im2, show=visualize)
+        uvs1, seg1, boxes1 = get_segment_points(output1)
+        uvs2, seg2, boxes2 = get_segment_points(output2)
         
         if (uvs1 == None or uvs2 == None) or (len(uvs1) != len(uvs2)):
             continue
@@ -120,13 +120,15 @@ def run(
             show_scatter_3D(p3ds)
         
         distances, connections = get_3D_distances(p3ds, connections = [[0,2], [1,3]])
+        im1_seg = get_dist_on_img(uvs1, boxes1, im1, distances, connections, show=True)
+        im2_seg = get_dist_on_img(uvs2, boxes2, im2, distances, connections, show=True)
         
         # Save results (image with detections)
         if save_img:
             if dataset_1.mode == 'image':
                 if not os.path.exists(str(save_dir / 'results')):
                     (save_dir / 'results').mkdir(parents=True, exist_ok=True)
-                cv2.imwrite(str(Path(save_dir / f'results/img{i}.jpg')), im1)
+                cv2.imwrite(str(Path(save_dir / f'results/img{i}.jpg')), im1_seg)
                 
             else:  # 'video' or 'stream'
                 if not os.path.exists(str(save_dir / 'results')):
