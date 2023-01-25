@@ -40,9 +40,29 @@ def get_segmentation(mask_array):
         coordinates.append([(y, x) for x, y in indices])
     return coordinates
 
-def get_segment_points(outputs, im, show = True):
+def get_dist_on_img(segment_points, boxes, im, distances, connections, show=True):
     # Creer une sauvegarde
     img = im.copy()
+    
+    for box in boxes:
+        cv2.drawContours(img, [np.int0(box)], -1, (0, 0, 255), 2)
+
+    # Initialiser un tableau de tableau vide pour stocker les points de segmentation de chaque espece
+    for segment_point in segment_points:
+        # dessiner les lines de longuer et de largeur
+        for i in range(0, len(segment_point), 2):
+            start = (int(segment_point[i][0]), int(segment_point[i][1]))
+            end = (int(segment_point[i+1][0]), int(segment_point[i+1][1]))
+            # Dessiner le segment sur l'image
+            cv2.line(img, start, end, (255, 0, 0), 2)
+        
+    if show == True:
+        #Afficher l'image
+        cv2.imshow("Points segmentation", img)
+        cv2.waitKey(0)
+    return img
+
+def get_segment_points(outputs):
     
     # Calculer le mask et points de segmentation
     mask_seg = outputs["instances"].pred_masks.cpu().numpy()
@@ -53,25 +73,11 @@ def get_segment_points(outputs, im, show = True):
         return None, None, None, None
     coords = np.array(coordonnes)
     
-    # convertir au format de cv2
-    mask_seg = mask_seg.astype(np.uint8) * 255
-    
-    # Creer une images avec le mask 1
-    white_image = np.zeros_like(mask_seg[0])
-    
-    # combiner les masks pour avoir une image avec toutes les especes
-    for mask in mask_seg:
-        white_image = cv2.bitwise_or(white_image, mask)
-        
-    white_image = cv2.cvtColor(white_image, cv2.COLOR_GRAY2BGR)
-    
     boxes = []
     for i, coord in enumerate(coords):
         rect = cv2.minAreaRect(np.array(coord))
         box = cv2.boxPoints(rect)
         boxes.append(box)
-        cv2.drawContours(white_image, [np.int0(box)], -1, (0, 0, 255), 2)
-        cv2.drawContours(img, [np.int0(box)], -1, (0, 0, 255), 2)
 
     # Initialiser un tableau de tableau vide pour stocker les points de segmentation de chaque espece
     segment_points = []
@@ -88,17 +94,5 @@ def get_segment_points(outputs, im, show = True):
         segment_point.append((((x[3]+x[0])/2), ((y[3]+y[0])/2)))
         # Sauvegarde des points de cette espece
         segment_points.append(segment_point)
-        # dessiner les lines de longuer et de largeur
-        for i in range(0, len(segment_point), 2):
-            start = (int(segment_point[i][0]), int(segment_point[i][1]))
-            end = (int(segment_point[i+1][0]), int(segment_point[i+1][1]))
-            # Dessiner le segment sur l'image
-            cv2.line(white_image, start, end, (255, 0, 0), 2)
-            cv2.line(img, start, end, (255, 0, 0), 2)
         
-    if show == True:
-        #Afficher l'image
-        cv2.imshow("Points segmentation", white_image)
-        cv2.imshow("Points segmentation", img)
-        cv2.waitKey(0)
-    return segment_points, coord, white_image, img
+    return segment_points, coords, boxes

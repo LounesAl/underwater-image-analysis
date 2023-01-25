@@ -23,8 +23,8 @@ output1 = inference(weights, im1, show=False)
 output2 = inference(weights, im2, show=False)
 
 # Get segmentation points " A optimiser "
-uvs1, seg1, white_img1, im1_seg = get_segment_points(output1, im1, show=visualize)
-uvs2, seg2, white_img2, im2_seg = get_segment_points(output2, im2, show=visualize)
+uvs1, seg1, boxes1 = get_segment_points(output1)
+uvs2, seg2, boxes2 = get_segment_points(output2)
 
 # transforme the 2D points in the images to 3D points in the exit()world
 # Il faut avoir le meme nombre de pairs de points dans les deux images
@@ -32,7 +32,7 @@ if len(uvs1) == len(uvs2):
     p3dss = transforme_to_3D(P1, P2, uvs1, uvs2)
 else:
     pass #contninu
-    
+
 ######################
 ## len(p3dss) = 2   ## => car il y'a deux espces detectées
 ## p3dss[0].shape = ## 
@@ -45,7 +45,8 @@ if visualize:
         
 distances, connections = get_3D_distances(p3dss, connections = [[0,2], [1,3]])
 
-print(distances)
+im1_seg = get_dist_on_img(uvs1, boxes1, im1, distances, connections, show=True)
+im2_seg = get_dist_on_img(uvs2, boxes2, im2, distances, connections, show=True)
 
 # on a 4 distances ici ... 2 espces, chaque espces a deux distances (longeur et largeur)
 # distances = [[36.848607476959444, 32.03362311274617], [29.84703379255751, 45.008806942883936]]
