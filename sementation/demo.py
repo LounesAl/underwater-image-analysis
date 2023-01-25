@@ -15,10 +15,10 @@
 if __name__ == "__main__":
 
     print("Initialisation du model en cours ...")
-    from utils import *
-    path_model = "Sementation/model/model_final.pth"
-    path_img = "dataset_download/test/gibbula_07_16-1101-_jpg.rf.5751193b6d97c81c7ed7f10ae7541bba.jpg"
+    from segmentation import *
+    path_model = "models/model_final.pth"
+    path_img = "dataset_download/test/imgs_c1/image1161_jpg.rf.07a4dd98766b4246db3d5eede7e327f3.jpg"
     output = inference(path_model, path_img, show=True)
     points_car, seg = get_segment_points(output, 0, show = True)
     # print(seg)
-    # np.save('seg.npy', seg)
+    np.save(f'{path_img}.npy', seg)

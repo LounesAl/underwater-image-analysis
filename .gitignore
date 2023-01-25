@@ -16,3 +16,4 @@
 /sementation/__pycache__
 /utils/__pycache__
 /models
+/sementation/segmentation.py
