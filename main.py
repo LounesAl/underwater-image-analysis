@@ -10,56 +10,125 @@
 
 3) Conversion 2D -> 3D:"""
 
+# Gérer le cas ou 
+
 
 import logging
 logging.info(f"model initialisation in progress ...")
 
-import glob
+
+import os
+from pathlib import Path
+import sys
+from tqdm import tqdm
+
+FILE = Path(__file__).resolve()
+ROOT = FILE.parents[0]  # UNDERWATER-IMAGE-ANALYSIS root directory
+if str(ROOT) not in sys.path:
+    sys.path.append(str(ROOT))  # add ROOT to PATH
+ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
+
 from utils.segmentation import *
 from utils.calibration import *
-import PIL
+from utils.dataloaders import (IMG_FORMATS, VID_FORMATS, check_file, increment_path, select_device, check_imshow, LoadImages, LoadScreenshots, LoadStreams)
 
-logging.info(f"load camera params in progress ...")
-mtx1, mtx2, R, T = load_calibration('stereo_calibration/camera_parameters/stereo_params.pkl')
-# Calculate the projection martrix
-P1, P2 = get_projection_matrix(mtx1, mtx2, R, T)
 
-path_model = './models/model_final.pth'
-
-images_c1 = glob.glob('dataset_download/test/imgs_c1/*.jpg', recursive=True)
-images_c2 = glob.glob('dataset_download/test/imgs_c2/*.jpg', recursive=True)
-
-show = True
-
-for i, img_c1, img_c2 in zip(range(len(images_c1)), images_c1, images_c2):
-
-    # Inferred with the images of each camera
-    output1 = inference(path_model, img_c1, show=show)
-    output2 = inference(path_model, img_c2, show=show)
-
-    # Get segmentation points " A optimiser "
-    uvs1, seg1 = get_segment_points(output1, 0, show=show)
-    uvs2, seg2 = get_segment_points(output2, 0, show=show)
-    if uvs1 == None or uvs2 == None :
-        print("Probleme")
-        continue
+def run(
+        weights = ROOT / 'models/model_final.pth',                          # model path or triton URL
+        save_img = True,                                                    # save inference images
+        src1 = ROOT / 'data/imgs_c1',                                       # file/dir/URL/glob/screen/0(webcam)
+        src2 = ROOT / 'data/imgs_c1',                                       # file/dir/URL/glob/screen/0(webcam)
+        imgsz=(640, 640),                                                   # inference size (height, width)
+        calib_cam='stereo_calibration/camera_parameters/stereo_params.pkl', # stereo cameras path parameters 
+        conf_thres=0.25,                                                    # confidence threshold
+        iou_thres=0.45,                                                     # NMS IOU threshold
+        device='',                                                          # cuda device, i.e. 0 or 0,1,2,3 or cpu
+        view_img=False,                                                     # visualize results
+        save_txt=False,                                                     # save results to *.txt
+        nosave=False,                                                       # do not save images/videos
+        classes=None,                                                       # filter by class: --class 0, or --class 0 2 3
+        visualize=False,                                                     # visualize features
+        update=False,                                                       # update all models
+        project=ROOT / 'runs/detect',                                       # save results to project/name
+        name='exp',                                                         # save results to project/name
+        exist_ok=False,                                                     # existing project/name ok, do not increment
+        vid_stride=1,                                                       # video frame-rate stride
+):
     
-    # transforme the 2D points in the images to 3D points in the exit()world
-    p3ds = transforme_to_3D(P1, P2, uvs1, uvs2)
-    
-    if show:
-        # Show the 3D points
-        show_scatter_3D(p3ds)
-    
-    distances, connections = get_3D_distances(p3ds, connections = [[0,2], [1,3]])
+    src1, src2 = str(src1), str(src2)
+    is_file = Path(src1).suffix[1:] in (IMG_FORMATS + VID_FORMATS)
+    is_url = src1.lower().startswith(('rtsp://', 'rtmp://', 'http://', 'https://'))
+    webcam = src1.isnumeric() or src1.endswith('.streams') or (is_url and not is_file)
+    screenshot = src1.lower().startswith('screen')
+    if is_url and is_file:
+        src1 = check_file(src1)  # download
 
-    if i == 2:
-        break
+    # Directories
+    save_dir = increment_path(Path(project) / name, exist_ok=exist_ok)  # increment run
+    (save_dir / 'labels' if save_txt else save_dir).mkdir(parents=True, exist_ok=True)  # make dir
+
+    # Load model
+    device = select_device(device)
+    # model = DetectMultiBackend(weights, device=device, dnn=dnn, data=data, fp16=half)
+
+    # Dataloader
+    bs = 1  # batch_size
+    if webcam:
+        view_img = check_imshow(warn=True)
+        dataset_1 = LoadStreams(src1, img_size=imgsz) # stride=stride, auto=pt, vid_stride=vid_stride
+        dataset_2 = LoadStreams(src2, img_size=imgsz) # stride=stride, auto=pt, vid_stride=vid_stride
+        bs = len(dataset_1)
+        
+    elif screenshot:
+        dataset_1 = LoadScreenshots(src1, img_size=imgsz) # , stride=stride, auto=pt
+        dataset_2 = LoadScreenshots(src2, img_size=imgsz) # , stride=stride, auto=pt
+    
+    else:
+        dataset_1 = LoadImages(src1, img_size=imgsz) # , stride=stride, auto=pt, vid_stride=vid_stride
+        dataset_2 = LoadImages(src2, img_size=imgsz)
+            
+    vid_path, vid_writer = [None] * bs, [None] * bs
+    
+    i = 0
+    mtx1, mtx2, R, T = load_calibration(calib_cam)
+    # Calculate the projection martrix
+    P1, P2 = get_projection_matrix(mtx1, mtx2, R, T)
+    
+    for (path1, im1, im0s1, vid_cap1, s), (path2, im2, im0s2, vid_cap2, s2) in tqdm(zip(dataset_1, dataset_2), unit='%', bar_format='{percentage:3.0f}%|{bar}|'):
+        i += 1
+        if i >= 3 : visualize = False
+        im1 = np.transpose(im1, (1, 2, 0))[:,:,::-1]
+        im2 = np.transpose(im2, (1, 2, 0))[:,:,::-1]
+        
+        # Inferred with the images of each camera
+        output1 = inference(str(weights), im1, show=visualize)
+        output2 = inference(str(weights), im2, show=visualize)
+
+        # Get segmentation points " A optimiser "
+        uvs1, seg1 = get_segment_points(output1, 0, show=visualize)
+        uvs2, seg2 = get_segment_points(output2, 0, show=visualize)
+        if uvs1 == None or uvs2 == None :
+            print("Probleme")
+            continue
+        
+        # transforme the 2D points in the images to 3D points in the exit()world
+        p3ds = transforme_to_3D(P1, P2, uvs1, uvs2)
+        
+        if visualize:
+            # visualize the 3D points
+            show_scatter_3D(p3ds)
+        
+        distances, connections = get_3D_distances(p3ds, connections = [[0,2], [1,3]])
+        
+        # if i==3: break
+           
+
+if __name__ == '__main__':
+    run(src1 = './data/video_c1', src2 = './data/video_c2')
         
         
 
     
-
 
 
 
