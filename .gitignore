@@ -18,3 +18,5 @@
 /models/model_final.pth
 /sementation/segmentation.py
 /utils/__pycache__
+/data/frames
+actinia.mp4

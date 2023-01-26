@@ -12,8 +12,8 @@ def visualiser(outputs, cfg, im):
     v = v.draw_instance_predictions(outputs["instances"].to("cpu"))
     cv2.imshow("Inference", v.get_image()[:, :, ::-1])
     cv2.waitKey(0)
-
-def inference(path_model, im, show=True):
+    
+def init_config(path_model, SCORE_THRESH_TEST = 0.8):
     cfg = get_cfg()
     cfg.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml"))
     cfg.DATASETS.TEST = (f"PFE_valid",)
@@ -24,8 +24,11 @@ def inference(path_model, im, show=True):
         cfg.MODEL.DEVICE = 'cpu'
     
     cfg.MODEL.WEIGHTS = path_model # Let training initialize from model zoo
-    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.8
+    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = SCORE_THRESH_TEST
     predictor = DefaultPredictor(cfg)
+    return predictor
+
+def inference(predictor, im, show=True):
     outputs = predictor(im)
     
     if show:
