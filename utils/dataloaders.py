@@ -1,4 +1,5 @@
 import os
+import contextlib
 from pathlib import Path
 import logging
 import urllib
@@ -514,6 +515,27 @@ class LoadScreenshots:
             im = np.ascontiguousarray(im)  # contiguous
         self.frame += 1
         return str(self.screen), im, im0, None, s  # screen, img, original img, im0s, s
+
+
+
+class Profile(contextlib.ContextDecorator):
+    # YOLOv5 Profile class. Usage: @Profile() decorator or 'with Profile():' context manager
+    def __init__(self, t=0.0):
+        self.t = t
+        self.cuda = torch.cuda.is_available()
+
+    def __enter__(self):
+        self.start = self.time()
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.dt = self.time() - self.start  # delta-time
+        self.t += self.dt  # accumulate dt
+
+    def time(self):
+        if self.cuda:
+            torch.cuda.synchronize()
+        return time.time()
 
 
 

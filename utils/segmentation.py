@@ -67,9 +67,9 @@ def draw_text(img, text,
 
     return text_size
 
-def dist_on_img(segment_points, boxes, im, distances, classes, class_dict, show=True):
+def dist_on_img(segment_points, boxes, im, distances, classes, class_dict, copy=True, show=True):
     # Creer une sauvegarde
-    img = im.copy()
+    img = im.copy() if copy else im
     
     for i,box in enumerate(boxes):
         class_name = class_dict[str(classes[i].item())]
