@@ -29,20 +29,21 @@ def convert_rgb_to_names(rgb_tuple):
 
 def get_nbr_image (chemin) : 
    #path = 'chemin/vers/dossier'
-    files = os.listdir(path)
+    files = os.listdir(chemin)
     num_files = len(files)/2
     
     return num_files
 
+#C:\Users\Amel\Documents\GitHub\underwater-image-analysis\data\outputs\output_0.jpg
 
-def get_couleur (nbr_image) : 
+def get_couleur (num_files , chemin) : 
     #d'abord recuperer toutes les images : 
     #nbr_image = 10 #(recuperer le nbr d'image)
 
     moy_tot_couleur = []                        #vecteur de la couleur moyenne pour toute le images 
-    for i in range(nbr_image) : 
+    for i in range(num_files) : 
         #chargement de l'image :
-        image = cv2.imread("image"+i+".jpg")
+        image = cv2.imread(chemin + "\output_" + str(i*40)+ ".jpg")
         #recuperer tous les pixel de l'espèce souhaitée 
         cnt = np.load('Coords'+i+'.npy')
         taille_cnt = len(cnt) 
@@ -68,7 +69,7 @@ def get_couleur (nbr_image) :
     #recuperer chaque colonne des intensités moyennes 
     exec("itens" + str(i) + " = np.take(moy_tot_couleur, i, axis=1)")
 
-    for i in range (0,nbr_image-1) : 
+    for i in range (0,num_files-1) : 
         #seuil de 10% pour chaque image 
         s = 10
         seuil_0 = (itens0[i]*s)/100
