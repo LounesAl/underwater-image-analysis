@@ -1,6 +1,7 @@
 #code pour suivre la couleur d'un objet : 
 #bibliotheque : 
 
+from utils.segmentation import *
 from webcolors import rgb_to_hex
 from webcolors import (
     CSS3_HEX_TO_NAMES,
@@ -9,6 +10,7 @@ from webcolors import (
 
 import cv2
 import numpy as np
+import os 
 
 def convert_rgb_to_names(rgb_tuple):
     
@@ -24,6 +26,13 @@ def convert_rgb_to_names(rgb_tuple):
     distance, index = kdt_db.query(rgb_tuple)
 
     return f' {names[index]}'
+
+def get_nbr_image (chemin) : 
+   #path = 'chemin/vers/dossier'
+    files = os.listdir(path)
+    num_files = len(files)/2
+    
+    return num_files
 
 
 def get_couleur (nbr_image) : 
