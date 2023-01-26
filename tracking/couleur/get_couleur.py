@@ -93,7 +93,7 @@ def get_couleur (num_files , chemin) :
             print ("lespece change de couleur vers :" , color) 
 
 
-chemin = "C:\Users\Amel\Documents\GitHub\underwater-image-analysis\data\outputs"
+chemin="C:\Users\Amel\Documents\GitHub\underwater-image-analysis\data\outputs"
 
 nbr = get_nbr_image (chemin)
 
