@@ -107,6 +107,13 @@ def run(
         # Inferred with the images of each camera
         output1 = inference(str(weights), im1, show=visualize)
         output2 = inference(str(weights), im2, show=visualize)
+        
+        # voir les classes predites
+        ## le resultat est de la forme : tensor([0, 1, 1, 2, 3, 3]), cela veut dire :
+        ## une espces PFE, deux actinia fermées, une ouverte et deux gibbula
+        classes1 = output1["instances"].pred_classes
+        classes2 = output2["instances"].pred_classes
+
 
         # Get segmentation points " A optimiser "
         uvs1, seg1, boxes1 = get_segment_points(output1)
@@ -122,9 +129,17 @@ def run(
             # visualize the 3D points
             show_scatter_3D(p3ds)
         
+        class_dict = {
+                        "0" : "PFE",
+                        "1" : "Actinia fermee",
+                        "2" : "Actinia ouverte",
+                        "3" : "Gibbula"
+                     }
+
+        
         distances, connections = get_3D_distances(p3ds, connections = [[0,2], [1,3]])
-        im1_seg = get_dist_on_img(uvs1, boxes1, im1, distances, connections, show=visualize)
-        im2_seg = get_dist_on_img(uvs2, boxes2, im2, distances, connections, show=visualize)
+        im1_seg = dist_on_img(uvs1, boxes1, im1, distances, classes1, class_dict, show=True)
+        im2_seg = dist_on_img(uvs2, boxes2, im2, distances, classes2, class_dict, show=True)
         
         # Save results (image with detections)
         if save_img:
