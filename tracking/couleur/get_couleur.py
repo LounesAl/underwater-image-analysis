@@ -81,17 +81,20 @@ def get_couleur (num_files , chemin) :
         seuil_1 = (itens1[i]*s)/100
         seuil_2 = (itens2[i]*s)/100
 
-        if ((itens0[i+1] < seuil_0 + itens0[i] and itens0[i+1] > seuil_0 - itens0[i]) or (itens1[i+1] < seuil_1 + itens1[i] and itens1[i+1] > seuil_1 - itens1[i]) or (itens2[i+1] < seuil_2 + itens2[i] and itens2[i+1] > seuil_2 - itens2[i]) ) : 
+        if (((itens0[i+1] < seuil_0 + itens0[i]) and (itens0[i+1] > seuil_0 - itens0[i])) or (itens1[i+1] < seuil_1 + itens1[i] and itens1[i+1] > seuil_1 - itens1[i]) or (itens2[i+1] < seuil_2 + itens2[i] and itens2[i+1] > seuil_2 - itens2[i]) ) : 
             print("pas de changement de couleur")
 
         else : 
 
             rgb = (itens0[i+1],itens1[i+1],itens2[i+1])
-
             #conversion en hexadécimal
             color = convert_rgb_to_names(rgb)
-
             #affichage de la couleur
-            print ("lespece change de couleur vers :" color) 
+            print ("lespece change de couleur vers :" , color) 
 
 
+chemin = "C:\Users\Amel\Documents\GitHub\underwater-image-analysis\data\outputs"
+
+nbr = get_nbr_image (chemin)
+
+get_couleur (nbr , chemin) 
