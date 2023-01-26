@@ -40,22 +40,55 @@ def get_segmentation(mask_array):
         coordinates.append([(y, x) for x, y in indices])
     return coordinates
 
-def get_dist_on_img(segment_points, boxes, im, distances, connections, show=True):
+def mid_point(box):
+    sorted_box = sorted(box, key=lambda x: x[1])
+    highest = sorted_box[-1]
+    second = sorted_box[-2]
+    mid = ((highest[0] + second[0]) / 2, (highest[1] + second[1]) / 2)
+    return mid
+
+def draw_text(img, text,
+          font=cv2.FONT_HERSHEY_PLAIN,
+          pos=(0, 0),
+          font_scale=3,
+          font_thickness=2,
+          text_color=(0, 255, 0),
+          text_color_bg=(0, 0, 0)
+          ):
+
+    x, y = pos
+    text_size, _ = cv2.getTextSize(text, font, font_scale, font_thickness)
+    text_w, text_h = text_size
+    cv2.rectangle(img, pos, (x + text_w, y + text_h), text_color_bg, -1)
+    cv2.putText(img, text, (x, int(y + text_h + font_scale - 1)), font, font_scale, text_color, font_thickness)
+
+    return text_size
+
+def dist_on_img(segment_points, boxes, im, distances, classes, class_dict, show=True):
     # Creer une sauvegarde
     img = im.copy()
     
-    for box in boxes:
+    for i,box in enumerate(boxes):
+        class_name = class_dict[str(classes[i].item())]
         cv2.drawContours(img, [np.int0(box)], -1, (0, 0, 255), 2)
+        # mid = mid_point(box)
+        highest = min(box, key=lambda point: point[1])
+        draw_text(img=img, text=class_name, pos=(int(highest[0]) + 10, int(highest[1]) - 10), 
+                  font_scale=2, font_thickness=2, text_color=(255, 255, 255), text_color_bg=(0, 0, 0))
+
 
     # Initialiser un tableau de tableau vide pour stocker les points de segmentation de chaque espece
-    for segment_point in segment_points:
+    for j, segment_point in enumerate(segment_points):
         # dessiner les lines de longuer et de largeur
-        for i in range(0, len(segment_point), 2):
+        for i, n in zip(range(0, len(segment_point), 2), range(len(distances[j]))):
             start = (int(segment_point[i][0]), int(segment_point[i][1]))
             end = (int(segment_point[i+1][0]), int(segment_point[i+1][1]))
+            x = start[0] + (end[0] - start[0]) * 0.25
+            y = start[1] + (end[1] - start[1]) * 0.25
             # Dessiner le segment sur l'image
             cv2.line(img, start, end, (255, 0, 0), 2)
-        
+            draw_text(img=img, text="{:.1f} cm".format(distances[j][n]), pos=(int(x) + 10, int(y) - 10), 
+                  font_scale=2, font_thickness=2, text_color=(255, 255, 255), text_color_bg=(0, 0, 0))
     if show == True:
         #Afficher l'image
         cv2.imshow("Points segmentation", img)
