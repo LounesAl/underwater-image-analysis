@@ -26,9 +26,9 @@ def init_config(path_model, SCORE_THRESH_TEST = 0.8):
     cfg.MODEL.WEIGHTS = path_model # Let training initialize from model zoo
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = SCORE_THRESH_TEST
     predictor = DefaultPredictor(cfg)
-    return predictor
+    return predictor, cfg
 
-def inference(predictor, im, show=True):
+def inference(predictor, cfg,  im, show=True):
     outputs = predictor(im)
     
     if show:
