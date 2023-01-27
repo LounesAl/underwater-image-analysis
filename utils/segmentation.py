@@ -82,12 +82,14 @@ def extract_caractristics(mask, pts, im):
     assert len(contours) == 1, f'we are supposed to retrieve a single contour that represents a species in what we have {len(contours)} contours.'
     cv2.drawContours(img, [contours[0]], 0, (0, 0, 255), 1)
     c = extract_desired_color_coordinates(img, (0, 0, 255))
-    common_elements1, _, _ = np.intersect1d(l1.view([('', l1.dtype)] * l1.shape[1]), 
-                                            c.view([('', c.dtype)] * c.shape[1]), return_indices = True)
-    common_elements2, _, _ = np.intersect1d(l2.view([('', l2.dtype)] * l2.shape[1])
-                                            , c.view([('', c.dtype)] * c.shape[1]), return_indices = True)
-    (x1, y1), (x2, y2), (x3, y3), (x4, y4) = common_elements1[0], common_elements1[1], common_elements2[0], common_elements2[1]
+    common_elements1 = l1[(l1[:, None] == c).all(-1).any(1)]
+    common_elements2 = l2[(l2[:, None] == c).all(-1).any(1)]
+    print('common_elements1 : ', common_elements1)
+    print('common_elements2 : ', common_elements2)
+    (x1, y1), (x2, y2) = common_elements1
+    (x3, y3), (x4, y4) = common_elements2
     return [(x1, y1), (x2, y2), (x3, y3), (x4, y4)]
+
 
 def dist_on_img(segment_points, boxes, im, distances, classes, class_dict, copy=True, show=True):
     # Creer une sauvegarde
