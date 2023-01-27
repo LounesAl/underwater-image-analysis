@@ -84,6 +84,8 @@ def run(
     seen, windows, dt = 0, [], (Profile(), Profile(), Profile())
     
     i = 0
+    predictor, cfg = init_config(str(weights), SCORE_THRESH_TEST = 0.8)
+    
     for (path1, im1, im0s1, vid_cap1, s1), (path2, im2, im0s2, vid_cap2, s2) in tqdm(zip(dataset_1, dataset_2)): # , unit='%', total=len(dataset_1), bar_format='{percentage:3.0f}%|{bar}|'
         
         i += 1
@@ -93,8 +95,8 @@ def run(
         
                 
         # Inferred with the images of each camera
-        output1 = inference(str(weights), im0s1, show=visualize)
-        output2 = inference(str(weights), im0s2, show=visualize)
+        output1 = inference(predictor, cfg,  im0s1, show=visualize)
+        output2 = inference(predictor, cfg,  im0s2, show=visualize)
         
         # voir les classes predites
         ## le resultat est de la forme : tensor([0, 1, 1, 2, 3, 3]), cela veut dire :
@@ -126,6 +128,7 @@ def run(
 
         
         distances, connections = get_3D_distances(p3ds, connections = [[0,2], [1,3]])
+        
         im1_seg = dist_on_img(uvs1, boxes1, im0s1, distances, classes1, class_dict, copy=False, show=visualize)
         im2_seg = dist_on_img(uvs2, boxes2, im0s2, distances, classes2, class_dict, copy=False, show=visualize)
         
