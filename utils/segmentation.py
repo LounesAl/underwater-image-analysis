@@ -8,7 +8,7 @@ from detectron2 import model_zoo
 import torch
 
 def visualiser(outputs, cfg, im):
-    v = Visualizer(im[:, :, ::-1], MetadataCatalog.get(cfg.DATASETS.TEST[0]), scale=1.2)
+    v = Visualizer(im[:, :, ::-1], MetadataCatalog.get(cfg.DATASETS.TEST[0]), scale=1)
     v = v.draw_instance_predictions(outputs["instances"].to("cpu"))
     cv2.imshow("Inference", v.get_image()[:, :, ::-1])
     cv2.waitKey(0)
