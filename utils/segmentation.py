@@ -12,6 +12,7 @@ def visualiser(outputs, cfg, im):
     v = v.draw_instance_predictions(outputs["instances"].to("cpu"))
     cv2.imshow("Inference", v.get_image()[:, :, ::-1])
     cv2.waitKey(0)
+    return v.get_image()[:, :, ::-1]
     
 def init_config(path_model, SCORE_THRESH_TEST = 0.8):
     cfg = get_cfg()
@@ -32,8 +33,8 @@ def inference(predictor, cfg,  im, show=True):
     outputs = predictor(im)
     
     if show:
-        visualiser(outputs, cfg, im)
-    return outputs
+        im_seg = visualiser(outputs, cfg, im)
+    return outputs, im_seg
 
 def get_segmentation(mask_array):
     num_instances = mask_array.shape[0]
@@ -71,13 +72,13 @@ def dist_on_img(segment_points, boxes, im, distances, classes, class_dict, copy=
     # Creer une sauvegarde
     img = im.copy() if copy else im
     
-    for i,box in enumerate(boxes):
-        class_name = class_dict[str(classes[i].item())]
-        cv2.drawContours(img, [np.int0(box)], -1, (0, 0, 255), 2)
-        # mid = mid_point(box)
-        highest = min(box, key=lambda point: point[1])
-        draw_text(img=img, text=class_name, pos=(int(highest[0]) + 10, int(highest[1]) - 10), 
-                  font_scale=2, font_thickness=2, text_color=(255, 255, 255), text_color_bg=(0, 0, 0))
+    # for i,box in enumerate(boxes):
+    #     class_name = class_dict[str(classes[i].item())]
+    #     cv2.drawContours(img, [np.int0(box)], -1, (0, 0, 255), 2)
+    #     # mid = mid_point(box)
+    #     highest = min(box, key=lambda point: point[1])
+    #     draw_text(img=img, text=class_name, pos=(int(highest[0]) + 10, int(highest[1]) - 10), 
+    #               font_scale=2, font_thickness=2, text_color=(255, 255, 255), text_color_bg=(0, 0, 0))
 
 
     # Initialiser un tableau de tableau vide pour stocker les points de segmentation de chaque espece
@@ -102,6 +103,7 @@ def get_segment_points(outputs):
     
     # Calculer le mask et points de segmentation
     mask_seg = outputs["instances"].pred_masks.cpu().numpy()
+    np.save('mask_seg.npy', mask_seg)
     coordonnes = get_segmentation(mask_seg)
 
     #Convertir les coordonnées en un tableau numpy
@@ -130,5 +132,5 @@ def get_segment_points(outputs):
         segment_point.append((((x[3]+x[0])/2), ((y[3]+y[0])/2)))
         # Sauvegarde des points de cette espece
         segment_points.append(segment_point)
-        
+    
     return segment_points, coords, boxes

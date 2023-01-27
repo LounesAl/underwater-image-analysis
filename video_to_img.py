@@ -24,7 +24,7 @@ from utils.calibration import *
 
 weights = 'models/model_final.pth'
 
-path = 'data/frames'
+path = 'data/imgs_c1'
 
 segmentation = []
 

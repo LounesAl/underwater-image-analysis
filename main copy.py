@@ -3,8 +3,8 @@ from utils.calibration import *
 
 visualize = False
 
-im2 = 'data/imgs_c2/image1832_jpg.rf.3f76332c090e81175da88367876dfcd8.jpg'
-im1 = 'data/imgs_c2/image1842_jpg.rf.fc8794fa0e45edf088fbd294b4b66188.jpg'
+im2 = 'data/imgs_c1/gibbula_07_16-1137-_jpg.rf.14010270c5faa4b12daee4276d06fbcf.jpg'
+im1 = 'data/imgs_c1/gibbula_07_16-1137-_jpg.rf.14010270c5faa4b12daee4276d06fbcf.jpg'
 
 im2 = cv2.imread(im2)
 im1 = cv2.imread(im1)
@@ -18,18 +18,22 @@ mtx1, mtx2, R, T = load_calibration(calib_cam)
 # Calculate the projection martrix
 P1, P2 = get_projection_matrix(mtx1, mtx2, R, T)
 
+# get config
+predictor, cfg = init_config(weights, SCORE_THRESH_TEST = 0.6)
+
+
 # Inferred with the images of each camera
-output1 = inference(weights, im1, show=False)
-output2 = inference(weights, im2, show=False)
+output1, im_seg1 = inference(predictor, cfg,  im1, show=True)
+output2, im_seg2 = inference(predictor, cfg,  im2, show=True)
 
 # voir les classes predites
 ## le resultat est de la forme : tensor([0, 1, 1, 2, 3, 3]), cela veut dire :
 ## une espces PFE, deux actinia fermées, une ouverte et deux gibbula
 classes1 = output1["instances"].pred_classes
-classes2 = output1["instances"].pred_classes
+classes2 = output2["instances"].pred_classes
 
 print(classes1)
-print(classes1)
+print(classes2)
 
 # --------------------------------------------#
 
@@ -68,8 +72,8 @@ class_dict = {
     "3" : "Gibbula"
 }
 
-im1_seg = dist_on_img(uvs1, boxes1, im1, distances, classes1, class_dict, show=True)
-im2_seg = dist_on_img(uvs2, boxes2, im2, distances, classes2, class_dict, show=True)
+im1_seg = dist_on_img(uvs1, boxes1, im_seg1, distances, classes1, class_dict, show=True)
+im2_seg = dist_on_img(uvs2, boxes2, im_seg2, distances, classes2, class_dict, show=True)
 
 # on a 4 distances ici ... 2 espces, chaque espces a deux distances (longeur et largeur)
 # distances = [[36.848607476959444, 32.03362311274617], [29.84703379255751, 45.008806942883936]]
