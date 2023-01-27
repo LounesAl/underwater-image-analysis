@@ -6,6 +6,7 @@ from detectron2.utils.visualizer import Visualizer
 from detectron2.data import MetadataCatalog
 from detectron2 import model_zoo
 import torch
+import os
 
 def visualiser(outputs, cfg, im):
     v = Visualizer(im[:, :, ::-1], MetadataCatalog.get(cfg.DATASETS.TEST[0]), scale=1.2)
@@ -18,7 +19,7 @@ def init_config(path_model, SCORE_THRESH_TEST = 0.8):
     cfg = get_cfg()
     cfg.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml"))
     cfg.DATASETS.TEST = (f"PFE_valid",)
-    cfg.MODEL.ROI_HEADS.NUM_CLASSES = 4
+    cfg.MODEL.ROI_HEADS.NUM_CLASSES = 4  # Don't change this!
 
     # Additional Info when using cuda
     if not torch.cuda.is_available():
@@ -29,9 +30,11 @@ def init_config(path_model, SCORE_THRESH_TEST = 0.8):
     predictor = DefaultPredictor(cfg)
     return predictor, cfg
 
-def inference(predictor, cfg,  im, show=True):
+def inference(predictor, cfg,  im, show=True, save_path=None):
     outputs = predictor(im)
     
+    if save_path != None and os.path.exists(save_path):
+        cv2.imwrite(save_path, outputs)
     if show:
         im_seg = visualiser(outputs, cfg, im)
     return outputs, im_seg
@@ -72,6 +75,7 @@ def dist_on_img(segment_points, boxes, im, distances, classes, class_dict, copy=
     # Creer une sauvegarde
     img = im.copy() if copy else im
     
+<<<<<<< HEAD
     # for i,box in enumerate(boxes):
     #     class_name = class_dict[str(classes[i].item())]
     #     cv2.drawContours(img, [np.int0(box)], -1, (0, 0, 255), 2)
@@ -79,6 +83,15 @@ def dist_on_img(segment_points, boxes, im, distances, classes, class_dict, copy=
     #     highest = min(box, key=lambda point: point[1])
     #     draw_text(img=img, text=class_name, pos=(int(highest[0]) + 10, int(highest[1]) - 10), 
     #               font_scale=2, font_thickness=2, text_color=(255, 255, 255), text_color_bg=(0, 0, 0))
+=======
+    for i, box in enumerate(boxes):
+        class_name = class_dict[str(classes[i].item())]
+        cv2.drawContours(img, [np.int0(box)], -1, (0, 0, 255), 2)
+        # mid = mid_point(box)
+        highest = min(box, key=lambda point: point[1])
+        draw_text(img=img, text=class_name, pos=(int(highest[0]) + 10, int(highest[1]) - 10), 
+                  font_scale=2, font_thickness=2, text_color=(255, 255, 255), text_color_bg=(0, 0, 0))
+>>>>>>> 70493d9 (improuvement)
 
 
     # Initialiser un tableau de tableau vide pour stocker les points de segmentation de chaque espece
