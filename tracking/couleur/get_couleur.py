@@ -12,6 +12,7 @@ import cv2
 import numpy as np
 import os 
 
+
 def convert_rgb_to_names(rgb_tuple):
     
     # a dictionary of all the hex and their respective names in css3
@@ -58,7 +59,7 @@ def get_couleur (num_files , chemin) :
         for j in range (taille_cnt) : 
             pixel = cnt[i]                              #recuperer les pixel 
             intensite.append(image[pixel[0],pixel[1]])  #recuperer les intensité des pixel d'interet 
-
+    
         moy_couleur = np.empty((3,1))                   #vecteur de la couleur moyenne de chaque image 
         #print(len(moy_couleur))
         for j in range(3):
