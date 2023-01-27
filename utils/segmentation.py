@@ -68,6 +68,27 @@ def draw_text(img, text,
 
     return text_size
 
+def extract_caractristics(mask, pts, im):
+    img = im.copy()
+    
+    pts = [tuple(map(int, coord)) for coord in pts]
+    (x1, y1), (x2, y2), (x3, y3), (x4, y4) = pts 
+    cv2.line(img, (x1, y1), (x2, y2), (255, 0, 0), 1)
+    l1 = extract_desired_color_coordinates(img, (255, 0, 0))
+    cv2.line(img, (x3, y3), (x4, y4), (0, 255, 0), 1)
+    l2 = extract_desired_color_coordinates(img, (0, 255, 0))
+    
+    contours, hierarchy = cv2.findContours(mask.astype(np.uint8), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    assert len(contours) == 1, f'we are supposed to retrieve a single contour that represents a species in what we have {len(contours)} contours.'
+    cv2.drawContours(img, [contours[0]], 0, (0, 0, 255), 1)
+    c = extract_desired_color_coordinates(img, (0, 0, 255))
+    common_elements1, _, _ = np.intersect1d(l1.view([('', l1.dtype)] * l1.shape[1]), 
+                                            c.view([('', c.dtype)] * c.shape[1]), return_indices = True)
+    common_elements2, _, _ = np.intersect1d(l2.view([('', l2.dtype)] * l2.shape[1])
+                                            , c.view([('', c.dtype)] * c.shape[1]), return_indices = True)
+    (x1, y1), (x2, y2), (x3, y3), (x4, y4) = common_elements1[0], common_elements1[1], common_elements2[0], common_elements2[1]
+    return [(x1, y1), (x2, y2), (x3, y3), (x4, y4)]
+
 def dist_on_img(segment_points, boxes, im, distances, classes, class_dict, copy=True, show=True):
     # Creer une sauvegarde
     img = im.copy() if copy else im
@@ -92,13 +113,21 @@ def dist_on_img(segment_points, boxes, im, distances, classes, class_dict, copy=
             cv2.line(img, start, end, (255, 0, 0), 2)
             draw_text(img=img, text="{:.1f} cm".format(distances[j][n]), pos=(int(x) + 10, int(y) - 10), 
                   font_scale=2, font_thickness=2, text_color=(255, 255, 255), text_color_bg=(0, 0, 0))
+            
     if show == True:
         #Afficher l'image
         cv2.imshow("Points segmentation", img)
         cv2.waitKey(0)
     return img
 
-def get_segment_points(outputs):
+def extract_desired_color_coordinates(img, color):
+    # Créer un masque pour isoler les pixels de la couleur cible
+    mask = np.all(img == color, axis=-1)
+    # Trouver les coordonnées des pixels de la couleur cible
+    x, y = np.where(mask)
+    return np.column_stack((x, y))
+
+def get_segment_points(outputs, im):
     
     # Calculer le mask et points de segmentation
     mask_seg = outputs["instances"].pred_masks.cpu().numpy()
@@ -130,6 +159,8 @@ def get_segment_points(outputs):
         segment_point.append((((x[1]+x[2])/2), ((y[1]+y[2])/2))) 
         segment_point.append((((x[3]+x[0])/2), ((y[3]+y[0])/2)))
         # Sauvegarde des points de cette espece
+        segment_point = extract_caractristics(mask_seg[i], segment_point, im)
+        # print(segment_point)
         segment_points.append(segment_point)
-    
+        
     return segment_points, coords, boxes

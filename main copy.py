@@ -23,8 +23,10 @@ predictor, cfg = init_config(weights, SCORE_THRESH_TEST = 0.6)
 
 
 # Inferred with the images of each camera
-output1, im_seg1 = inference(predictor, cfg,  im1, show=True)
-output2, im_seg2 = inference(predictor, cfg,  im2, show=True)
+img1 = im1.copy()
+img2 = im2.copy()
+output1, im_seg1 = inference(predictor, cfg,  im1.copy(), show=True)
+output2, im_seg2 = inference(predictor, cfg,  im2.copy(), show=True)
 
 # voir les classes predites
 ## le resultat est de la forme : tensor([0, 1, 1, 2, 3, 3]), cela veut dire :
@@ -43,8 +45,8 @@ print(classes2)
 # --------------------------------------------#
 
 # Get segmentation points " A optimiser "
-uvs1, seg1, boxes1 = get_segment_points(output1)
-uvs2, seg2, boxes2 = get_segment_points(output2)
+uvs1, seg1, boxes1 = get_segment_points(output1, im1)
+uvs2, seg2, boxes2 = get_segment_points(output2, im2)
 
 # transforme the 2D points in the images to 3D points in the exit()world
 # Il faut avoir le meme nombre de pairs de points dans les deux images
