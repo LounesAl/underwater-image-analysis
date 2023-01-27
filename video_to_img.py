@@ -19,23 +19,36 @@
 # # Libérer la vidéo
 # video.release()
 
-from utils.segmentation import *
-from utils.calibration import *
+# from utils.segmentation import *
+# from utils.calibration import *
 
-weights = 'models/model_final.pth'
+# weights = 'models/model_final.pth'
 
-path = 'data/imgs_c1'
+# path = 'data/imgs_c1'
 
-segmentation = []
+# segmentation = []
 
-files = os.listdir(path)
+# files = os.listdir(path)
 
-for i in range(0,len(files), 40):
-    im1 = cv2.imread(os.path.join(path, files[i]))
+# for i in range(0,len(files), 40):
+#     im1 = cv2.imread(os.path.join(path, files[i]))
     
-    print(files[i])
-    output1 = inference(weights, im1, show=False)
-    np.save("data/outputs/output_{}.npy".format(i), output1)
-    cv2.imwrite("data/outputs/output_{}.jpg".format(i), im1)
+#     print(files[i])
+#     output1 = inference(weights, im1, show=False)
+#     np.save("data/outputs/output_{}.npy".format(i), output1)
+#     cv2.imwrite("data/outputs/output_{}.jpg".format(i), im1)
 
-print('OK')
+# print('OK')
+
+import numpy as np
+
+list1 = np.array([[1, 2], [3, 4], [5, 6]])
+list2 = np.array([[3, 4], [4, 5], [1, 2]])
+
+def array_row_intersection(a,b):
+   tmp=np.prod(np.swapaxes(a[:,:,None],1,2)==b,axis=2)
+   return a[np.sum(np.cumsum(tmp,axis=0)*tmp==1,axis=1).astype(bool)]
+
+indice = (list1[:, None] == list2).all(-1).any(1)
+
+print(list1[indice])
