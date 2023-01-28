@@ -77,6 +77,7 @@ def get_couleur (num_files , chemin) :
     itens_1 = np.take(moy_tot_couleur, 1, axis=1) 
     itens_2 = np.take(moy_tot_couleur, 2, axis=1) 
 
+    #recuperer la premiere couleur de l'espece :
     rgb = tuple(np.concatenate([itens_0[0],itens_1[0],itens_2[0]]))
     print(rgb)
     color = convert_rgb_to_names(rgb)
