@@ -25,7 +25,7 @@ def run(
         src1=ROOT / 'data/imgs_c1',                                                 # file/dir/URL/glob/screen/0(webcam)
         src2=ROOT / 'data/imgs_c1',                                                 # file/dir/URL/glob/screen/0(webcam)
         imgsz=(640, 640),                                                           # inference size (height, width)
-        calib_cam='settings/camera_parameters/stereo_params.pkl',  # stereo cameras path parameters 
+        calib_cam=ROOT / 'settings/camera_parameters/stereo_params.pkl',  # stereo cameras path parameters 
         conf_thres=0.25,                                                            # confidence threshold
         device='',                                                                  # cuda device, i.e. 0 or 0,1,2,3 or cpu
         view_img=True,                                                              # visualize results
@@ -35,7 +35,7 @@ def run(
         exist_ok=False,                                                             # existing project/name ok, do not increment
 ):
     
-    src1, src2 = str(src1), str(src2)
+    src1, src2, calib_cam = str(src1), str(src2), str(calib_cam)
     is_file = Path(src1).suffix[1:] in (IMG_FORMATS + VID_FORMATS)
     is_url = src1.lower().startswith(('rtsp://', 'rtmp://', 'http://', 'https://'))
     webcam = src1.isnumeric() or src1.endswith('.streams') or (is_url and not is_file)
@@ -86,8 +86,8 @@ def run(
         
                 
         # Inferred with the images of each camera
-        output1 = inference(predictor, cfg,  im0s1, show=False)
-        output2 = inference(predictor, cfg,  im0s2, show=False)
+        output1 = inference(predictor, cfg,  im0s1)
+        output2 = inference(predictor, cfg,  im0s2)
         
         # voir les classes predites
         ## le resultat est de la forme : tensor([0, 1, 1, 2, 3, 3]), cela veut dire :
@@ -117,8 +117,8 @@ def run(
         
         distances, connections = get_3D_distances(p3ds, connections = [[0,2], [1,3]])
         
-        im1_seg = dist_on_img(uvs1, boxes1, im0s1, distances, classes1, class_dict, copy=False, show=False)
-        im2_seg = dist_on_img(uvs2, boxes2, im0s2, distances, classes2, class_dict, copy=False, show=False)
+        im1_seg = dist_on_img(uvs1, boxes1, im0s1, distances, classes1, class_dict, copy=False)
+        im2_seg = dist_on_img(uvs2, boxes2, im0s2, distances, classes2, class_dict, copy=False)
         
          # Stream results
         if view_img:
@@ -157,7 +157,7 @@ def parse_opt():
     parser.add_argument('--src1', type=str, default=ROOT / 'data/video_c1', help='file/dir/')
     parser.add_argument('--src2', type=str, default=ROOT / 'data/video_c2', help='file/dir/')
     parser.add_argument('--imgsz', '--img', '--img-size', nargs='+', type=int, default=(640, 640), help='inference size h,w')
-    parser.add_argument('--calib-cam', default=ROOT / 'stereo_calibration/camera_parameters/stereo_params.pkl', help='parameters calibration for cameras')    
+    parser.add_argument('--calib-cam', default=ROOT / 'settings/camera_parameters/stereo_params.pkl', help='parameters calibration for cameras')    
     parser.add_argument('--conf-thres', type=float, default=0.25, help='confidence threshold')
     parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     parser.add_argument('--view-img', action='store_true', help='show results')
