@@ -34,7 +34,7 @@ def inference(predictor, cfg,  im, show=True):
     
     if show:
         im_seg = visualiser(outputs, cfg, im)
-    return outputs, im_seg
+    return outputs
 
 def get_segmentation(mask_array):
     num_instances = mask_array.shape[0]
@@ -161,7 +161,7 @@ def get_segment_points(outputs, im):
         segment_point.append((((x[1]+x[2])/2), ((y[1]+y[2])/2))) 
         segment_point.append((((x[3]+x[0])/2), ((y[3]+y[0])/2)))
         # Sauvegarde des points de cette espece
-        segment_point = extract_caractristics(mask_seg[i], segment_point, im)
+        # segment_point = extract_caractristics(mask_seg[i], segment_point, im)
         # print(segment_point)
         segment_points.append(segment_point)
         
