@@ -1,16 +1,13 @@
 import os 
 import sys
 import logging
-from utils import parse_calibration_settings_file
+from utils.calibration import parse_calibration_settings_file
 import cv2
 import glob
 import numpy as np
 import pickle
 from pathlib import Path
 from tqdm import tqdm
-
-# Current path 
-CURENT_PATH = os.path.dirname(os.path.abspath('__file__'))
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # UNDERWATER-IMAGE-ANALYSIS root directory
