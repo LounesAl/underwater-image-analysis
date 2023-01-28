@@ -16,7 +16,7 @@ if str(ROOT) not in sys.path:
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
 # Retrieve the calibration parameters 
-calibration_settings = parse_calibration_settings_file(os.path.join(ROOT, 'stereo_calibration','calibration_settings.yaml'))
+calibration_settings = parse_calibration_settings_file(os.path.join(ROOT, 'settings','calibration_settings.yaml'))
 
 
 # Calibrate single camera to obtain camera intrinsic parameters from saved frames.
@@ -78,13 +78,9 @@ def calibrate_camera_for_intrinsic_parameters(path_image):
     return cmtx, dist, ret
 
 #save camera intrinsic parameters to file
-def save_camera_intrinsics(camera_matrix, distortion_coefs, camera_name):
+def save_camera_intrinsics(camera_matrix, distortion_coefs, save_path, camera_name):
 
-    #create folder if it does not exist
-    if not os.path.exists(os.path.join('.', 'camera_parameters')):
-        os.mkdir(os.path.join('.', 'camera_parameters'))
-
-    out_filename = os.path.join('.', 'camera_parameters', camera_name + '_intrinsics.dat')
+    out_filename = os.path.join(save_path, camera_name + '_intrinsics.dat')
     outf = open(out_filename, 'w')
 
     outf.write('intrinsic:\n')
@@ -161,13 +157,9 @@ def stereo_calibrate(mtx0, dist0, mtx1, dist1, frames_prefix_c0, frames_prefix_c
 
 
 
-def save_extrinsic_calibration_parameters(R0, T0, R1, T1, prefix = ''):
-    
-    #create folder if it does not exist
-    if not os.path.exists('camera_parameters'):
-        os.mkdir('camera_parameters')
+def save_extrinsic_calibration_parameters(R0, T0, R1, T1, save_path, prefix = ''):
 
-    camera0_rot_trans_filename = os.path.join('camera_parameters', prefix + 'camera0_rot_trans.dat')
+    camera0_rot_trans_filename = os.path.join(save_path, prefix + 'camera0_rot_trans.dat')
     outf = open(camera0_rot_trans_filename, 'w')
 
     outf.write('R:\n')
@@ -184,7 +176,7 @@ def save_extrinsic_calibration_parameters(R0, T0, R1, T1, prefix = ''):
     outf.close()
 
     #R1 and T1 are just stereo calibration returned values
-    camera1_rot_trans_filename = os.path.join('camera_parameters', prefix + 'camera1_rot_trans.dat')
+    camera1_rot_trans_filename = os.path.join(save_path, prefix + 'camera1_rot_trans.dat')
     outf = open(camera1_rot_trans_filename, 'w')
 
     outf.write('R:\n')
@@ -206,18 +198,19 @@ def main(path_folder_cam1, path_folder_cam2):
     """Step1. Obtain camera intrinsic matrices and save them"""
     # # camera0 intrinsics
     cmtx0, dist0, ret0 = calibrate_camera_for_intrinsic_parameters(path_folder_cam1) 
-    save_camera_intrinsics(cmtx0, dist0, 'camera0') #this will write cmtx and dist to disk
     # camera1 intrinsics
-    path_image = os.path.join('.', 'camera1')
     cmtx1, dist1, ret1 = calibrate_camera_for_intrinsic_parameters(path_folder_cam2)
-    save_camera_intrinsics(cmtx1, dist1, 'camera1') #this will write cmtx and dist to disk
     
     #create folder if it does not exist
-    if not os.path.exists(os.path.join('.' , 'camera_parameters')):
-        os.mkdir(os.path.join('.' , 'camera_parameters'))
+    if not os.path.exists(os.path.join('.' , 'settings', 'camera_parameters')):
+        os.mkdir(os.path.join('.' , 'settings', 'camera_parameters'))
+    
+    save_path = os.path.join('.' , 'settings', 'camera_parameters')
+    save_camera_intrinsics(cmtx0, dist0, save_path, 'camera0') #this will write cmtx and dist to disk
+    save_camera_intrinsics(cmtx1, dist1, save_path, 'camera1') #this will write cmtx and dist to disk
         
     # Open a file to save the dictionary contane cmtx, dist and ret to disk in pkl file
-    with open(os.path.join('.', 'camera_parameters', 'mono_params.pkl'), 'wb') as f:
+    with open(os.path.join(save_path, 'mono_params.pkl'), 'wb') as f:
         # Save the dictionary to the file
         pickle.dump({'cmtx0': cmtx0, 'cmtx1': cmtx1, 'dist0': dist0, 'dist1': dist1, 'ret0': ret0, 'ret1': ret1}, f)
 
@@ -229,17 +222,17 @@ def main(path_folder_cam1, path_folder_cam2):
     R0 = np.eye(3, dtype=np.float32)
     T0 = np.array([0., 0., 0.]).reshape((3, 1))
 
-    save_extrinsic_calibration_parameters(R0, T0, R, T) #this will write R and T to disk
+    save_extrinsic_calibration_parameters(R0, T0, R, T, save_path) #this will write R and T to disk
     R1 = R; T1 = T #to avoid confusion, camera1 R and T are labeled R1 and T1
     
     # Open a file to save the dictionary contane cmtx, dist and ret to disk in pkl file
-    with open(os.path.join('.', 'camera_parameters', 'stereo_params.pkl'), 'wb') as f:
+    with open(os.path.join(save_path, 'stereo_params.pkl'), 'wb') as f:
         # Save the dictionary to the file
         pickle.dump({'cmtx0': cmtx0, 'cmtx1': cmtx1, 'R': R, 'T': T}, f)
     
 
 if __name__ == '__main__':
-    main('stereo_calibration_/camera0', 'stereo_calibration_/camera1')
+    main('data/camera0', 'data/camera1')
     
         
         
