@@ -1,12 +1,14 @@
 #code pour suivre la couleur d'un objet : 
 #bibliotheque : 
 
-from utils.segmentation import *
+from segmentation import *
+from glob import glob
 from webcolors import rgb_to_hex
 from webcolors import (
     CSS3_HEX_TO_NAMES,
     hex_to_rgb,
 )
+from scipy.spatial import KDTree
 
 import cv2
 import numpy as np
@@ -36,16 +38,18 @@ def get_nbr_image (chemin) :
 
 #C:\Users\Amel\Documents\GitHub\underwater-image-analysis\data\outputs\output_0.jpg
 
-def get_couleur (num_files , chemin) : 
+def get_couleur (chemin_npy , chemin_img) : 
 
+    num_files = len(chemin_img)
     moy_tot_couleur = []                        #vecteur de la couleur moyenne pour toute le images 
     for i in range(num_files) : 
         #chargement de l'image :
-        image = cv2.imread(chemin + "\output_" + str(i*40)+ ".jpg")
+        image = cv2.imread(chemin_img[i])
         #recuperer tous les pixel de l'espèce souhaitée 
 
-        outputs = np.load('output_'+ str(i*40) +'.npy')
+        outputs = np.load(chemin_npy[i], allow_pickle=True)
 
+        print(outputs[0])
         # a tester et voir 
         mask_seg = outputs["instances"].pred_masks.cpu().numpy()
         cnt = get_segmentation(mask_seg)
@@ -101,3 +105,8 @@ def get_couleur (num_files , chemin) :
             #affichage de la couleur
             print ("lespece change de couleur vers :" , color) 
 
+if __name__ == "__main__":
+    path_img = glob('data/outputs/*.jpg')
+    path_npy = glob('data/outputs/*.npy')
+    num_img = len(path_img)
+    get_couleur (path_npy , path_img)
