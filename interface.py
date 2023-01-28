@@ -3,7 +3,7 @@ from PySide2 import QtCore, QtGui
 from utils.ui_fonctions import *
 from temporaire.main_copy import seg_img
 from PySide2.QtWidgets import *
-from PySide2.QtWebEngineWidgets import QWebEngineView
+# from PySide2.QtWebEngineWidgets import QWebEngineView
 
 
 class MainWindow(QMainWindow):
@@ -166,12 +166,15 @@ class img_seg_window(QWidget):
         self.setWindowTitle("Image segmentation")
         
         # Default path
-        self.img_path1 = 'data/imgs_c1/gibbula_07_16-1097-_jpg.rf.632cd8777f2b205c4fcd37545105890d.jpg'
-        self.img_path2 = 'data/imgs_c2/image1226_jpg.rf.5c88e00836cd73eefb40ade61f5ea77a.jpg'
+        self.path1 = 'data/imgs_c1/image990_jpg.rf.a5aeb14b2ae137ab47885a8079967d3a.jpg'
+        self.path2 = 'data/imgs_c1/image1026_jpg.rf.267e1da1a481440cf8b08314eed1a6ff.jpg'
         
         # Create labels to display "Sélectionner un dossier 1" and "Sélectionner un dossier 2"
         self.label1 = QLabel("Sélectionner l'image depuis la caméra 1")
         self.label2 = QLabel("Sélectionner l'image depuis la caméra 2")
+        self.label3 = QLabel("Definir le seuil de detection")
+        self.label4 = QLabel("Afficher la segmentation")
+        self.label5 = QLabel("Afficher la presentation en 3D")
         
         # Create the browse buttons
         self.browse_button1 = QPushButton('Parcourir', self)
@@ -179,20 +182,39 @@ class img_seg_window(QWidget):
         self.browse_button2 = QPushButton('Parcourir', self)
         self.browse_button2.clicked.connect(lambda: browse_file(self, 2))
         
-        self.seg_button = QPushButton('detecter et segmenter', self)
-        self.seg_button.clicked.connect(lambda: seg_img(self))
+        self.seg_button = QPushButton('Detecter et segmenter', self)
+        self.seg_button.clicked.connect(lambda: seg_img(self, SCORE_THRESH_TEST = self.double_spin_box.value(), show_inf = self.checkbox.isChecked(), show_3d = self.checkbox1.isChecked()))
         
         # Create a grid layout
         self.grid = QGridLayout()
         self.grid.setSpacing(10)
+        
+        # Create a checkbox
+        self.checkbox = QCheckBox("Avant d'afficher la distance", self)
+        self.checkbox1 = QCheckBox("en 3D", self)
 
         # Add the label and button to the grid layout
         self.grid.addWidget(self.label1, 0, 0)
         self.grid.addWidget(self.browse_button1, 0, 1)
         self.grid.addWidget(self.label2, 1, 0)
         self.grid.addWidget(self.browse_button2, 1, 1)
-        self.grid.addWidget(self.seg_button, 2, 0, 1, 2, QtCore.Qt.AlignCenter)
+        self.grid.addWidget(self.seg_button, 5, 0, 1, 2, QtCore.Qt.AlignCenter)
         
+        # Create a double spin box with a default value of 0.5
+        self.double_spin_box = QDoubleSpinBox()
+        self.double_spin_box.setMinimum(0.1)
+        self.double_spin_box.setMaximum(1)
+        self.double_spin_box.setSingleStep(0.1)
+        self.double_spin_box.setValue(0.8)
+
+        # Add the double spin box to the grid layout
+        self.grid.addWidget(self.label3, 2, 0)
+        self.grid.addWidget(self.double_spin_box, 2, 1, 1, 1)
+        self.grid.addWidget(self.label4, 3, 0)
+        self.grid.addWidget(self.checkbox, 3, 1)
+        self.grid.addWidget(self.label4, 4, 0)
+        self.grid.addWidget(self.checkbox, 4, 1)
+
         # Create a vertical layout
         self.layout = QVBoxLayout(self)
         self.layout.addLayout(self.grid)

@@ -7,11 +7,12 @@ from detectron2.data import MetadataCatalog
 from detectron2 import model_zoo
 import torch
 
-def visualiser(outputs, cfg, im):
+def visualiser(outputs, cfg, im, show):
     v = Visualizer(im[:, :, ::-1], MetadataCatalog.get(cfg.DATASETS.TEST[0]), scale=1)
     v = v.draw_instance_predictions(outputs["instances"].to("cpu"))
-    cv2.imshow("Inference", v.get_image()[:, :, ::-1])
-    cv2.waitKey(0)
+    if show:
+        cv2.imshow("Inference", v.get_image()[:, :, ::-1])
+        # cv2.waitKey(0)
     return v.get_image()[:, :, ::-1]
     
 def init_config(path_model, SCORE_THRESH_TEST = 0.8):
@@ -90,7 +91,7 @@ def extract_caractristics(mask, pts, im):
     return [(x1, y1), (x2, y2), (x3, y3), (x4, y4)]
 
 
-def dist_on_img(segment_points, boxes, im, distances, classes, class_dict, copy=True, show=True):
+def dist_on_img(segment_points, boxes, im, distances, classes, class_dict, copy=True):
     # Creer une sauvegarde
     img = im.copy() if copy else im
     
@@ -114,11 +115,6 @@ def dist_on_img(segment_points, boxes, im, distances, classes, class_dict, copy=
             cv2.line(img, start, end, (255, 0, 0), 2)
             draw_text(img=img, text="{:.1f} cm".format(distances[j][n]), pos=(int(x) + 10, int(y) - 10), 
                   font_scale=2, font_thickness=2, text_color=(255, 255, 255), text_color_bg=(0, 0, 0))
-            
-    if show == True:
-        #Afficher l'image
-        cv2.imshow("Points segmentation", img)
-        cv2.waitKey(0)
     return img
 
 def extract_desired_color_coordinates(img, color):
