@@ -57,7 +57,7 @@ def calibrate_camera_for_intrinsic_parameters(path_image):
     objpoints = [] # 3d point in real world space
 
 
-    for i, frame in tqdm(enumerate(images), total=len(images), desc = f"calibration of the {Path(path_image).name}"):
+    for i, frame in tqdm(enumerate(images), total=len(images), desc = f"Calibration Of The {Path(path_image).name.capitalize()}"):
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
         #find the checkerboard
@@ -140,7 +140,7 @@ def stereo_calibrate(mtx0, dist0, mtx1, dist1, frames_prefix_c0, frames_prefix_c
     #coordinates of the checkerboard in checkerboard world space.
     objpoints = [] # 3d point in real world space
 
-    for frame0, frame1 in tqdm(zip(c0_images, c1_images), total=len(c0_images), desc = f'stereo calibration'):
+    for frame0, frame1 in tqdm(zip(c0_images, c1_images), total=len(c0_images), desc = f'Stereo Calibration'):
         gray1 = cv2.cvtColor(frame0, cv2.COLOR_BGR2GRAY)
         gray2 = cv2.cvtColor(frame1, cv2.COLOR_BGR2GRAY)
         c_ret1, corners1 = cv2.findChessboardCorners(gray1, (rows, columns), None)
