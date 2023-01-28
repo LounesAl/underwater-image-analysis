@@ -15,10 +15,8 @@ if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))  # add ROOT to PATH
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
-
-
 # Retrieve the calibration parameters 
-calibration_settings = parse_calibration_settings_file(os.path.join(ROOT, 'calibration_settings.yaml'))
+calibration_settings = parse_calibration_settings_file(os.path.join(ROOT, 'stereo_calibration','calibration_settings.yaml'))
 
 
 # Calibrate single camera to obtain camera intrinsic parameters from saved frames.
