@@ -212,8 +212,8 @@ class img_seg_window(QWidget):
         self.grid.addWidget(self.double_spin_box, 2, 1, 1, 1)
         self.grid.addWidget(self.label4, 3, 0)
         self.grid.addWidget(self.checkbox, 3, 1)
-        self.grid.addWidget(self.label4, 4, 0)
-        self.grid.addWidget(self.checkbox, 4, 1)
+        self.grid.addWidget(self.label5, 4, 0)
+        self.grid.addWidget(self.checkbox1, 4, 1)
 
         # Create a vertical layout
         self.layout = QVBoxLayout(self)
