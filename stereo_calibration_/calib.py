@@ -210,15 +210,8 @@ def save_extrinsic_calibration_parameters(R0, T0, R1, T1, prefix = ''):
 
 if __name__ == '__main__':
 
-    if len(sys.argv) != 2:
-        logging.info(f'Call with settings filename: "python3 calibrate.py calibration_settings.yaml"')
-        sys.exit()
-    
-    # Open and parse the settings file
-    parse_calibration_settings_file(sys.argv[1])
 
-
-    """Step2. Obtain camera intrinsic matrices and save them"""
+    """Step1. Obtain camera intrinsic matrices and save them"""
     # # camera0 intrinsics
     path_image = os.path.join(CURRENT_PATH, 'camera0')
     cmtx0, dist0, ret0 = calibrate_camera_for_intrinsic_parameters(path_image) 
@@ -237,13 +230,13 @@ if __name__ == '__main__':
         # Save the dictionary to the file
         pickle.dump({'cmtx0': cmtx0, 'cmtx1': cmtx1, 'dist0': dist0, 'dist1': dist1, 'ret0': ret0, 'ret1': ret1}, f)
 
-    """Step4. Use paired calibration pattern frames to obtain camera0 to camera1 rotation and translation"""
+    """Step2. Use paired calibration pattern frames to obtain camera0 to camera1 rotation and translation"""
     frames_prefix_c0 = os.path.join(CURRENT_PATH, 'camera0')
     frames_prefix_c1 = os.path.join(CURRENT_PATH, 'camera1')
     R, T = stereo_calibrate(cmtx0, dist0, cmtx1, dist1, frames_prefix_c0, frames_prefix_c1)
 
 
-    """Step5. Save calibration data where camera0 defines the world space origin."""
+    """Step3. Save calibration data where camera0 defines the world space origin."""
     #camera0 rotation and translation is identity matrix and zeros vector
     R0 = np.eye(3, dtype=np.float32)
     T0 = np.array([0., 0., 0.]).reshape((3, 1))
@@ -255,3 +248,6 @@ if __name__ == '__main__':
     with open(os.path.join(CURRENT_PATH, 'camera_parameters', 'stereo_params.pkl'), 'wb') as f:
         # Save the dictionary to the file
         pickle.dump({'cmtx0': cmtx0, 'cmtx1': cmtx1, 'R': R, 'T': T}, f)
+        
+        
+        
