@@ -1,23 +1,26 @@
 import os
 import contextlib
-from pathlib import Path
 import logging
 import urllib
 import torch
 import glob
 import sys
-from datetime import datetime
-from subprocess import check_output
 import platform
 import cv2
 import IPython
 import numpy as np
 import time
 import re
-from urllib.parse import urlparse
-from threading import Thread
 import math
 import pkg_resources as pkg
+import inspect
+
+from urllib.parse import urlparse
+from threading import Thread
+from typing import Optional
+from datetime import datetime
+from subprocess import check_output
+from pathlib import Path
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[1]  # YOLOv5 root directory
@@ -537,6 +540,20 @@ class Profile(contextlib.ContextDecorator):
             torch.cuda.synchronize()
         return time.time()
 
+def print_args(args: Optional[dict] = None, show_file=True, show_func=False):
+    # Print function arguments (optional args dict)
+    x = inspect.currentframe().f_back  # previous frame
+    file, _, func, _, _ = inspect.getframeinfo(x)
+    if args is None:  # get args automatically
+        args, _, _, frm = inspect.getargvalues(x)
+        args = {k: v for k, v in frm.items() if k in args}
+    try:
+        file = Path(file).resolve().relative_to(ROOT).with_suffix('')
+    except ValueError:
+        file = Path(file).stem
+    s = (f'{file}: ' if show_file else '') + (f'{func}: ' if show_func else '')
+    # LOGGER.info(colorstr(s) + ', '.join(f'{k}={v}' for k, v in args.items()))
+    print(colorstr(s) + ', '.join(f'{k}={v}' for k, v in args.items()))    
 
 
 
