@@ -7,12 +7,9 @@ from detectron2.data import MetadataCatalog
 from detectron2 import model_zoo
 import torch
 
-def visualiser(outputs, cfg, im, show):
+def visualiser(outputs, cfg, im):
     v = Visualizer(im[:, :, ::-1], MetadataCatalog.get(cfg.DATASETS.TEST[0]), scale=1)
     v = v.draw_instance_predictions(outputs["instances"].to("cpu"))
-    if show:
-        cv2.imshow("Inference", v.get_image()[:, :, ::-1])
-        # cv2.waitKey(0)
     return v.get_image()[:, :, ::-1]
     
 def init_config(path_model, SCORE_THRESH_TEST = 0.8):
@@ -30,9 +27,9 @@ def init_config(path_model, SCORE_THRESH_TEST = 0.8):
     predictor = DefaultPredictor(cfg)
     return predictor, cfg
 
-def inference(predictor, cfg,  im, show=True):
+def inference(predictor, cfg,  im):
     outputs = predictor(im)
-    im_seg = visualiser(outputs, cfg, im, show)
+    im_seg = visualiser(outputs, cfg, im)
     
     return outputs, im_seg
 

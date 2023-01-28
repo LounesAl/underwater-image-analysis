@@ -175,6 +175,7 @@ class img_seg_window(QWidget):
         self.label3 = QLabel("Definir le seuil de detection")
         self.label4 = QLabel("Afficher la segmentation")
         self.label5 = QLabel("Afficher la presentation en 3D")
+        self.label6 = QLabel("Afficher l'image avec les dimentions")
         
         # Create the browse buttons
         self.browse_button1 = QPushButton('Parcourir', self)
@@ -183,7 +184,7 @@ class img_seg_window(QWidget):
         self.browse_button2.clicked.connect(lambda: browse_file(self, 2))
         
         self.seg_button = QPushButton('Detecter et segmenter', self)
-        self.seg_button.clicked.connect(lambda: seg_img(self, SCORE_THRESH_TEST = self.double_spin_box.value(), show_inf = self.checkbox.isChecked(), show_3d = self.checkbox1.isChecked()))
+        self.seg_button.clicked.connect(lambda: seg_img(self, SCORE_THRESH_TEST = self.double_spin_box.value(), show_inf = self.checkbox.isChecked(), show_3d = self.checkbox1.isChecked(), show_final = self.checkbox2.isChecked()))
         
         # Create a grid layout
         self.grid = QGridLayout()
@@ -192,13 +193,14 @@ class img_seg_window(QWidget):
         # Create a checkbox
         self.checkbox = QCheckBox("Avant d'afficher la distance", self)
         self.checkbox1 = QCheckBox("en 3D", self)
+        self.checkbox2 = QCheckBox("FInal", self, checked=True)
 
         # Add the label and button to the grid layout
         self.grid.addWidget(self.label1, 0, 0)
         self.grid.addWidget(self.browse_button1, 0, 1)
         self.grid.addWidget(self.label2, 1, 0)
         self.grid.addWidget(self.browse_button2, 1, 1)
-        self.grid.addWidget(self.seg_button, 5, 0, 1, 2, QtCore.Qt.AlignCenter)
+        self.grid.addWidget(self.seg_button, 6, 0, 1, 2, QtCore.Qt.AlignCenter)
         
         # Create a double spin box with a default value of 0.5
         self.double_spin_box = QDoubleSpinBox()
@@ -214,6 +216,8 @@ class img_seg_window(QWidget):
         self.grid.addWidget(self.checkbox, 3, 1)
         self.grid.addWidget(self.label5, 4, 0)
         self.grid.addWidget(self.checkbox1, 4, 1)
+        self.grid.addWidget(self.label6, 5, 0)
+        self.grid.addWidget(self.checkbox2, 5, 1)
 
         # Create a vertical layout
         self.layout = QVBoxLayout(self)
