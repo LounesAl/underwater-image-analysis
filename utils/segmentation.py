@@ -31,10 +31,9 @@ def init_config(path_model, SCORE_THRESH_TEST = 0.8):
 
 def inference(predictor, cfg,  im, show=True):
     outputs = predictor(im)
+    im_seg = visualiser(outputs, cfg, im, show)
     
-    if show:
-        im_seg = visualiser(outputs, cfg, im)
-    return outputs
+    return outputs, im_seg
 
 def get_segmentation(mask_array):
     num_instances = mask_array.shape[0]
