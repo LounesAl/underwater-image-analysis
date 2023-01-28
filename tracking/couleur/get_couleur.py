@@ -37,8 +37,6 @@ def get_nbr_image (chemin) :
 #C:\Users\Amel\Documents\GitHub\underwater-image-analysis\data\outputs\output_0.jpg
 
 def get_couleur (num_files , chemin) : 
-    #d'abord recuperer toutes les images : 
-    #nbr_image = 10 #(recuperer le nbr d'image)
 
     moy_tot_couleur = []                        #vecteur de la couleur moyenne pour toute le images 
     for i in range(num_files) : 
@@ -59,7 +57,7 @@ def get_couleur (num_files , chemin) :
             intensite.append(image[cnt[j][0],cnt[j][1]])  #recuperer les intensité des pixel d'interet 
     
         moy_couleur = np.empty((np.shape(intensite)[1],1))                   #vecteur de la couleur moyenne de chaque image 
-        #print(len(moy_couleur))
+
         for j in range(np.shape(intensite)[1]):
             #recuperer les colonnes de chaque intensité (R,G,B)
             exec("colonne_" + str(j) + " = np.take(intensite, j, axis=0)")
@@ -75,9 +73,9 @@ def get_couleur (num_files , chemin) :
         #exec("colonne_" + str(i) + " = tableau[i]")
         #print (itens_1)
 
-    itens_0 = np.take(moy_tot_couleur, 0, axis=1) #moy_tot_couleur[ : , 0]
-    itens_1 = np.take(moy_tot_couleur, 1, axis=1) #moy_tot_couleur[: , 1]
-    itens_2 = np.take(moy_tot_couleur, 2, axis=1) #moy_tot_couleur[: , 2]
+    itens_0 = np.take(moy_tot_couleur, 0, axis=1) 
+    itens_1 = np.take(moy_tot_couleur, 1, axis=1) 
+    itens_2 = np.take(moy_tot_couleur, 2, axis=1) 
 
     rgb = tuple(np.concatenate([itens_0[0],itens_1[0],itens_2[0]]))
     print(rgb)
@@ -85,8 +83,8 @@ def get_couleur (num_files , chemin) :
     print ("la couleur de l'espece est" , color)
 
     for i in range (0,num_files-1) : 
-        #seuil de 10% pour chaque image 
-        s = 10
+        
+        s = 10                              #seuil de 10% pour chaque image 
         seuil_0 = (itens_0[i]*s)/100
         seuil_1 = (itens_1[i]*s)/100
         seuil_2 = (itens_2[i]*s)/100
