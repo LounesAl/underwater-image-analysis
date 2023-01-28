@@ -1,7 +1,7 @@
 import sys
 from PySide2 import QtCore, QtGui
-from PySide2.QtWidgets import (QApplication, QMainWindow, QAction, QToolBar, 
-                               QHBoxLayout, QVBoxLayout, QPushButton, QLabel, QMenu, QToolButton, QStackedLayout, QWidget, QMessageBox, QFileDialog)
+from PySide2.QtWidgets import (QApplication, QMainWindow, QAction, QToolBar, QGridLayout,
+                               QHBoxLayout, QVBoxLayout, QPushButton, QLabel, QMenu, QToolButton, QFileDialog, QWidget, QMessageBox, QFileDialog)
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -59,7 +59,7 @@ class MainWindow(QMainWindow):
         self.outils_menu.addAction(self.calib_action)
         self.outils_menu.addAction(self.seg_action)
         # I.4 Associer des fonction au action des sous menu
-        self.calib_action.triggered.connect(self.calibration_main)
+        self.calib_action.triggered.connect(self.calibration_func_windows)
         self.seg_action.triggered.connect(self.segmentation)
         
         # I.5 Ajouter un bouton parametres
@@ -96,7 +96,7 @@ class MainWindow(QMainWindow):
     def exit(self):
         QApplication.exit()
     
-    def calibration_main(self):
+    def calibration_func_windows(self):
         self.calib = calib_window()
         self.calib.show()
         
@@ -121,35 +121,57 @@ class MainWindow(QMainWindow):
             print("OK!")
         
 class calib_window(QWidget):
-    """
-    This "window" is a QWidget. If it has no parent, it
-    will appear as a free-floating window as we want.
-    """
     def __init__(self):
-        super().__init__()
+        super(calib_window, self).__init__()
+        
         self.setGeometry(650, 400, 600, 400)
-        layout = QVBoxLayout()
-        self.label = QLabel("Another Window")
-        layout.addWidget(self.label)
-        self.setLayout(layout)
-        button1 = QPushButton("Calibrer")
-        button1.clicked.connect(self.select_intput_file)
-        layout.addWidget(button1)
+        self.setWindowTitle("Calibration")
         
-    def calibration(self):
-        print("En train de calibrer ... ")
-        path=str(self.setOpenFileName('Shapefile (*.shp)'))
+        # Default path
+        self.folder_path1 = 'data/imgs_c1'
+        self.folder_path2 = 'data/imgs_c2'
         
+        # Create labels to display "Sélectionner un dossier 1" and "Sélectionner un dossier 2"
+        self.label1 = QLabel("Sélectionner un dossier 1")
+        self.label2 = QLabel("Sélectionner un dossier 2")
         
-    def select_intput_file(self):
-            """
-    
-            :return:
-            """
-            self.filename = str(QFileDialog.getExistingDirectory(
-                self.dlg, "Select input file "))
-            self.dlg.lineEdit.setText(self.filename)
-            self.filename =  self.filename + "/"
+        # Create the browse buttons
+        self.browse_button1 = QPushButton('Parcourir 1', self)
+        self.browse_button1.clicked.connect(lambda: self.browse_folder(1))
+        self.browse_button2 = QPushButton('Parcourir 2', self)
+        self.browse_button2.clicked.connect(lambda: self.browse_folder(2))
+        
+        self.calib_button = QPushButton('Calibrer', self)
+        self.calib_button.clicked.connect(self.calibration_func)
+        
+        # Create a grid layout
+        self.grid = QGridLayout()
+        self.grid.setSpacing(10)
+
+        # Add the label and button to the grid layout
+        self.grid.addWidget(self.label1, 0, 0)
+        self.grid.addWidget(self.browse_button1, 0, 1)
+        self.grid.addWidget(self.label2, 1, 0)
+        self.grid.addWidget(self.browse_button2, 1, 1)
+        self.grid.addWidget(self.calib_button, 2, 0, 1, 2, QtCore.Qt.AlignCenter)
+        
+        # Create a vertical layout
+        self.layout = QVBoxLayout(self)
+        self.layout.addLayout(self.grid)
+
+
+    def browse_folder(self, button_id):
+        folder_path = QFileDialog.getExistingDirectory(self, 'Sélectionner un dossier', '', QFileDialog.ShowDirsOnly)
+        if folder_path:
+            if button_id == 1:
+                self.folder_path1 = folder_path
+            elif button_id == 2:
+                self.folder_path2 = folder_path
+                
+    def calibration_func(self):
+        # calib(self.folder_path1, self.folder_path2)
+        print(f"path1 : {self.folder_path1} \npath2 : {self.folder_path2}")
+
        
 if __name__ == "__main__":
     app = QApplication(sys.argv)
