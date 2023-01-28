@@ -16,7 +16,8 @@ ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
 from utils.segmentation import *
 from utils.calibration import *
-from utils.dataloaders import (IMG_FORMATS, VID_FORMATS, check_file, increment_path, select_device, check_imshow,  Profile, LoadImages, LoadScreenshots, LoadStreams)
+from utils.dataloaders import (IMG_FORMATS, VID_FORMATS, check_file, increment_path, select_device, check_imshow, 
+                               Profile, LoadImages, LoadScreenshots, LoadStreams)
 
 
 def run(
@@ -33,7 +34,7 @@ def run(
         save_txt=False,                                                     # save results to *.txt
         nosave=False,                                                       # do not save images/videos
         classes=None,                                                       # filter by class: --class 0, or --class 0 2 3
-        visualize=False,                                                     # visualize features
+        visualize=False,                                                    # visualize features
         update=False,                                                       # update all models
         project=ROOT / 'runs/detect',                                       # save results to project/name
         name='exp',                                                         # save results to project/name
