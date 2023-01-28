@@ -1,25 +1,23 @@
 import pickle
 import cv2
+import imutils
 import numpy as np
 import os 
+import time
 import logging
 import sys
+import requests
 import glob
-from utils import (parse_calibration_settings_file)
-from pathlib import Path
+from utils import (parse_calibration_settings_file, start_message)
+
 
 
 
 # Current path 
-FILE = Path(__file__).resolve()
-ROOT = FILE.parents[0]  # UNDERWATER-IMAGE-ANALYSIS root directory
-if str(ROOT) not in sys.path:
-    sys.path.append(str(ROOT))  # add ROOT to PATH
-ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
-
+CURRENT_PATH = os.path.dirname(os.path.abspath('__file__'))
 
 # Retrieve the calibration parameters 
-calibration_settings = parse_calibration_settings_file(str(ROOT / 'calibration_settings.yaml'))
+calibration_settings = parse_calibration_settings_file(r'./calibration_settings.yaml')
 
 # Create logging
 logging.basicConfig(level=logging.DEBUG, 
@@ -27,6 +25,73 @@ logging.basicConfig(level=logging.DEBUG,
                     filemode='w',
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
+
+
+# Open camera stream and save frames
+def save_frames_single_camera(camera_name):
+
+    # create frames directory
+    if not os.path.exists(os.path.join(CURRENT_PATH, f'frames_{camera_name}')):
+        os.mkdir(os.path.join(CURRENT_PATH, f'frames_{camera_name}'))
+    
+    # get settings
+    camera_device_id = calibration_settings[camera_name]
+    width = calibration_settings['frame_width']
+    height = calibration_settings['frame_height']
+    number_to_save = calibration_settings['mono_calibration_frames']
+    view_resize = calibration_settings['view_resize']
+    cooldown_time = calibration_settings['cooldown']
+    
+    cooldown = cooldown_time
+    start = False
+    saved_count = 0
+
+    while True:
+        
+        # Read frames
+        try:
+            img_resp = requests.get(camera_device_id)
+            img_arr = np.array(bytearray(img_resp.content), dtype=np.uint8)
+            frame = cv2.imdecode(img_arr, -1)
+            frame = imutils.resize(frame, width=width, height=height)
+        except Exception as e:
+            #if no video data is received, can't calibrate the camera, so exit.
+            logging.error(f"No video data received from camera. Exiting...")
+            sys.exit()
+
+        frame_small = cv2.resize(frame, None, fx = 1/view_resize, fy=1/view_resize)
+
+        if not start:
+            frame_small = start_message(frame_small, "Press SPACEBAR to start collection frames")
+        
+        if start:
+            cooldown -= 1
+            cv2.putText(frame_small, "Cooldown: " + str(cooldown), (8,25), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 0), 0)
+            cv2.putText(frame_small, "Num frames: " + str(saved_count), (8,65), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 0, 0), 0)
+            
+            #save the frame when cooldown reaches 0.
+            if cooldown <= 0:
+                id_no = time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime(time.time()))
+                savename = os.path.join(CURRENT_PATH, f'frames_{camera_name}', str(camera_name) + '_' + id_no + '_' + str(saved_count) + '.png')
+                cv2.imwrite(savename, frame)
+                saved_count += 1
+                cooldown = cooldown_time
+
+        cv2.imshow('frame_small', frame_small)
+        k = cv2.waitKey(1)
+        
+        if k == 27:
+            # if ESC is pressed at any time, the program will exit.
+            sys.exit()
+
+        if k == 32:
+            # Press spacebar to start data collection
+            start = True
+
+        # break out of the loop when enough number of frames have been saved
+        if saved_count == number_to_save: break
+
+    cv2.destroyAllWindows()
 
 
 # Calibrate single camera to obtain camera intrinsic parameters from saved frames.
@@ -100,22 +165,27 @@ def calibrate_camera_for_intrinsic_parameters(images_prefix):
 
 if __name__ == '__main__':
 
+    """Step1. Save calibration frames for single cameras"""
+    save_frames_single_camera('camera0') #save frames for camera0
+    save_frames_single_camera('camera1') #save frames for camera1
+
+
+    """Step2. Obtain camera intrinsic matrices and save them"""
     # camera0 intrinsics
-    images_prefix = str(ROOT / 'camera0*')
-    
+    images_prefix = os.path.join('frames_camera0', 'camera0*')
     cmtx0, dist0, ret0 = calibrate_camera_for_intrinsic_parameters(images_prefix) 
     # save_camera_intrinsics(cmtx0, dist0, 'camera0') #this will write cmtx and dist to disk
     # camera1 intrinsics
-    images_prefix = str(ROOT / 'camera1*')
+    images_prefix = os.path.join('frames_camera1', 'camera1*')
     cmtx1, dist1, ret1 = calibrate_camera_for_intrinsic_parameters(images_prefix)
     # save_camera_intrinsics(cmtx1, dist1, 'camera1') #this will write cmtx and dist to disk
 
     #create folder if it does not exist
-    if not os.path.exists(str(ROOT / 'camera_parameters')):
-        os.mkdir(str(ROOT / 'camera_parameters'))
+    if not os.path.exists(os.path.join(CURRENT_PATH, 'camera_parameters')):
+        os.mkdir(os.path.join(CURRENT_PATH, 'camera_parameters'))
         
     # Open a file to save the dictionary contane cmtx, dist and ret to disk in pkl file
-    with open(str(ROOT / 'camera_parameters/mono_params.pkl'), 'wb') as f:
+    with open(os.path.join(CURRENT_PATH, 'camera_parameters', 'mono_params.pkl'), 'wb') as f:
         # Save the dictionary to the file
         pickle.dump({'cmtx0': cmtx0, 'cmtx1': cmtx1, 'dist0': dist0, 'dist1': dist1, 'ret0': ret0, 'ret1': ret1}, f)
 

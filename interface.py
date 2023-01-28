@@ -1,6 +1,6 @@
 import sys
 from PySide2 import QtCore, QtGui
-# from stereo_calibration_.calib import main
+from stereo_calibration_.calib import main
 from utils.ui_fonctions import *
 from temporaire.main_copy import seg_img
 from PySide2.QtWidgets import *
