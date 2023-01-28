@@ -18,7 +18,6 @@ ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 # Retrieve the calibration parameters 
 calibration_settings = parse_calibration_settings_file(os.path.join(ROOT, 'settings','calibration_settings.yaml'))
 
-
 # Calibrate single camera to obtain camera intrinsic parameters from saved frames.
 def calibrate_camera_for_intrinsic_parameters(path_image):
     
