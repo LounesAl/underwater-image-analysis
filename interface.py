@@ -1,6 +1,6 @@
 import sys
 from PySide2 import QtCore, QtGui
-# from stereo_calibration_.calib import main
+from calib import main
 from utils.ui_fonctions import *
 from temporaire.main_copy import seg_img
 from PySide2.QtWidgets import *
@@ -129,7 +129,7 @@ class calib_window(QWidget):
         self.browse_button2.clicked.connect(lambda: browse_folder(self, 2))
         
         self.calib_button = QPushButton('Calibrer', self)
-        # self.calib_button.clicked.connect(lambda: main(self.path1, self.path2))
+        self.calib_button.clicked.connect(lambda: main(self.path1, self.path2))
         
         # Create a grid layout
         self.grid = QGridLayout()

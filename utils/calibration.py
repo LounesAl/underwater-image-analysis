@@ -146,5 +146,5 @@ def load_calibration(path_calib):
     with open(path_calib, "rb") as f:
         # Load the dictionary from the file
         loaded_data = pickle.load(f)
-    mtx1, mtx2, R, T = loaded_data['mtx0'], loaded_data['mtx1'], loaded_data['R'], loaded_data['T']
+    mtx1, mtx2, R, T = loaded_data['cmtx0'], loaded_data['cmtx1'], loaded_data['R'], loaded_data['T']
     return mtx1, mtx2, R, T

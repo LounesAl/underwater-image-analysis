@@ -24,3 +24,5 @@ actinia.mp4
 /stereo_calibration_/__pycache__
 rapport/Rapport.pdf
 /test.ipynb
+__pycache__/
+
