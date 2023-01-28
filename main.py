@@ -19,21 +19,20 @@ from utils.segmentation import *
 from utils.calibration import *
 from utils.dataloaders import (IMG_FORMATS, VID_FORMATS, check_file, increment_path, select_device, print_args, Profile, LoadImages)
 
-
 def run(
-        weights=ROOT / 'models/model_final.pth',                                 # model path or triton URL
-        save_rest=True,                                                          # save inference images
-        src1=ROOT / 'data/imgs_c1',                                              # file/dir/URL/glob/screen/0(webcam)
-        src2=ROOT / 'data/imgs_c1',                                              # file/dir/URL/glob/screen/0(webcam)
-        imgsz=(640, 640),                                                          # inference size (height, width)
-        calib_cam=ROOT / 'stereo_calibration/camera_parameters/stereo_params.pkl', # stereo cameras path parameters 
-        conf_thres=0.25,                                                           # confidence threshold
-        device='',                                                                 # cuda device, i.e. 0 or 0,1,2,3 or cpu
-        view_img=True,                                                            # visualize results
-        visualize=False,                                                           # visualize features
-        project=ROOT / 'runs/detect',                                              # save results to project/name
-        name='exp',                                                                # save results to project/name
-        exist_ok=False,                                                            # existing project/name ok, do not increment
+        weights=ROOT / 'models/model_final.pth',                                    # model path or triton URL
+        save_rest=True,                                                             # save inference images
+        src1=ROOT / 'data/imgs_c1',                                                 # file/dir/URL/glob/screen/0(webcam)
+        src2=ROOT / 'data/imgs_c1',                                                 # file/dir/URL/glob/screen/0(webcam)
+        imgsz=(640, 640),                                                           # inference size (height, width)
+        calib_cam=ROOT / 'stereo_calibration/camera_parameters/stereo_params.pkl',  # stereo cameras path parameters 
+        conf_thres=0.25,                                                            # confidence threshold
+        device='',                                                                  # cuda device, i.e. 0 or 0,1,2,3 or cpu
+        view_img=True,                                                              # visualize results
+        visualize=False,                                                            # visualize features
+        project=ROOT / 'runs/detect',                                               # save results to project/name
+        name='exp',                                                                 # save results to project/name
+        exist_ok=False,                                                             # existing project/name ok, do not increment
 ):
     
     src1, src2 = str(src1), str(src2)
@@ -63,8 +62,8 @@ def run(
         dataset_1 = LoadImages(src1, img_size=imgsz)
         dataset_2 = LoadImages(src2, img_size=imgsz)
     
-    assert len(dataset_1) == len(dataset_2), 'The size of the two datasets must be equal.'
     assert dataset_1.mode == dataset_2.mode, 'Both datasets must have the same mode.'
+    assert len(dataset_1) == len(dataset_2), 'The size of the two datasets must be equal.'
     
     vid_path, vid_writer = None, None         
     
@@ -154,9 +153,11 @@ def run(
 def parse_opt():
     parser = argparse.ArgumentParser()
     parser.add_argument('--weights', nargs='+', type=str, default=ROOT / 'models/model_final.pth', help='model path')
+    parser.add_argument('--save-rest', action='store_false', help='save results of inference')    
     parser.add_argument('--src1', type=str, default=ROOT / 'data/video_c1', help='file/dir/')
     parser.add_argument('--src2', type=str, default=ROOT / 'data/video_c2', help='file/dir/')
     parser.add_argument('--imgsz', '--img', '--img-size', nargs='+', type=int, default=(640, 640), help='inference size h,w')
+    parser.add_argument('--calib-cam', default=ROOT / 'stereo_calibration/camera_parameters/stereo_params.pkl', help='parameters calibration for cameras')    
     parser.add_argument('--conf-thres', type=float, default=0.25, help='confidence threshold')
     parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     parser.add_argument('--view-img', action='store_true', help='show results')
@@ -164,12 +165,10 @@ def parse_opt():
     parser.add_argument('--project', default=ROOT / 'runs/detect', help='save results to project/name')
     parser.add_argument('--name', default='exp', help='save results to project/name')
     parser.add_argument('--exist-ok', action='store_true', help='existing project/name ok, do not increment')
-    parser.add_argument('--save-rest', action='store_false', help='save results of inference')    
-    parser.add_argument('--calib-cam', default=ROOT / 'stereo_calibration/camera_parameters/stereo_params.pkl', help='parameters calibration for cameras')    
     opt = parser.parse_args()
     opt.imgsz *= 2 if len(opt.imgsz) == 1 else 1  # expand
     print_args(vars(opt))
-    return opt
+    return opt       
 
 def main(opt):
     run(**vars(opt))
