@@ -1,7 +1,7 @@
 import os 
 import sys
 import logging
-from utils import (parse_calibration_settings_file)
+from utils import parse_calibration_settings_file
 import cv2
 import glob
 import numpy as np
