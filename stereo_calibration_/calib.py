@@ -10,7 +10,7 @@ from pathlib import Path
 from tqdm import tqdm
 
 # Current path 
-CURRENT_PATH = os.path.dirname(os.path.abspath('__file__'))
+CURENT_PATH = os.path.dirname(os.path.abspath('__file__'))
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # UNDERWATER-IMAGE-ANALYSIS root directory
@@ -86,10 +86,10 @@ def calibrate_camera_for_intrinsic_parameters(path_image):
 def save_camera_intrinsics(camera_matrix, distortion_coefs, camera_name):
 
     #create folder if it does not exist
-    if not os.path.exists(os.path.join(CURRENT_PATH, 'camera_parameters')):
-        os.mkdir(os.path.join(CURRENT_PATH, 'camera_parameters'))
+    if not os.path.exists(os.path.join('.', 'camera_parameters')):
+        os.mkdir(os.path.join('.', 'camera_parameters'))
 
-    out_filename = os.path.join(CURRENT_PATH, 'camera_parameters', camera_name + '_intrinsics.dat')
+    out_filename = os.path.join('.', 'camera_parameters', camera_name + '_intrinsics.dat')
     outf = open(out_filename, 'w')
 
     outf.write('intrinsic:\n')
@@ -108,7 +108,6 @@ def save_camera_intrinsics(camera_matrix, distortion_coefs, camera_name):
 #open paired calibration frames and stereo calibrate for cam0 to cam1 coorindate transformations
 def stereo_calibrate(mtx0, dist0, mtx1, dist1, frames_prefix_c0, frames_prefix_c1):
     #read the synched frames
-    images_names = glob.glob(path_image + '/*.JPG')
     c0_images_names = sorted(glob.glob(frames_prefix_c0 + '/*.JPG'))
     c1_images_names = sorted(glob.glob(frames_prefix_c1 + '/*.JPG'))
 
@@ -208,33 +207,27 @@ def save_extrinsic_calibration_parameters(R0, T0, R1, T1, prefix = ''):
 
     return R0, T0, R1, T1
 
-if __name__ == '__main__':
-
-
+def main(path_folder_cam1, path_folder_cam2):
     """Step1. Obtain camera intrinsic matrices and save them"""
     # # camera0 intrinsics
-    path_image = os.path.join(CURRENT_PATH, 'camera0')
-    cmtx0, dist0, ret0 = calibrate_camera_for_intrinsic_parameters(path_image) 
+    cmtx0, dist0, ret0 = calibrate_camera_for_intrinsic_parameters(path_folder_cam1) 
     save_camera_intrinsics(cmtx0, dist0, 'camera0') #this will write cmtx and dist to disk
     # camera1 intrinsics
-    path_image = os.path.join(CURRENT_PATH, 'camera1')
-    cmtx1, dist1, ret1 = calibrate_camera_for_intrinsic_parameters(path_image)
+    path_image = os.path.join('.', 'camera1')
+    cmtx1, dist1, ret1 = calibrate_camera_for_intrinsic_parameters(path_folder_cam2)
     save_camera_intrinsics(cmtx1, dist1, 'camera1') #this will write cmtx and dist to disk
     
     #create folder if it does not exist
-    if not os.path.exists(os.path.join(CURRENT_PATH , 'camera_parameters')):
-        os.mkdir(os.path.join(CURRENT_PATH , 'camera_parameters'))
+    if not os.path.exists(os.path.join('.' , 'camera_parameters')):
+        os.mkdir(os.path.join('.' , 'camera_parameters'))
         
     # Open a file to save the dictionary contane cmtx, dist and ret to disk in pkl file
-    with open(os.path.join(CURRENT_PATH, 'camera_parameters', 'mono_params.pkl'), 'wb') as f:
+    with open(os.path.join('.', 'camera_parameters', 'mono_params.pkl'), 'wb') as f:
         # Save the dictionary to the file
         pickle.dump({'cmtx0': cmtx0, 'cmtx1': cmtx1, 'dist0': dist0, 'dist1': dist1, 'ret0': ret0, 'ret1': ret1}, f)
 
     """Step2. Use paired calibration pattern frames to obtain camera0 to camera1 rotation and translation"""
-    frames_prefix_c0 = os.path.join(CURRENT_PATH, 'camera0')
-    frames_prefix_c1 = os.path.join(CURRENT_PATH, 'camera1')
-    R, T = stereo_calibrate(cmtx0, dist0, cmtx1, dist1, frames_prefix_c0, frames_prefix_c1)
-
+    R, T = stereo_calibrate(cmtx0, dist0, cmtx1, dist1, path_folder_cam1, path_folder_cam2)
 
     """Step3. Save calibration data where camera0 defines the world space origin."""
     #camera0 rotation and translation is identity matrix and zeros vector
@@ -245,9 +238,14 @@ if __name__ == '__main__':
     R1 = R; T1 = T #to avoid confusion, camera1 R and T are labeled R1 and T1
     
     # Open a file to save the dictionary contane cmtx, dist and ret to disk in pkl file
-    with open(os.path.join(CURRENT_PATH, 'camera_parameters', 'stereo_params.pkl'), 'wb') as f:
+    with open(os.path.join('.', 'camera_parameters', 'stereo_params.pkl'), 'wb') as f:
         # Save the dictionary to the file
         pickle.dump({'cmtx0': cmtx0, 'cmtx1': cmtx1, 'R': R, 'T': T}, f)
+    
+
+if __name__ == '__main__':
+    main('stereo_calibration_/camera0', 'stereo_calibration_/camera1')
+    
         
         
         
