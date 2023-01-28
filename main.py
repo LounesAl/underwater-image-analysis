@@ -7,6 +7,7 @@ import platform
 from pathlib import Path
 import sys
 from tqdm import tqdm
+import argparse
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # UNDERWATER-IMAGE-ANALYSIS root directory
@@ -16,7 +17,7 @@ ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
 from utils.segmentation import *
 from utils.calibration import *
-from utils.dataloaders import (IMG_FORMATS, VID_FORMATS, check_file, increment_path, select_device, check_imshow, Profile, LoadImages)
+from utils.dataloaders import (IMG_FORMATS, VID_FORMATS, check_file, increment_path, select_device, print_args, Profile, LoadImages)
 
 
 def run(
@@ -30,15 +31,10 @@ def run(
         iou_thres=0.45,                                                     # NMS IOU threshold
         device='',                                                          # cuda device, i.e. 0 or 0,1,2,3 or cpu
         view_img=False,                                                     # visualize results
-        save_txt=False,                                                     # save results to *.txt
-        nosave=False,                                                       # do not save images/videos
-        classes=None,                                                       # filter by class: --class 0, or --class 0 2 3
         visualize=False,                                                    # visualize features
-        update=False,                                                       # update all models
         project=ROOT / 'runs/detect',                                       # save results to project/name
         name='exp',                                                         # save results to project/name
         exist_ok=False,                                                     # existing project/name ok, do not increment
-        vid_stride=1,                                                       # video frame-rate stride
 ):
     
     src1, src2 = str(src1), str(src2)
@@ -51,7 +47,7 @@ def run(
 
     # Directories
     save_dir = increment_path(Path(project) / name, exist_ok=exist_ok)  # increment run
-    (save_dir / 'labels' if save_txt else save_dir).mkdir(parents=True, exist_ok=True)  # make dir
+    (save_dir).mkdir(parents=True, exist_ok=True)  # make dir
 
     # Load model
     device = select_device(device)
@@ -80,7 +76,7 @@ def run(
     seen, windows, dt = 0, [], (Profile(), Profile(), Profile())
     
     i = 0
-    predictor, cfg = init_config(str(weights), SCORE_THRESH_TEST = 0.8)
+    predictor, cfg = init_config(str(weights), SCORE_THRESH_TEST = conf_thres)
     
     for (path1, im1, im0s1, vid_cap1, s1), (path2, im2, im0s2, vid_cap2, s2) in tqdm(zip(dataset_1, dataset_2)): 
         # , unit='%', total=len(dataset_1), bar_format='{percentage:3.0f}%|{bar}|'
@@ -92,8 +88,8 @@ def run(
         
                 
         # Inferred with the images of each camera
-        output1 = inference(predictor, cfg,  im0s1, show=visualize)
-        output2 = inference(predictor, cfg,  im0s2, show=visualize)
+        output1 = inference(predictor, cfg,  im0s1, show=False)
+        output2 = inference(predictor, cfg,  im0s2, show=False)
         
         # voir les classes predites
         ## le resultat est de la forme : tensor([0, 1, 1, 2, 3, 3]), cela veut dire :
@@ -103,8 +99,8 @@ def run(
 
 
         # Get segmentation points " A optimiser "
-        uvs1, seg1, boxes1 = get_segment_points(output1)
-        uvs2, seg2, boxes2 = get_segment_points(output2)
+        uvs1, seg1, boxes1 = get_segment_points(output1, im1)
+        uvs2, seg2, boxes2 = get_segment_points(output2, im2)
         
         if (uvs1 == None or uvs2 == None) or (len(uvs1) != len(uvs2)):
             continue
@@ -154,10 +150,36 @@ def run(
                     save_path = str(Path(save_path).with_suffix('.mp4'))  # force *.mp4 suffix on results videos
                     vid_writer = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
                 vid_writer.write(im1_seg)
+
+
+def parse_opt():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--weights', nargs='+', type=str, default=ROOT / 'models/model_final.pth', help='model path')
+    parser.add_argument('--src1', type=str, default=ROOT / 'data/imgs_c1', help='file/dir/')
+    parser.add_argument('--src2', type=str, default=ROOT / 'data/imgs_c2', help='file/dir/')
+    parser.add_argument('--imgsz', '--img', '--img-size', nargs='+', type=int, default=(640, 640), help='inference size h,w')
+    parser.add_argument('--conf-thres', type=float, default=0.25, help='confidence threshold')
+    parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
+    parser.add_argument('--view-img', action='store_true', help='show results')
+    parser.add_argument('--visualize', action='store_true', help='visualize features')
+    parser.add_argument('--project', default=ROOT / 'runs/detect', help='save results to project/name')
+    parser.add_argument('--name', default='exp', help='save results to project/name')
+    parser.add_argument('--exist-ok', action='store_true', help='existing project/name ok, do not increment')
+    parser.add_argument('--save-rest', action='store_true', help='save results of inference')    
+    parser.add_argument('--calib-cam', default=ROOT / 'stereo_calibration/camera_parameters/stereo_params.pkl', help='parameters calibration for cameras')    
+    opt = parser.parse_args()
+    opt.imgsz *= 2 if len(opt.imgsz) == 1 else 1  # expand
+    print_args(vars(opt))
+    return opt
+
+def main(opt):
+    run(**vars(opt))
            
 
 if __name__ == '__main__':
-    run(src1 = './data/video_c1', src2 = './data/video_c2')
+    opt = parse_opt()
+    main(opt)
+    # run(src1 = './data/video_c1', src2 = './data/video_c2')
     
     
     
