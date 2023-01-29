@@ -17,23 +17,26 @@ def get_nbr_espece (tensor, classe_dict) :
     taille_tensor = len(tensor)                             #recuperer la taille du vecteur qui correspond au nbr d'espece detectée
     nbr_classe = len(classe_dict)
 
+    nbr_classe_ =  np.zeros(nbr_classe, dtype=int)
+    print(nbr_classe_)
 
-    nbr_classe_ =  np.empty((nbr_classe+1,1))
-
-    for i in range (nbr_classe+1) : 
-        #exec("nbr_classe_" + str(i) + " = 0")
-        nbr_classe_[i] = 0
-
-    for elem in tensor : 
-        #for i in range (1 , nbr_classe+1) : 
-        for classe, nom in classe_dict.items():
-            if (elem == classe) : 
-                nbr_classe_[i] = nbr_classe_[i] + 1 
+    for elem in tensor :
+        #print("ele",elem) 
+        for i in range (0 , nbr_classe) : 
+        #for classe, nom in classe_dict.items():
+            #print ("cls" , classe , "nom" , nom)
+            if (elem == i and i != 0) : 
+                #print ("lkd")
+                #nbr_classe_[int(classe)] = nbr_classe_[int(classe)] + 1
+                nbr_classe_[i] = nbr_classe_[i] + 1
+                print(i , "=" , nbr_classe_[i]) 
 
 
     for classe, nom in classe_dict.items():
-        if (classe != 0 ) : 
+        if (int(classe) != 0 ) : 
             print ("l'espece" , nom , "a ete detecte" ,  nbr_classe_[int(classe)] , "fois")
+    
+    return nbr_classe_ 
 
 
 
@@ -57,8 +60,9 @@ if __name__ == "__main__":
             "3" : "Gibbula"}
     #for cle, valeur in dictionnaire.items():
     #    print (class_dict['i'])
-    get_nbr_espece (tensor, class_dict)
+    nbr = get_nbr_espece (tensor, class_dict)
 
+    print(nbr)
 
 
 
