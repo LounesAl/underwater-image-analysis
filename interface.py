@@ -89,6 +89,9 @@ class MainWindow(QMainWindow):
         self.toolbar.addWidget(self.params_button)
         self.toolbar.addWidget(self.aide_button)
         self.toolbar.addWidget(self.a_propos_button)
+        # self.toolbar.setStyleSheet("background-color: rgb(200,200,200);")
+        self.toolbar.setStyleSheet("background-color: lightgray;")
+
         
     def segmentation(self):
         self.img_seg = img_seg_window()
