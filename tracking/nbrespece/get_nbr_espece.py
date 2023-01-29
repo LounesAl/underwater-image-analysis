@@ -12,6 +12,7 @@ import numpy as np
 #            "3" : "Gibbula"
 #        }
 
+
 def get_nbr_espece (tensor, classe_dict) : 
 
     taille_tensor = len(tensor)                             #recuperer la taille du vecteur qui correspond au nbr d'espece detectée
@@ -34,7 +35,10 @@ def get_nbr_espece (tensor, classe_dict) :
 
     for classe, nom in classe_dict.items():
         if (int(classe) != 0 ) : 
-            print ("l'espece" , nom , "a ete detecte" ,  nbr_classe_[int(classe)] , "fois")
+            if (nbr_classe_[int(classe)] != 0) : 
+                print ("l'espece" , nom , "a ete detectee" ,  nbr_classe_[int(classe)] , "fois")
+            else : 
+                print ("l'espece" , nom , "n'a pas ete detectee")
     
     return nbr_classe_ 
 
@@ -51,7 +55,7 @@ def get_nbr_espece (tensor, classe_dict) :
 
 if __name__ == "__main__":
 
-    tensor = [0, 1, 1, 2, 3, 3 , 3]
+    tensor = [0, 2, 3, 3 , 3]
     nbr_classe = 3
     class_dict = {
             "0" : "PFE",
