@@ -232,7 +232,11 @@ class img_seg_window(QWidget):
         self.browse_button2.clicked.connect(lambda: browse_file(self, 2))
         
         self.seg_button = QPushButton('Detecter et segmenter', self)
-        self.seg_button.clicked.connect(lambda: seg_img(self, SCORE_THRESH_TEST = self.double_spin_box.value(), show_inf = self.checkbox.isChecked(), show_3d = self.checkbox1.isChecked(), show_final = self.checkbox2.isChecked()))
+        self.seg_button.clicked.connect(lambda: seg_img(self, 
+                                                        SCORE_THRESH_TEST = self.double_spin_box.value(), 
+                                                        show_inf = self.checkbox.isChecked(), 
+                                                        show_3d = self.checkbox1.isChecked(), 
+                                                        show_final = self.checkbox2.isChecked()))
         
         # Create a grid layout
         self.grid = QGridLayout()
