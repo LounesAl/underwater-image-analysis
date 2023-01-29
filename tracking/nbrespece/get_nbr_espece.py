@@ -26,9 +26,6 @@ def get_nbr_espece (tensor, nbr_classe) :
         #exec("nbr_classe_" + str(i) + " = 0")
         nbr_classe_[i] = 0
 
-    print(nbr_classe_[2])
-    print("je suis la")
-
     for i in range (taille_tensor) : 
         pass
 
