@@ -2,7 +2,6 @@
 #from glob import glob
 
 import numpy as np
-#import os 
 
 
 ## voir les classes predites
@@ -18,7 +17,7 @@ import numpy as np
 
 def get_nbr_espece (tensor, nbr_classe) : 
 
-    taille_tensor = len(tensor)
+    taille_tensor = len(tensor)                             #recuperer la taille du vecteur qui correspond au nbr d'espece detectée
 
     nbr_classe_ =  np.empty((nbr_classe+1,1))
 
@@ -32,8 +31,9 @@ def get_nbr_espece (tensor, nbr_classe) :
                 nbr_classe_[i] = nbr_classe_[i] + 1 
 
 
-    print(nbr_classe_[3])
-
+    print(nbr_classe_[3])   #enlever le print apres et uriliser un dictionnaire  cad retourner le dictionnaire 
+    #chaque classe aura son nom plus le nbr de fois qu'elle a été detecté 
+    
     #return nbr_espece 
 
 #ce qui reste a faire associer les classes aux nbr de fois qu'on l'a detecter 
