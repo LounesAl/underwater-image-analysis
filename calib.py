@@ -22,11 +22,12 @@ calibration_settings = parse_calibration_settings_file(os.path.join(ROOT, 'setti
 def calibrate_camera_for_intrinsic_parameters(path_image):
     
     #NOTE: images_prefix contains camera name: "frames/camera0*".
-    images_names = glob.glob(path_image + '/*.JPG')
-    
+    images_names = (str(p.resolve()) for p in Path(path_image).glob("**/*") if p.suffix in {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", 
+                                                                                            ".JPG", ".JPEG", ".PNG", ".GIF", ".BMP", ".TIFF"})
+
     #read all frames
     images = [cv2.imread(imname, 1) for imname in images_names]
-
+    
     #criteria used by checkerboard pattern detector.
     #Change this if the code can't find the checkerboard. 
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.001)
@@ -43,7 +44,7 @@ def calibrate_camera_for_intrinsic_parameters(path_image):
     #frame dimensions. Frames should be the same size.
     width = images[0].shape[1]
     height = images[0].shape[0]
-
+    
     #Pixel coordinates of checkerboards
     imgpoints = [] # 2d points in image plane.
 
@@ -56,9 +57,8 @@ def calibrate_camera_for_intrinsic_parameters(path_image):
 
         #find the checkerboard
         ret, corners = cv2.findChessboardCorners(gray, (rows, columns), None)
-
+        
         if ret == True:
-
             #Convolution size used to improve corner detection. Don't make this too large.
             conv_size = (11, 11)
 
@@ -67,7 +67,6 @@ def calibrate_camera_for_intrinsic_parameters(path_image):
         
             objpoints.append(objp)
             imgpoints.append(corners)
-
 
     ret, cmtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, (width, height), None, None)
     logging.info(f'rmse: {ret}')
@@ -98,8 +97,10 @@ def save_camera_intrinsics(camera_matrix, distortion_coefs, save_path, camera_na
 #open paired calibration frames and stereo calibrate for cam0 to cam1 coorindate transformations
 def stereo_calibrate(mtx0, dist0, mtx1, dist1, frames_prefix_c0, frames_prefix_c1):
     #read the synched frames
-    c0_images_names = sorted(glob.glob(frames_prefix_c0 + '/*.JPG'))
-    c1_images_names = sorted(glob.glob(frames_prefix_c1 + '/*.JPG'))
+    c0_images_names = (str(p.resolve()) for p in Path(frames_prefix_c0).glob("**/*") if p.suffix in {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", 
+                                                                                                     ".JPG", ".JPEG", ".PNG", ".GIF", ".BMP", ".TIFF"})
+    c1_images_names = (str(p.resolve()) for p in Path(frames_prefix_c1).glob("**/*") if p.suffix in {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", 
+                                                                                                     ".JPG", ".JPEG", ".PNG", ".GIF", ".BMP", ".TIFF"})
 
     #open images
     c0_images = [cv2.imread(imname, 1) for imname in c0_images_names]
