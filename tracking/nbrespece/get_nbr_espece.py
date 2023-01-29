@@ -6,8 +6,8 @@ import numpy as np
 
 
 ## voir les classes predites
-    ## le resultat est de la forme : tensor([0, 1, 1, 2, 3, 3]), cela veut dire :
-    ## une espces PFE, deux actinia fermées, une ouverte et deux gibbula
+## le resultat est de la forme : tensor([0, 1, 1, 2, 3, 3]), cela veut dire :
+## une espces PFE, deux actinia fermées, une ouverte et deux gibbula
 
 #class_dict = {
 #            "0" : "PFE",
