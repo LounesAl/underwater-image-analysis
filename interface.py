@@ -4,16 +4,24 @@ from calib import main
 from utils.ui_fonctions import *
 from utils.segmentation import seg_img
 from PySide2.QtWidgets import *
+import glob
 # from PySide2.QtWebEngineWidgets import QWebEngineView
-
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
         # Initialisation de la fenêtre
-        self.setWindowTitle("UnderSor")
-        self.setGeometry(550, 300, 800, 600)
+        self.setWindowTitle("UnderSea")
+        self.setGeometry(550, 200, 512, 512)
+
+        self.label = QLabel(self)
+        self.label.setAlignment(QtCore.Qt.AlignCenter)
+        # glob.glob("/data/fond_ecran/*.jpeg")
+        self.images = glob.glob("./data/fond_ecran/*.jpeg")
+        self.current_image = 0
+        self.change_image()
+        self.setCentralWidget(self.label)
 
         # I. Initialisation de la barre d'outils
         self.toolbar = QToolBar("Bar d'outils")
@@ -58,14 +66,17 @@ class MainWindow(QMainWindow):
         # I.2 definir les actions du sous menu
         self.calib_action = QAction("Calibration", self)
         self.seg_action = QAction("Image segmentation", self)
+        self.vid_seg_action = QAction("Video segmentation", self)
         self.tracking_action = QAction("Tracking", self)
         # I.3 Ajouter les actions au sous menu
         self.outils_menu.addAction(self.calib_action)
         self.outils_menu.addAction(self.seg_action)
+        self.outils_menu.addAction(self.vid_seg_action)
         self.outils_menu.addAction(self.tracking_action)
         # I.4 Associer des fonction au action des sous menu
         self.calib_action.triggered.connect(self.calibration_func_windows)
         self.seg_action.triggered.connect(self.segmentation)
+        self.vid_seg_action.triggered.connect(self.video_segmentation)
         self.tracking_action.triggered.connect(self.tracking)
         
         # I.5 Ajouter un bouton parametres
@@ -91,11 +102,43 @@ class MainWindow(QMainWindow):
         self.toolbar.addWidget(self.a_propos_button)
         # self.toolbar.setStyleSheet("background-color: rgb(200,200,200);")
         self.toolbar.setStyleSheet("background-color: lightgray;")
+            
+    def change_image(self):
+        # Créer un QPixmap à partir de l'image
+        pixmap = QtGui.QPixmap(self.images[self.current_image])
+        self.label.setPixmap(pixmap)
+        # Créer un QPropertyAnimation pour l'opacité de l'image
+        animation = QtCore.QPropertyAnimation(self.label, b"windowOpacity")
+        animation.setDuration(3000)
+        animation.setStartValue(1)
+        animation.setEndValue(0)
+        animation.start()
+        # Planifier l'appel de la fonction de changement d'image suivante après un délai de 1000ms
+        QtCore.QTimer.singleShot(3000, self.next_image)
 
+        
+
+    def next_image(self):
+        # Incrémenter l'index de l'image courante
+        self.current_image += 1
+        if self.current_image >= len(self.images):
+            self.current_image = 0
+        # Créer un QPropertyAnimation pour l'opacité de l'image
+        animation = QtCore.QPropertyAnimation(self.label, b"windowOpacity")
+        animation.setDuration(3000)
+        animation.setStartValue(0)
+        animation.setEndValue(1)
+        animation.start()
+        # Connecter la fin de l'animation à la fonction de changement d'image suivante*
+        QtCore.QTimer.singleShot(3000, self.change_image)
         
     def segmentation(self):
         self.img_seg = img_seg_window()
         self.img_seg.show()    
+        
+    def video_segmentation(self):
+        self.vid_seg = vid_seg_window()
+        self.vid_seg.show()    
         
     def calibration_func_windows(self):
         self.calib = calib_window()
@@ -296,7 +339,89 @@ class error():
     def __init__(self):
         self.error_msg = ''
         self.check_error = False
+
+class vid_seg_window(QWidget):
+    def __init__(self):
+        super(vid_seg_window, self).__init__()
         
+        self.setGeometry(650, 400, 600, 400)
+        self.setWindowTitle("Video segmentation")
+        # Initialiser de la variable erreur
+        self.error = error()
+        
+        # Default path
+        self.path1 = 'data/imgs_c1/image1842_jpg.rf.fc8794fa0e45edf088fbd294b4b66188.jpg'
+        self.path2 = 'data/imgs_c1/image1856_jpg.rf.7ced282377b524c9ed4e9c301f4ce73c.jpg'
+        
+        # Create labels to display "Sélectionner un dossier 1" and "Sélectionner un dossier 2"
+        self.label1 = QLabel("Sélectionner la video depuis la caméra 1")
+        self.label2 = QLabel("Sélectionner la video depuis la caméra 2")
+        self.label3 = QLabel("Definir le seuil de detection")
+        self.label4 = QLabel("Afficher la segmentation")
+        self.label5 = QLabel("Afficher la presentation en 3D")
+        self.label6 = QLabel("Afficher l'image avec les dimentions")
+        
+        # Create the browse buttons
+        self.browse_button1 = QPushButton('Parcourir', self)
+        self.browse_button1.clicked.connect(lambda: browse_file(self, 1))
+        self.browse_button2 = QPushButton('Parcourir', self)
+        self.browse_button2.clicked.connect(lambda: browse_file(self, 2))
+        
+        self.seg_button = QPushButton('Segmenter les videos', self)
+        self.seg_button.clicked.connect(self.vid_segmentation)
+        
+        # Create a grid layout
+        self.grid = QGridLayout()
+        self.grid.setSpacing(10)
+        
+        # Create a checkbox
+        self.checkbox = QCheckBox("Avant d'afficher la distance", self)
+        self.checkbox1 = QCheckBox("en 3D", self)
+        self.checkbox2 = QCheckBox("Final", self, checked=True)
+
+        # Add the label and button to the grid layout
+        self.grid.addWidget(self.label1, 0, 0)
+        self.grid.addWidget(self.browse_button1, 0, 1)
+        self.grid.addWidget(self.label2, 1, 0)
+        self.grid.addWidget(self.browse_button2, 1, 1)
+        self.grid.addWidget(self.seg_button, 6, 0, 1, 2, QtCore.Qt.AlignCenter)
+        
+        # Create a double spin box with a default value of 0.5
+        self.double_spin_box = QDoubleSpinBox()
+        self.double_spin_box.setMinimum(0.1)
+        self.double_spin_box.setMaximum(1)
+        self.double_spin_box.setSingleStep(0.1)
+        self.double_spin_box.setValue(0.8)
+
+        # Add the double spin box to the grid layout
+        self.grid.addWidget(self.label3, 2, 0)
+        self.grid.addWidget(self.double_spin_box, 2, 1, 1, 1)
+        self.grid.addWidget(self.label4, 3, 0)
+        self.grid.addWidget(self.checkbox, 3, 1)
+        self.grid.addWidget(self.label5, 4, 0)
+        self.grid.addWidget(self.checkbox1, 4, 1)
+        self.grid.addWidget(self.label6, 5, 0)
+        self.grid.addWidget(self.checkbox2, 5, 1)
+
+        # Create a vertical layout
+        self.layout = QVBoxLayout(self)
+        self.layout.addLayout(self.grid)
+        self.setLayout(self.layout)
+        
+    def vid_segmentation(self):
+        seg_img(self, SCORE_THRESH_TEST = self.double_spin_box.value(), 
+                        show_inf = self.checkbox.isChecked(), 
+                        show_3d = self.checkbox1.isChecked(), 
+                        show_final = self.checkbox2.isChecked() )
+        
+        if self.error.check_error:
+            dlg = QMessageBox(self)
+            dlg.setWindowTitle("Erreur lors de la segmentation")
+            dlg.setText(self.error.error_msg)
+            button = dlg.exec_()
+            if button == QMessageBox.Ok:
+                self.error.check_error = False
+                self.error.error_msg = ''
          
 if __name__ == "__main__":
     app = QApplication(sys.argv)
