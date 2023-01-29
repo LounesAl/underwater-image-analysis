@@ -12,23 +12,36 @@ import numpy as np
 #            "3" : "Gibbula"
 #        }
 
-def get_nbr_espece (tensor, nbr_classe) : 
+def get_nbr_espece (tensor, classe_dict) : 
 
     taille_tensor = len(tensor)                             #recuperer la taille du vecteur qui correspond au nbr d'espece detectée
+    nbr_classe = len(classe_dict)
 
-    nbr_classe_ =  np.empty((nbr_classe+1,1))
+    nbr_classe_ =  np.zeros(nbr_classe, dtype=int)
+    print(nbr_classe_)
 
-    for i in range (nbr_classe+1) : 
-        #exec("nbr_classe_" + str(i) + " = 0")
-        nbr_classe_[i] = 0
+    for elem in tensor :
+        #print("ele",elem) 
+        for i in range (0 , nbr_classe) : 
+        #for classe, nom in classe_dict.items():
+            #print ("cls" , classe , "nom" , nom)
+            if (elem == i and i != 0) : 
+                #print ("lkd")
+                #nbr_classe_[int(classe)] = nbr_classe_[int(classe)] + 1
+                nbr_classe_[i] = nbr_classe_[i] + 1
+                print(i , "=" , nbr_classe_[i]) 
 
-    for elem in tensor : 
-        for i in range (1 , nbr_classe+1) : 
-            if (elem == i) : 
-                nbr_classe_[i] = nbr_classe_[i] + 1 
+
+    for classe, nom in classe_dict.items():
+        if (int(classe) != 0 ) : 
+            print ("l'espece" , nom , "a ete detecte" ,  nbr_classe_[int(classe)] , "fois")
+    
+    return nbr_classe_ 
 
 
-    print(nbr_classe_[3])   #enlever le print apres et uriliser un dictionnaire  cad retourner le dictionnaire 
+
+
+    #print(nbr_classe_[3])   #enlever le print apres et uriliser un dictionnaire cad retourner le dictionnaire 
     #chaque classe aura son nom plus le nbr de fois qu'elle a été detecté 
 
     #return nbr_espece 
@@ -40,9 +53,16 @@ if __name__ == "__main__":
 
     tensor = [0, 1, 1, 2, 3, 3 , 3]
     nbr_classe = 3
+    class_dict = {
+            "0" : "PFE",
+            "1" : "Actinia fermee",
+            "2" : "Actinia ouverte",
+            "3" : "Gibbula"}
+    #for cle, valeur in dictionnaire.items():
+    #    print (class_dict['i'])
+    nbr = get_nbr_espece (tensor, class_dict)
 
-    get_nbr_espece (tensor, nbr_classe)
-
+    print(nbr)
 
 
 

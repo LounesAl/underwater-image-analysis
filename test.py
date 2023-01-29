@@ -55,10 +55,10 @@ for mask in mask_seg:
 
     
     
-    cv2.imshow("mask", img) # *255
-    cv2.waitKey(0)
+#     cv2.imshow("mask", img) # *255
+#     cv2.waitKey(0)
 
-cv2.destroyAllWindows()
+# cv2.destroyAllWindows()
 
 
 
