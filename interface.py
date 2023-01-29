@@ -212,10 +212,12 @@ class img_seg_window(QWidget):
         
         self.setGeometry(650, 400, 600, 400)
         self.setWindowTitle("Image segmentation")
+        # Initialiser de la variable erreur
+        self.error = error()
         
         # Default path
-        self.path1 = 'data/imgs_c1/image990_jpg.rf.a5aeb14b2ae137ab47885a8079967d3a.jpg'
-        self.path2 = 'data/imgs_c1/image1026_jpg.rf.267e1da1a481440cf8b08314eed1a6ff.jpg'
+        self.path1 = 'data/imgs_c1/image1842_jpg.rf.fc8794fa0e45edf088fbd294b4b66188.jpg'
+        self.path2 = 'data/imgs_c1/image1856_jpg.rf.7ced282377b524c9ed4e9c301f4ce73c.jpg'
         
         # Create labels to display "Sélectionner un dossier 1" and "Sélectionner un dossier 2"
         self.label1 = QLabel("Sélectionner l'image depuis la caméra 1")
@@ -232,11 +234,7 @@ class img_seg_window(QWidget):
         self.browse_button2.clicked.connect(lambda: browse_file(self, 2))
         
         self.seg_button = QPushButton('Detecter et segmenter', self)
-        self.seg_button.clicked.connect(lambda: seg_img(self, 
-                                                        SCORE_THRESH_TEST = self.double_spin_box.value(), 
-                                                        show_inf = self.checkbox.isChecked(), 
-                                                        show_3d = self.checkbox1.isChecked(), 
-                                                        show_final = self.checkbox2.isChecked()))
+        self.seg_button.clicked.connect(self.segmentation)
         
         # Create a grid layout
         self.grid = QGridLayout()
@@ -275,6 +273,26 @@ class img_seg_window(QWidget):
         self.layout = QVBoxLayout(self)
         self.layout.addLayout(self.grid)
         self.setLayout(self.layout)
+        
+    def segmentation(self):
+        seg_img(self, SCORE_THRESH_TEST = self.double_spin_box.value(), 
+                        show_inf = self.checkbox.isChecked(), 
+                        show_3d = self.checkbox1.isChecked(), 
+                        show_final = self.checkbox2.isChecked() )
+        
+        if self.error.check_error:
+            dlg = QMessageBox(self)
+            dlg.setWindowTitle("Erreur lors de la segmentation")
+            dlg.setText(self.error.error_msg)
+            button = dlg.exec_()
+            if button == QMessageBox.Ok:
+                self.error.check_error = False
+                self.error.error_msg = ''
+                
+class error():
+    def __init__(self):
+        self.error_msg = ''
+        self.check_error = False
         
          
 if __name__ == "__main__":
