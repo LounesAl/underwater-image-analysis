@@ -30,9 +30,6 @@ def get_nbr_espece (tensor, classe_dict) :
             if (elem == classe) : 
                 nbr_classe_[i] = nbr_classe_[i] + 1 
 
-    #for i in range (1 , nbr_classe+1) : 
-
-    #    print ("l'espece" , classe_dict[i] ) #, "a ete detecte" ,  nbr_classe_[i] , "fois")
 
     for classe, nom in classe_dict.items():
         if (classe != 0 ) : 
