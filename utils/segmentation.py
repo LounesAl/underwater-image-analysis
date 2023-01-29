@@ -6,6 +6,7 @@ from detectron2.utils.visualizer import Visualizer
 from detectron2.data import MetadataCatalog
 from detectron2 import model_zoo
 import torch
+from utils.calibration import *
 
 def visualiser(outputs, cfg, im):
     v = Visualizer(im[:, :, ::-1], MetadataCatalog.get(cfg.DATASETS.TEST[0]), scale=1)
@@ -158,3 +159,96 @@ def get_segment_points(outputs, im):
         segment_points.append(segment_point)
         
     return segment_points, coords, boxes
+
+def seg_img(self, SCORE_THRESH_TEST = 0.8, show_inf = False, show_3d = False, show_final = True):
+    im2 = cv2.imread(self.path1)
+    im1 = cv2.imread(self.path2)
+
+    weights = 'models/model_final.pth'
+
+    calib_cam = 'settings/camera_parameters/stereo_params.pkl'
+
+    mtx1, mtx2, R, T = load_calibration(calib_cam)
+
+    # Calculate the projection martrix
+    P1, P2 = get_projection_matrix(mtx1, mtx2, R, T)
+
+    # get config
+    predictor, cfg = init_config(weights, SCORE_THRESH_TEST)
+
+
+    # Inferred with the images of each camera
+    output1, im_seg1 = inference(predictor, cfg,  im1.copy())
+    output2, im_seg2 = inference(predictor, cfg,  im2.copy())
+    
+    if show_inf:
+        cv2.imshow("Image segmentee 1", im_seg1)
+        cv2.imshow("Image segmentee 2", im_seg2)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows() 
+
+    # voir les classes predites
+    ## le resultat est de la forme : tensor([0, 1, 1, 2, 3, 3]), cela veut dire :
+    ## une espces PFE, deux actinia fermées, une ouverte et deux gibbula
+    classes1 = output1["instances"].pred_classes
+    classes2 = output2["instances"].pred_classes
+
+    # --------------------------------------------#
+
+    # maintenant il faut trouver comment traiter que 
+    # les class en commune entre l'image 1 et 2
+
+    # --------------------------------------------#
+
+    # Get segmentation points " A optimiser "
+    uvs1, seg1, boxes1 = get_segment_points(output1, im1)
+    uvs2, seg2, boxes2 = get_segment_points(output2, im2)
+    
+    if uvs1==None:
+        self.error.error_msg = f"Aucune detection dans l'image 1 \nVeuillez diminuer le seuil de detection"
+        self.error.check_error = True
+        return
+    if uvs2==None:
+        self.error.error_msg = f"Aucune detection dans l'image 2 \nVeuillez diminuer le seuil de detection"
+        self.error.check_error = True
+        return 
+
+    # transforme the 2D points in the images to 3D points in the exit()world
+    # Il faut avoir le meme nombre de pairs de points dans les deux images
+    if len(uvs1) == len(uvs2):
+        p3dss = transforme_to_3D(P1, P2, uvs1, uvs2)
+    else:
+        self.error.error_msg = "Nombre de pairs de points dans les deux images est different \nVeuillez changer d'image ou modifier le seuil de detectrion"
+        self.error.check_error = True
+        return 
+        
+    ######################
+    ## len(p3dss) = 2   ## => car il y'a deux espces detectées
+    ## p3dss[0].shape = ## 
+    ## (4, 3)           ## => 4 points (largeur longuer), 3 c'est x,y,z
+    ######################
+
+    if show_3d:
+        # visualize the 3D points
+        show_scatter_3D(p3dss)
+        
+    if show_final:
+        distances, connections = get_3D_distances(p3dss, connections = [[0,2], [1,3]])
+
+        class_dict = {
+            "0" : "PFE",
+            "1" : "Actinia fermee",
+            "2" : "Actinia ouverte",
+            "3" : "Gibbula"
+        }
+
+        im1_dist = dist_on_img(uvs1, boxes1, im_seg1, distances, classes1, class_dict)
+        # im2_dist = dist_on_img(uvs2, boxes2, im_seg2, distances, classes2, class_dict)
+        
+        cv2.imshow("Image 1 segmentee avec distances", im1_dist)
+        # cv2.imshow("Image 2 segmentee avec distances", im2_dist)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows() 
+
+    # on a 4 distances ici ... 2 espces, chaque espces a deux distances (longeur et largeur)
+    # distances = [[36.848607476959444, 32.03362311274617], [29.84703379255751, 45.008806942883936]]

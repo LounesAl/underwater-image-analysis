@@ -2,7 +2,7 @@ import sys
 from PySide2 import QtCore, QtGui
 from calib import main
 from utils.ui_fonctions import *
-from temporaire.main_copy import seg_img
+from utils.segmentation import seg_img
 from PySide2.QtWidgets import *
 # from PySide2.QtWebEngineWidgets import QWebEngineView
 
