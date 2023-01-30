@@ -9,13 +9,13 @@ colors = [ (255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255), 
            (128, 128, 0), (0, 128, 128), (128, 0, 128) ]
 
 weights='./models/model_final.pth'
-predictor, cfg = init_config(str(weights), SCORE_THRESH_TEST = 0.8)
+predictor, cfg = init_config(str(weights), SCORE_THRESH_TEST = 0.5)
 
 
 
 # charger l'image
-img_cam1 = cv2.imread("./data/imm/GOPR1463.JPG")
-img_cam2 = cv2.imread("./data/imm/GOPR1464.JPG")
+img_cam1 = cv2.imread("./data/imgg1/GOPR1483.JPG")
+img_cam2 = cv2.imread("./data/imgg2/GOPR1501.JPG")
 
 img_cam1 = imutils.resize(img_cam1, width=640, height=640)
 img_cam2 = imutils.resize(img_cam2, width=640, height=640)
@@ -27,19 +27,22 @@ output_cam2, _ = inference(predictor, cfg, img_cam2)
 masks_cam1 = output_cam1["instances"].pred_masks.cpu().numpy().astype(np.uint8)
 masks_cam2 = output_cam2["instances"].pred_masks.cpu().numpy().astype(np.uint8)
 
-masks_cam1 = sorted(masks_cam1, key=cv2.countNonZero, reverse=True)
-masks_cam2 = sorted(masks_cam2, key=cv2.countNonZero, reverse=True)
-
-print(len(masks_cam1))
-print(len(masks_cam2))
+def center_of_gravity_distance(mask):
+    contours, _ = cv2.findContours(mask.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cnt = contours[0]
+    moments = cv2.moments(cnt)
+    cx = int(moments["m10"] / moments["m00"])
+    cy = int(moments["m01"] / moments["m00"])
+    return np.subtract((np.linalg.norm(((cx, cy)))), ((np.linalg.norm((cx, mask.shape[1]-cy)))))
+    # return np.linalg.norm(np.linalg.norm((cx, cy)), np.linalg.norm((mask.shape[0] // 2, mask.shape[1]//2)))
+    
+masks_cam1 = sorted(masks_cam1, key=center_of_gravity_distance, reverse=True)
+masks_cam2 = sorted(masks_cam2, key=center_of_gravity_distance, reverse=True)
 
 classes_cam1 = output_cam1["instances"].pred_classes
 classes_cam2 = output_cam2["instances"].pred_classes
 
 for mask_cam1, mask_cam2, class_cam1, classe_cam2 in zip(masks_cam1, masks_cam2, classes_cam1, classes_cam2):
-    
-    mask_cam1 = mask_cam1
-    mask_cam2 = mask_cam2
         
     contours_cam1, _ = cv2.findContours(mask_cam1, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     contours_cam2, _ = cv2.findContours(mask_cam2, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
