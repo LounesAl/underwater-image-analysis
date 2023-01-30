@@ -4,6 +4,7 @@ from calib import main
 from utils.ui_fonctions import *
 from utils.segmentation import seg_img
 from PySide2.QtWidgets import *
+import random
 import glob
 # from PySide2.QtWebEngineWidgets import QWebEngineView
 
@@ -14,6 +15,11 @@ class MainWindow(QMainWindow):
         # Initialisation de la fenêtre
         self.setWindowTitle("UnderSea")
         self.setGeometry(550, 200, 512, 512)
+        # Ajouter le logo pour l'application comme une icône
+        icons = ["./data/logo/logo.ico", "./data/logo/logo1.ico"]
+        icon = random.choice(icons)
+        ico = QtGui.QIcon(icon)
+        self.setWindowIcon(ico)
 
         self.label = QLabel(self)
         self.label.setAlignment(QtCore.Qt.AlignCenter)
@@ -30,7 +36,7 @@ class MainWindow(QMainWindow):
 
         # Ajouter le texte de bienvenue
         self.welcome_label = QLabel("Bienvenue sur UnderSea", self)
-        self.welcome_label.setStyleSheet("font: bold 20px; color: rgba(255, 255, 255, 0.9);")
+        self.welcome_label.setStyleSheet("font: bold 20px; color: rgba(255, 255, 255, 0.97);")
         self.welcome_label.setAlignment(QtCore.Qt.AlignCenter)
         self.welcome_label.setGeometry(self.width()/2 - 125, 0, 500, 100)
         
@@ -40,11 +46,32 @@ class MainWindow(QMainWindow):
         self.button_rect_g.setGeometry(QtCore.QRect(self.width()/2 - 125, 400, 500, 300))
         self.button_rect_g.setStyleSheet("background-color: rgba(60, 60, 60, 0.9); border-radius:15px;")
         
-        # Ajouter le texte de bienvenue
+        # Ajouter le texte de que voullez vous faire
         self.welcome_label = QLabel("Que voullez vous faire ?", self)
         self.welcome_label.setStyleSheet("font: bold 15px; color: rgba(255, 255, 255, 0.9);")
         self.welcome_label.setAlignment(QtCore.Qt.AlignCenter)
         self.welcome_label.setGeometry(self.width()/2 - 125, 280, 500, 300)
+        
+        # Ajouter les boutons d'action
+        self.button1 = QPushButton("Calibration", self)
+        self.button1.setGeometry(170, 500, 200, 50)
+        self.button1.setStyleSheet("background-color: lightblue; border-radius: 10px; font: bold 15px;")
+        self.button1.clicked.connect(self.calibration_func_windows)
+
+        self.button2 = QPushButton("Tracking", self)
+        self.button2.setGeometry(400, 500, 200, 50)
+        self.button2.setStyleSheet("background-color: lightblue; border-radius: 10px; font: bold 15px;")
+        self.button2.clicked.connect(self.tracking)
+
+        self.button3 = QPushButton("Image segmantion", self)
+        self.button3.setGeometry(170, 600, 200, 50)
+        self.button3.setStyleSheet("background-color: lightblue; border-radius: 10px; font: bold 15px;")
+        self.button3.clicked.connect(self.segmentation)
+
+        self.button4 = QPushButton("Video segmentation", self)
+        self.button4.setGeometry(400, 600, 200, 50)
+        self.button4.setStyleSheet("background-color: lightblue; border-radius: 10px; font: bold 15px;")
+        self.button4.clicked.connect(self.video_segmentation)
 
         # I. Initialisation de la barre d'outils
         self.toolbar = QToolBar("Bar d'outils")
@@ -271,8 +298,8 @@ class img_seg_window(QWidget):
         self.error = error()
         
         # Default path
-        self.path1 = 'data/imgs_c1/image1842_jpg.rf.fc8794fa0e45edf088fbd294b4b66188.jpg'
-        self.path2 = 'data/imgs_c1/image1856_jpg.rf.7ced282377b524c9ed4e9c301f4ce73c.jpg'
+        self.path1 = 'data/imgs_c0/GOPR1471.JPG'
+        self.path2 = 'data/imgs_c1/GOPR1489.JPG'
         
         # Create labels to display "Sélectionner un dossier 1" and "Sélectionner un dossier 2"
         self.label1 = QLabel("Sélectionner l'image depuis la caméra 1")
