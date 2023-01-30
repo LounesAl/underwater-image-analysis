@@ -32,6 +32,8 @@ def get_nbr_espece (chemin_npy, classe_dict) :
                 else : 
                     print ("l'espece" , nom , "n'a pas ete detectee")
         
+    couleurs= np.split(classe_tot, num_files)  #pour couper le vecteur en num_files 
+
 
     #for j in range (nbr_classe) : 
     #    classe_mean[i] =  
