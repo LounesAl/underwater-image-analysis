@@ -14,8 +14,8 @@ predictor, cfg = init_config(str(weights), SCORE_THRESH_TEST = 0.8)
 
 
 # charger l'image
-img_cam1 = cv2.imread("/home/bra/Downloads/underwater-image-analysis/data/imgs_c0/gibbula_07_16-1137-_jpg.rf.14010270c5faa4b12daee4276d06fbcf.jpg")
-img_cam2 = cv2.imread("/home/bra/Downloads/underwater-image-analysis/data/imgs_c0/gibbula_07_16-1137-_jpg.rf.14010270c5faa4b12daee4276d06fbcf.jpg")
+img_cam1 = cv2.imread("./data/imgs_c0/gibbula_07_16-1137-_jpg.rf.14010270c5faa4b12daee4276d06fbcf.jpg")
+img_cam2 = cv2.imread("./data/imgs_c0/gibbula_07_16-1137-_jpg.rf.14010270c5faa4b12daee4276d06fbcf.jpg")
 
 # img_cam1 = imutils.resize(img_cam1, width=640, height=640)
 # img_cam2 = imutils.resize(img_cam2, width=640, height=640)
