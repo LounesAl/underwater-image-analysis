@@ -17,11 +17,34 @@ class MainWindow(QMainWindow):
 
         self.label = QLabel(self)
         self.label.setAlignment(QtCore.Qt.AlignCenter)
-        # glob.glob("/data/fond_ecran/*.jpeg")
         self.images = glob.glob("./data/fond_ecran/*.jpeg")
         self.current_image = 0
         self.change_image()
         self.setCentralWidget(self.label)
+
+        # Ajouter un rectangle gris transparent pour le texte de bienvenue
+        self.welcome_rect = QLabel(self)
+        self.welcome_rect.setAlignment(QtCore.Qt.AlignCenter)
+        self.welcome_rect.setGeometry(QtCore.QRect(self.width()/2 - 50, 0, 340, 70))
+        self.welcome_rect.setStyleSheet("background-color: rgba(60, 60, 60, 0.9); border-radius:15px;")
+
+        # Ajouter le texte de bienvenue
+        self.welcome_label = QLabel("Bienvenue sur UnderSea", self)
+        self.welcome_label.setStyleSheet("font: bold 20px; color: rgba(255, 255, 255, 0.9);")
+        self.welcome_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.welcome_label.setGeometry(self.width()/2 - 125, 0, 500, 100)
+        
+        # Ajouter un rectangle gris transparent pour le texte de bienvenue
+        self.button_rect_g = QLabel(self)
+        self.button_rect_g.setAlignment(QtCore.Qt.AlignCenter)
+        self.button_rect_g.setGeometry(QtCore.QRect(self.width()/2 - 125, 400, 500, 300))
+        self.button_rect_g.setStyleSheet("background-color: rgba(60, 60, 60, 0.9); border-radius:15px;")
+        
+        # Ajouter le texte de bienvenue
+        self.welcome_label = QLabel("Que voullez vous faire ?", self)
+        self.welcome_label.setStyleSheet("font: bold 15px; color: rgba(255, 255, 255, 0.9);")
+        self.welcome_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.welcome_label.setGeometry(self.width()/2 - 125, 280, 500, 300)
 
         # I. Initialisation de la barre d'outils
         self.toolbar = QToolBar("Bar d'outils")
@@ -107,28 +130,14 @@ class MainWindow(QMainWindow):
         # Créer un QPixmap à partir de l'image
         pixmap = QtGui.QPixmap(self.images[self.current_image])
         self.label.setPixmap(pixmap)
-        # Créer un QPropertyAnimation pour l'opacité de l'image
-        animation = QtCore.QPropertyAnimation(self.label, b"windowOpacity")
-        animation.setDuration(3000)
-        animation.setStartValue(1)
-        animation.setEndValue(0)
-        animation.start()
         # Planifier l'appel de la fonction de changement d'image suivante après un délai de 1000ms
         QtCore.QTimer.singleShot(3000, self.next_image)
-
-        
 
     def next_image(self):
         # Incrémenter l'index de l'image courante
         self.current_image += 1
         if self.current_image >= len(self.images):
             self.current_image = 0
-        # Créer un QPropertyAnimation pour l'opacité de l'image
-        animation = QtCore.QPropertyAnimation(self.label, b"windowOpacity")
-        animation.setDuration(3000)
-        animation.setStartValue(0)
-        animation.setEndValue(1)
-        animation.start()
         # Connecter la fin de l'animation à la fonction de changement d'image suivante*
         QtCore.QTimer.singleShot(3000, self.change_image)
         
