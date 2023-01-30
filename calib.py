@@ -8,6 +8,7 @@ import numpy as np
 import pickle
 from pathlib import Path
 from tqdm import tqdm
+import imutils
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # UNDERWATER-IMAGE-ANALYSIS root directory
@@ -26,7 +27,7 @@ def calibrate_camera_for_intrinsic_parameters(path_image):
                                                                                             ".JPG", ".JPEG", ".PNG", ".GIF", ".BMP", ".TIFF"})
 
     #read all frames
-    images = [cv2.imread(imname, 1) for imname in images_names]
+    images = [imutils.resize(cv2.imread(imname, 1), width=640, height=640) for imname in images_names]
     
     #criteria used by checkerboard pattern detector.
     #Change this if the code can't find the checkerboard. 
@@ -103,9 +104,9 @@ def stereo_calibrate(mtx0, dist0, mtx1, dist1, frames_prefix_c0, frames_prefix_c
                                                                                                      ".JPG", ".JPEG", ".PNG", ".GIF", ".BMP", ".TIFF"})
 
     #open images
-    c0_images = [cv2.imread(imname, 1) for imname in c0_images_names]
-    c1_images = [cv2.imread(imname, 1) for imname in c1_images_names]
-
+    c0_images = [imutils.resize(cv2.imread(imname, 1), width=640, height=640) for imname in c0_images_names]
+    c1_images = [imutils.resize(cv2.imread(imname, 1), width=640, height=640) for imname in c1_images_names]
+    
     #change this if stereo calibration not good.
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.001)
 
