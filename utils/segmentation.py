@@ -7,6 +7,7 @@ from detectron2.data import MetadataCatalog
 from detectron2 import model_zoo
 import torch
 from utils.calibration import *
+import imutils
 
 def visualiser(outputs, cfg, im):
     v = Visualizer(im[:, :, ::-1], MetadataCatalog.get(cfg.DATASETS.TEST[0]), scale=1)
@@ -126,7 +127,7 @@ def get_segment_points(outputs, im):
     
     # Calculer le mask et points de segmentation
     mask_seg = outputs["instances"].pred_masks.cpu().numpy()
-    np.save('mask_seg.npy', mask_seg)
+    # np.save('mask_seg.npy', mask_seg)
     coordonnes = get_segmentation(mask_seg)
 
     #Convertir les coordonnées en un tableau numpy
@@ -163,6 +164,8 @@ def get_segment_points(outputs, im):
 def seg_img(self, SCORE_THRESH_TEST = 0.8, show_inf = False, show_3d = False, show_final = True):
     im2 = cv2.imread(self.path1)
     im1 = cv2.imread(self.path2)
+    im1 = imutils.resize(im1, width=640, height=640)
+    im2 = imutils.resize(im2, width=640, height=640)
 
     weights = 'models/model_final.pth'
 
