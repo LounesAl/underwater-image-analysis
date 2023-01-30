@@ -27,20 +27,36 @@ output_cam2, _ = inference(predictor, cfg, img_cam2)
 masks_cam1 = output_cam1["instances"].pred_masks.cpu().numpy().astype(np.uint8)
 masks_cam2 = output_cam2["instances"].pred_masks.cpu().numpy().astype(np.uint8)
 
-def center_of_gravity_distance(mask):
-    contours, _ = cv2.findContours(mask.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    cnt = contours[0]
-    moments = cv2.moments(cnt)
-    cx = int(moments["m10"] / moments["m00"])
-    cy = int(moments["m01"] / moments["m00"])
-    return np.subtract((np.linalg.norm(((cx, cy)))), ((np.linalg.norm((cx, mask.shape[1]-cy)))))
-    # return np.linalg.norm(np.linalg.norm((cx, cy)), np.linalg.norm((mask.shape[0] // 2, mask.shape[1]//2)))
-    
-masks_cam1 = sorted(masks_cam1, key=center_of_gravity_distance, reverse=True)
-masks_cam2 = sorted(masks_cam2, key=center_of_gravity_distance, reverse=True)
-
 classes_cam1 = output_cam1["instances"].pred_classes
 classes_cam2 = output_cam2["instances"].pred_classes
+
+# def center_of_gravity_distance(mask):
+#     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+#     cnt = contours[0]
+#     moments = cv2.moments(cnt)
+#     cx = int(moments["m10"] / moments["m00"])
+#     cy = int(moments["m01"] / moments["m00"])
+#     return np.subtract((np.linalg.norm(((cx, cy)))), ((np.linalg.norm((cx, mask.shape[1]-cy)))))
+#     # return np.linalg.norm(np.linalg.norm((cx, cy)), np.linalg.norm((mask.shape[0] // 2, mask.shape[1]//2)))
+    
+# masks_cam1 = [index for index, _ in sorted(enumerate(masks_cam1), key=center_of_gravity_distance, reverse=True)]
+# masks_cam2 = [index for index, _ in sorted(enumerate(masks_cam2), key=center_of_gravity_distance, reverse=True)]
+
+def center_of_gravity_distance(mask_index):
+    mask = cv2.UMat(masks_cam1[mask_index])
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    c = max(contours, key=cv2.contourArea)
+    M = cv2.moments(c)
+    cX = int(M["m10"] / M["m00"])
+    cY = int(M["m01"] / M["m00"])
+    return cX, cY
+
+masks_cam1 = np.array(masks_cam1)
+sorted_indices = np.argsort(np.array([center_of_gravity_distance(i) for i in range(len(masks_cam1))]), axis=0)
+
+print(sorted_indices)
+
+
 
 for mask_cam1, mask_cam2, class_cam1, classe_cam2 in zip(masks_cam1, masks_cam2, classes_cam1, classes_cam2):
         
