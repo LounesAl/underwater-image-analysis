@@ -15,7 +15,7 @@ predictor, cfg = init_config(str(weights), SCORE_THRESH_TEST = 0.8)
 
 # charger l'image
 img_cam1 = cv2.imread("./data/imm/GOPR1463.JPG")
-img_cam2 = cv2.imread("./data/imm/GOPR1462.JPG")
+img_cam2 = cv2.imread("./data/imm/GOPR1464.JPG")
 
 img_cam1 = imutils.resize(img_cam1, width=640, height=640)
 img_cam2 = imutils.resize(img_cam2, width=640, height=640)
