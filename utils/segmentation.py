@@ -113,7 +113,7 @@ def dist_on_img(segment_points, boxes, im, distances, classes, class_dict, copy=
             # Dessiner le segment sur l'image
             cv2.line(img, start, end, (255, 0, 0), 2)
             draw_text(img=img, text="{:.1f} cm".format(distances[j][n]), pos=(int(x) + 10, int(y) - 10), 
-                  font_scale=2, font_thickness=2, text_color=(255, 255, 255), text_color_bg=(0, 0, 0))
+                  font_scale=1, font_thickness=1, text_color=(255, 255, 255), text_color_bg=(0, 0, 0))
     return img
 
 def extract_desired_color_coordinates(img, color):
