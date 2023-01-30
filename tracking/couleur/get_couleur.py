@@ -39,21 +39,24 @@ def get_nbr_image (chemin) :
 #C:\Users\Amel\Documents\GitHub\underwater-image-analysis\data\outputs\output_0.jpg
 
 def get_couleur (chemin_npy , chemin_img) : 
+#def get_couleur (num_files , chemin) : 
 
-    num_files = len(chemin_img)
+    num_files = len(chemin_img) 
     moy_tot_couleur = []                        #vecteur de la couleur moyenne pour toute le images 
     for i in range(num_files) : 
         #chargement de l'image :
-        image = cv2.imread(chemin_img[i])
+        #image = cv2.imread(chemin + '\output_' + str(i*40)+ '.jpg")
+        image = cv2.imread(chemin_img[i])  *
+
         #recuperer tous les pixel de l'espèce souhaitée 
 
-        outputs = np.load(chemin_npy[i], allow_pickle=True)
+        #outputs = np.load(chemin_npy[i], allow_pickle=True)
 
-        print(outputs[0])
+        #print(outputs[0])
         # a tester et voir 
-        mask_seg = outputs["instances"].pred_masks.cpu().numpy()
-        cnt = get_segmentation(mask_seg)
-
+        #mask_seg = outputs["instances"].pred_masks.cpu().numpy()
+        #cnt = get_segmentation(mask_seg)
+        cnt = np.load(chemin + '\output_' + str(i*40)+ '.npy')
         taille_cnt = len(cnt) 
         intensite = []
 
@@ -124,3 +127,7 @@ if __name__ == "__main__":
     path_npy = glob('data/outputs/*.npy')
     num_img = len(path_img)
     color = get_couleur (path_npy , path_img)
+
+    #chemin="\PFE\Base_de_donnees"
+    #nbr = 5
+    #color = get_couleur (nbr , chemin)

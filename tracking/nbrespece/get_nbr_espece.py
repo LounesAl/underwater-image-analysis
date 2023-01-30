@@ -32,6 +32,14 @@ def get_nbr_espece (chemin_npy, classe_dict) :
                 else : 
                     print ("l'espece" , nom , "n'a pas ete detectee")
         
+
+    #for j in range (nbr_classe) : 
+    #    classe_mean[i] =  
+    #for j in (i*)
+    #4 image / 3 classe 
+   # 0 1 2 3 0 1 2 3 0 1 2 3 0 1 2 3 
+
+
     return classe_tot 
 
 
@@ -59,4 +67,3 @@ if __name__ == "__main__":
 
 
 
-    
