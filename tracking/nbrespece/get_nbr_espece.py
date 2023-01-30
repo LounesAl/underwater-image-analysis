@@ -2,12 +2,13 @@ import numpy as np
 from segmentation import *
 from glob import glob
 
-def get_nbr_espece (tensor, classe_dict , chemin_npy , chemin_img) : 
+def get_nbr_espece (chemin_npy, classe_dict) : 
 
-    taille_tensor = len(tensor)                             #recuperer la taille du vecteur qui correspond au nbr d'espece detectée
     nbr_classe = len(classe_dict)                           #recuperer le nbr de classe à detecter 
+    num_files = len(chemin_npy)                             #recuperer le nbr d'image à traiter 
 
-    num_files = len(chemin_npy)
+    #parcourir toutes les images 
+    classe_tot = []
     for j in range (num_files) : 
         #recuperer les npy 
         outputs = np.load(chemin_npy[j], allow_pickle=True)
@@ -21,6 +22,8 @@ def get_nbr_espece (tensor, classe_dict , chemin_npy , chemin_img) :
                 if (elem == i and i != 0) : 
                     nbr_classe_[i] = nbr_classe_[i] + 1         #incrementer la 
 
+        classe_tot.append( nbr_classe_ )
+
         for classe, nom in classe_dict.items():
             if (int(classe) != 0 ) : 
                 print("l'image " , j , ":")
@@ -29,22 +32,31 @@ def get_nbr_espece (tensor, classe_dict , chemin_npy , chemin_img) :
                 else : 
                     print ("l'espece" , nom , "n'a pas ete detectee")
         
-    return nbr_classe_ 
+    return classe_tot 
+
 
 if __name__ == "__main__":
 
-    tensor = [0, 2, 3, 3 , 3]
+    path_npy = glob('data/outputs/*.npy')
+
     class_dict = {
             "0" : "PFE",
             "1" : "Actinia fermee",
             "2" : "Actinia ouverte",
             "3" : "Gibbula"}
 
-    nbr = get_nbr_espece (tensor, class_dict)
-    #print(nbr)
+    nbr = get_nbr_espece (path_npy, class_dict)
 
 
 
 
 
 
+
+
+
+
+
+
+
+    
