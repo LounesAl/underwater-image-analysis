@@ -14,29 +14,35 @@ predictor, cfg = init_config(str(weights), SCORE_THRESH_TEST = 0.8)
 
 
 # charger l'image
-img_cam1 = cv2.imread("./data/imgs_c0/gibbula_07_16-1137-_jpg.rf.14010270c5faa4b12daee4276d06fbcf.jpg")
-img_cam2 = cv2.imread("./data/imgs_c0/gibbula_07_16-1137-_jpg.rf.14010270c5faa4b12daee4276d06fbcf.jpg")
+img_cam1 = cv2.imread("./data/imm/GOPR1463.JPG")
+img_cam2 = cv2.imread("./data/imm/GOPR1462.JPG")
 
-# img_cam1 = imutils.resize(img_cam1, width=640, height=640)
-# img_cam2 = imutils.resize(img_cam2, width=640, height=640)
+img_cam1 = imutils.resize(img_cam1, width=640, height=640)
+img_cam2 = imutils.resize(img_cam2, width=640, height=640)
 
 
 output_cam1, _ = inference(predictor, cfg, img_cam1)
 output_cam2, _ = inference(predictor, cfg, img_cam2)
 
-masks_cam1 = output_cam1["instances"].pred_masks.cpu().numpy()
-masks_cam2 = output_cam2["instances"].pred_masks.cpu().numpy()
+masks_cam1 = output_cam1["instances"].pred_masks.cpu().numpy().astype(np.uint8)
+masks_cam2 = output_cam2["instances"].pred_masks.cpu().numpy().astype(np.uint8)
+
+masks_cam1 = sorted(masks_cam1, key=cv2.countNonZero, reverse=True)
+masks_cam2 = sorted(masks_cam2, key=cv2.countNonZero, reverse=True)
+
+print(len(masks_cam1))
+print(len(masks_cam2))
 
 classes_cam1 = output_cam1["instances"].pred_classes
 classes_cam2 = output_cam2["instances"].pred_classes
 
 for mask_cam1, mask_cam2, class_cam1, classe_cam2 in zip(masks_cam1, masks_cam2, classes_cam1, classes_cam2):
     
-    mask_cam1 = mask_cam1.astype(np.uint8)
-    mask_cam2 = mask_cam2.astype(np.uint8)
+    mask_cam1 = mask_cam1
+    mask_cam2 = mask_cam2
         
-    contours_cam1, _ = cv2.findContours(mask_cam1,  None, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    contours_cam2, _ = cv2.findContours(mask_cam2,  None, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours_cam1, _ = cv2.findContours(mask_cam1, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours_cam2, _ = cv2.findContours(mask_cam2, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     assert len(contours_cam1) == 1 and len(contours_cam1) == 1, \
     f'we are supposed to retrieve a single contour that represents a species in what we have {len(contours_cam1) and len(contours_cam2)}  contours.'
@@ -62,7 +68,7 @@ for mask_cam1, mask_cam2, class_cam1, classe_cam2 in zip(masks_cam1, masks_cam2,
         
         # Utilise les indices pour extraire les points du contour
         subset_cam1 = cnt_cam1[spaced_indices_cam1]
-        subset_cam2 = cnt_cam1[spaced_indices_cam2]
+        subset_cam2 = cnt_cam2[spaced_indices_cam2]
         
         # dessiner un cercle autour du centre de gravité
         cv2.circle(img_cam1, (cx_cam1, cy_cam1), 5, (255, 0, 0), -1)
@@ -74,7 +80,7 @@ for mask_cam1, mask_cam2, class_cam1, classe_cam2 in zip(masks_cam1, masks_cam2,
             
             # color = random.choice(colors)
             cv2.line(img_cam1, (cx_cam1, cy_cam1), tuple(sub_cam1[0]), color, 1)
-            cv2.line(img_cam2, (cx_cam1, cy_cam2), tuple(sub_cam1[0]), color, 1)
+            cv2.line(img_cam2, (cx_cam2, cy_cam2), tuple(sub_cam2[0]), color, 1)
         
     
     cv2.imshow("mask_cam1", img_cam1) # *255
