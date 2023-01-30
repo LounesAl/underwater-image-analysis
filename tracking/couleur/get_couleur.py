@@ -89,6 +89,7 @@ def get_couleur (chemin_npy , chemin_img) :
 
     for i in range (0,num_files-1) : 
         
+
         s = 10                              #seuil de 10% pour chaque image 
         seuil_0 = (itens_0[i]*s)/100
         seuil_1 = (itens_1[i]*s)/100
@@ -105,8 +106,21 @@ def get_couleur (chemin_npy , chemin_img) :
             #affichage de la couleur
             print ("lespece change de couleur vers :" , color) 
 
+        
+    color_1 = []
+
+    for i in range (0,num_files) : 
+
+        rgb_1 = tuple(np.concatenate((itens_0[i],itens_1[i],itens_2[i])))
+        #conversion en hexadécimal
+        color_1.append(convert_rgb_to_names(rgb_1))
+
+    return (color_1) 
+
+        
+
 if __name__ == "__main__":
     path_img = glob('data/outputs/*.jpg')
     path_npy = glob('data/outputs/*.npy')
     num_img = len(path_img)
-    get_couleur (path_npy , path_img)
+    color = get_couleur (path_npy , path_img)
