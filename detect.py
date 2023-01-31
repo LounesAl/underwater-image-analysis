@@ -31,10 +31,10 @@ def run(
         src1=ROOT / 'data/imgs_c1',                                                 # file/dir/URL/glob/screen/0(webcam)
         src2=ROOT / 'data/imgs_c1',                                                 # file/dir/URL/glob/screen/0(webcam)
         imgsz=(640, 640),                                                           # inference size (height, width)
-        calib_cam=ROOT / 'settings/camera_parameters/stereo_params.pkl',  # stereo cameras path parameters 
+        calib_cam=ROOT / 'settings/camera_parameters/stereo_params.pkl',            # stereo cameras path parameters 
         conf_thres=0.25,                                                            # confidence threshold
         device='',                                                                  # cuda device, i.e. 0 or 0,1,2,3 or cpu
-        view_img=False,                                                              # visualize results
+        view_img=False,                                                             # visualize results
         visualize=False,                                                            # visualize features
         project=ROOT / 'runs/detect',                                               # save results to project/name
         name='exp',                                                                 # save results to project/name

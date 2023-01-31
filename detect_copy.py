@@ -8,6 +8,7 @@ from pathlib import Path
 import sys
 from tqdm import tqdm
 import argparse
+import imutils
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # UNDERWATER-IMAGE-ANALYSIS root directory
@@ -48,7 +49,6 @@ def run(
         exist_ok=False,                                                             # existing project/name ok, do not increment
         nb_lines=15,                                                                # number of lines/distance between the counter and the center of gravity 
         draw_size=1,                                                                # the width of the markers 
-
 ):
     
     src1, src2, calib_cam = str(src1), str(src2), str(calib_cam)
@@ -93,11 +93,13 @@ def run(
     predictor, cfg = init_config(str(weights), SCORE_THRESH_TEST = conf_thres)
     
     for (path1, im1, im0s1, vid_cap1, s1), (path2, im2, im0s2, vid_cap2, s2) in tqdm(zip(dataset_1, dataset_2), desc = f'Detection of characteristics '): 
-       
+        
         # , unit='%', total=len(dataset_1), bar_format='{percentage:3.0f}%|{bar}|'
         i += 1
         
-
+        # im0s1 = imutils.resize(im0s1, width=640, height=640)
+        # im0s2 = imutils.resize(im0s2, width=640, height=640)
+        
         im1 = np.transpose(im1, (1, 2, 0))[:,:,::-1]
         im2 = np.transpose(im2, (1, 2, 0))[:,:,::-1]
                 
@@ -127,9 +129,12 @@ def run(
         
             contours_cam1, _ = cv2.findContours(masks_cam1[arg1], cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             contours_cam2, _ = cv2.findContours(masks_cam2[arg2], cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-            assert len(contours_cam1) == 1 and len(contours_cam1) == 1, \
-            f'we are supposed to retrieve a single contour that represents a species in what we have {len(contours_cam1) and len(contours_cam2)}  contours.'
+            
+            if not (len(contours_cam1) == len(contours_cam2) == 1):
+                continue
+            # assert len(contours_cam1) == 1 and len(contours_cam2) == 1, \
+            # f'we are supposed to retrieve a single contour that represents a species in what we have \
+            #  {len(contours_cam1)} contours in camera0 and {len(contours_cam2)} in contour1  .'
             
             # pour chaque contour
             cnt_cam1, cnt_cam2 = contours_cam1[0], contours_cam2[0]
@@ -166,7 +171,7 @@ def run(
                     
                     # color = random.choice(colors)
                     cv2.line(im0s1, (cx_cam1, cy_cam1), tuple(sub_cam1[0]), color, draw_size)
-                    cv2.line(im0s1, (cx_cam2, cy_cam2), tuple(sub_cam2[0]), color, draw_size)
+                    # cv2.line(im0s2, (cx_cam2, cy_cam2), tuple(sub_cam2[0]), color, draw_size)
                     
                     # calculer la distance le centre et les autres points autour
                     u1 = (cx_cam1, cy_cam1) if i == 0 else tuple(sub_cam1[0])
@@ -226,8 +231,8 @@ def parse_opt():
     parser.add_argument('--project', default=ROOT / 'runs/detect', help='save results to project/name')
     parser.add_argument('--name', default='exp', help='save results to project/name')
     parser.add_argument('--exist-ok', action='store_true', help='existing project/name ok, do not increment')
-    parser.add_argument('--np-lignes', type=int, default=15, help='number of lines/distance between the counter and the center of gravity')
-    parser.add_argument('--draw-size', type=int, default=1, help='the width of the markers ')
+    parser.add_argument('--nb-lines', type=int, default=15, help='number of lines/distance between the counter and the center of gravity')
+    parser.add_argument('--draw-size', type=int, default=1, help='the width of the markers')
 
     opt = parser.parse_args()
     opt.imgsz *= 2 if len(opt.imgsz) == 1 else 1  # expand
