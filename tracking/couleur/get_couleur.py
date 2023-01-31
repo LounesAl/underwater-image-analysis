@@ -37,7 +37,7 @@ def convert_rgb_to_names(rgb_tuple):
 
 
 
-def get_couleur(chemin_img, num_espece, duree_entre_frames) : 
+def get_couleur(chemin_img, num_espece, duree_entre_frames, seuil_couleur) : 
 
     num_files = len(chemin_img) 
     weights = 'models/model_final.pth'
@@ -69,11 +69,10 @@ def get_couleur(chemin_img, num_espece, duree_entre_frames) :
     print (f"la couleur de l'espece au debut est {color}")
 
     for i in range (0,num_files-1) :
-        # seuil de 10% pour chaque image 
-        s = 10                               
-        seuil_0 = (itens_0[i]*s)/100
-        seuil_1 = (itens_1[i]*s)/100
-        seuil_2 = (itens_2[i]*s)/100
+        # seuil de 10% pour chaque image                              
+        seuil_0 = (itens_0[i]*seuil_couleur)/100
+        seuil_1 = (itens_1[i]*seuil_couleur)/100
+        seuil_2 = (itens_2[i]*seuil_couleur)/100
         if (((itens_0[i+1] < seuil_0 + itens_0[i]) and (itens_0[i+1] > seuil_0 - itens_0[i])) or (itens_1[i+1] < seuil_1 + itens_1[i] and itens_1[i+1] > seuil_1 - itens_1[i]) or (itens_2[i+1] < seuil_2 + itens_2[i] and itens_2[i+1] > seuil_2 - itens_2[i]) ) : 
             pass
         else : 
@@ -94,7 +93,7 @@ def get_couleur(chemin_img, num_espece, duree_entre_frames) :
 
 if __name__ == "__main__":
     path_img = glob('data/outputs/*.jpg')
-    get_couleur(path_img, num_espece=0, duree_entre_frames=2)
+    get_couleur(path_img, num_espece=0, duree_entre_frames=2, seuil_couleur = 10)
 
 
 
