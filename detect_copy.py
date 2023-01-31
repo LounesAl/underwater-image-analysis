@@ -21,17 +21,6 @@ from utils.calibration import *
 from utils.dataloaders import (IMG_FORMATS, VID_FORMATS, check_file, increment_path, select_device, print_args, Profile, LoadImages)
 
 
-colors = [ (255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255), (0, 255, 255),
-           (255, 128, 0), (255, 0, 128), (0, 255, 128), (128, 255, 0), (0, 128, 255), (128, 0, 255),
-           (128, 128, 0), (0, 128, 128), (128, 0, 128) ]
-
-class_dict = {
-                "0" : "PFE",
-                "1" : "Actinia fermee",
-                "2" : "Actinia ouverte",
-                "3" : "Gibbula"
-             }
-
 
 def run(
         weights=ROOT / 'models/model_final.pth',                                    # model path or triton URL
@@ -49,7 +38,7 @@ def run(
         exist_ok=False,                                                             # existing project/name ok, do not increment
         nb_lines=15,                                                                # number of lines/distance between the counter and the center of gravity 
         draw_size=1,                                                                # the width of the markers 
-):
+       ):
     
     src1, src2, calib_cam = str(src1), str(src2), str(calib_cam)
     is_file = Path(src1).suffix[1:] in (IMG_FORMATS + VID_FORMATS)
@@ -89,16 +78,16 @@ def run(
     
     seen, windows, dt = 0, [], (Profile(), Profile(), Profile())
     
-    i = 0
+    
     predictor, cfg = init_config(str(weights), SCORE_THRESH_TEST = conf_thres)
     
-    for (path1, im1, im0s1, vid_cap1, s1), (path2, im2, im0s2, vid_cap2, s2) in tqdm(zip(dataset_1, dataset_2), desc = f'Detection of characteristics '): 
-        
+    # dataset = tqdm(zip(dataset_1, dataset_2), \
+    #                    total=len(dataset_1) if dataset_1.mode=='image' else dataset_1.frames, \
+    #                    desc=f'Detection of characteristics ')
+    i = 0
+    for (path1, im1, im0s1, vid_cap1, s1), (path2, im2, im0s2, vid_cap2, s2) in zip(dataset_1, dataset_2):
         # , unit='%', total=len(dataset_1), bar_format='{percentage:3.0f}%|{bar}|'
         i += 1
-        
-        # im0s1 = imutils.resize(im0s1, width=640, height=640)
-        # im0s2 = imutils.resize(im0s2, width=640, height=640)
         
         im1 = np.transpose(im1, (1, 2, 0))[:,:,::-1]
         im2 = np.transpose(im2, (1, 2, 0))[:,:,::-1]
@@ -113,15 +102,12 @@ def run(
         classes1 = output_cam1["instances"].pred_classes
         classes2 = output_cam2["instances"].pred_classes
 
-
         masks_cam1 = output_cam1["instances"].pred_masks.cpu().numpy().astype(np.uint8)
         masks_cam2 = output_cam2["instances"].pred_masks.cpu().numpy().astype(np.uint8)
 
-        
-        if (not len(masks_cam1) or not len(masks_cam2)) or (len(masks_cam1) != len(masks_cam2)):
+        if not detections_ok(classes1, classes2):
             continue
         
-    
         sorted_args1 = [index for index, _ in sorted(enumerate(masks_cam1), key=center_of_gravity_distance, reverse=True)]
         sorted_args2 = [index for index, _ in sorted(enumerate(masks_cam2), key=center_of_gravity_distance, reverse=True)]
         
@@ -160,18 +146,13 @@ def run(
                 subset_cam2 = cnt_cam2[spaced_indices_cam2]
                 
                 # dessiner un cercle autour du centre de gravité
-                # cv2.circle(img_cam1, (cx_cam1, cy_cam1), draw_size, (255, 0, 0), -1)
-                # cv2.circle(img_cam2, (cx_cam2, cy_cam2), draw_size, (255, 0, 0), -1)
                 cv2.drawContours(im0s1, [cnt_cam1], -1, (0, 255, 0), draw_size)
-                # cv2.drawContours(im0s2, [cnt_cam2], -1, (0, 255, 0), draw_size)
                 
                 p3ds = []
                 temp_dist = []
-                for i, sub_cam1, sub_cam2, color in zip(range(len(subset_cam1)), subset_cam1, subset_cam2, colors):
+                for i, sub_cam1, sub_cam2, color in zip(range(len(subset_cam1)), subset_cam1, subset_cam2, COLORS):
                     
-                    # color = random.choice(colors)
                     cv2.line(im0s1, (cx_cam1, cy_cam1), tuple(sub_cam1[0]), color, draw_size)
-                    # cv2.line(im0s2, (cx_cam2, cy_cam2), tuple(sub_cam2[0]), color, draw_size)
                     
                     # calculer la distance le centre et les autres points autour
                     u1 = (cx_cam1, cy_cam1) if i == 0 else tuple(sub_cam1[0])
@@ -182,10 +163,12 @@ def run(
                     
                 height = np.max(temp_dist)*2
                 width = np.min(temp_dist)*2
-                # distances.append([longueur, largeur])
-                draw_text(img=im0s1, text="{} W : {:.1f} cm L : {:.1f} cm".format(class_dict[str(classes1[arg1].item())], width, height), pos=tuple(sub_cam1[0]), 
+                draw_text(img=im0s1, text="{} W : {:.1f} cm L : {:.1f} cm".format(CLASSES_DICT[str(classes1[arg1].item())], width, height), pos=tuple(sub_cam1[0]), 
                         font_scale=0.5, font_thickness=1, text_color=(255, 255, 255), text_color_bg=(0, 0, 0))
-                  
+        
+        # s1 += '%gx%g ' % im0s1.shape[2:]
+        print(s1)
+        
          # Stream results
         if view_img:
             if platform.system() == 'Linux' and path1 not in windows:
