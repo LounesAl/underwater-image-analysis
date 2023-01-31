@@ -8,14 +8,15 @@ def affichage_couleur (path_npy , path_img) :
     nbr_image = len(path_img)
 
     fig = plt.figure()
-    #ax = fig.add_subplot(111)
+ 
     plt.plot(len(path_img) , color)
-    #plt.axis([])
+ 
     plt.xlabel('Temps')
     plt.ylabel('Couleur')
     plt.title("Suivi de la couleur")
 
     plt.show() 
+
 
 
 

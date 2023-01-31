@@ -16,7 +16,7 @@ import os
 
 def convert_rgb_to_names(rgb_tuple):
     
-    # a dictionary of all the hex and their respective names in css3
+
     css3_db = CSS3_HEX_TO_NAMES
     names = []
     rgb_values = []
@@ -30,13 +30,12 @@ def convert_rgb_to_names(rgb_tuple):
     return f' {names[index]}'
 
 def get_nbr_image (chemin) : 
-   #path = 'chemin/vers/dossier'
     files = os.listdir(chemin)
     num_files = len(files)/2
     
     return num_files
 
-#C:\Users\Amel\Documents\GitHub\underwater-image-analysis\data\outputs\output_0.jpg
+
 
 def get_couleur (chemin_npy , chemin_img) : 
 #def get_couleur (num_files , chemin) : 
@@ -46,17 +45,19 @@ def get_couleur (chemin_npy , chemin_img) :
     for i in range(num_files) : 
         #chargement de l'image :
         #image = cv2.imread(chemin + '\output_' + str(i*40)+ '.jpg")
-        image = cv2.imread(chemin_img[i])  *
+        image = cv2.imread(chemin_img[i])  
 
         #recuperer tous les pixel de l'espèce souhaitée 
 
-        #outputs = np.load(chemin_npy[i], allow_pickle=True)
+        outputs = np.load(chemin_npy[i], allow_pickle=True)
 
         #print(outputs[0])
         # a tester et voir 
-        #mask_seg = outputs["instances"].pred_masks.cpu().numpy()
-        #cnt = get_segmentation(mask_seg)
-        cnt = np.load(chemin + '\output_' + str(i*40)+ '.npy')
+        mask_seg = outputs["instances"].pred_masks.cpu().numpy()
+        cnt = get_segmentation(mask_seg)
+
+        #cnt = np.load(chemin + '\output_' + str(i*40)+ '.npy')
+        
         taille_cnt = len(cnt) 
         intensite = []
 
@@ -90,9 +91,9 @@ def get_couleur (chemin_npy , chemin_img) :
     color = convert_rgb_to_names(rgb)
     print ("la couleur de l'espece est" , color)
 
+
     for i in range (0,num_files-1) : 
         
-
         s = 10                              #seuil de 10% pour chaque image 
         seuil_0 = (itens_0[i]*s)/100
         seuil_1 = (itens_1[i]*s)/100
@@ -118,16 +119,21 @@ def get_couleur (chemin_npy , chemin_img) :
         #conversion en hexadécimal
         color_1.append(convert_rgb_to_names(rgb_1))
 
+
     return (color_1) 
 
         
 
+
+
 if __name__ == "__main__":
+
+    
     path_img = glob('data/outputs/*.jpg')
     path_npy = glob('data/outputs/*.npy')
     num_img = len(path_img)
     color = get_couleur (path_npy , path_img)
 
-    #chemin="\PFE\Base_de_donnees"
-    #nbr = 5
-    #color = get_couleur (nbr , chemin)
+
+
+

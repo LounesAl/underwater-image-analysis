@@ -32,17 +32,21 @@ def get_nbr_espece (chemin_npy, classe_dict) :
                 else : 
                     print ("l'espece" , nom , "n'a pas ete detectee")
         
-    couleurs= np.split(classe_tot, num_files)  #pour couper le vecteur en num_files 
+    
+    vecteur = classe_tot.reshape(num_files, classe_tot)
+    vecteur = vecteur.transpose()
+    moy = []
+    for ligne in vecteur:
+        moy.append(np.mean(ligne))  
 
-
-    #for j in range (nbr_classe) : 
-    #    classe_mean[i] =  
-    #for j in (i*)
-    #4 image / 3 classe 
-   # 0 1 2 3 0 1 2 3 0 1 2 3 0 1 2 3 
-
-
+    for classe, nom in classe_dict.items():
+            if (int(classe) != 0 ) : 
+                 ("l'espece" , nom , "a ete detectee en moyenne" ,  moy[int(classe)] , "fois")
+    
     return classe_tot 
+
+
+
 
 
 if __name__ == "__main__":

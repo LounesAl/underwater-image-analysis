@@ -1,6 +1,6 @@
 import cv2
 from utils.segmentation import *
-from utils.segmentation import inference
+from utils.calibration import *
 import random
 import imutils
 
@@ -9,53 +9,45 @@ colors = [ (255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255), 
            (128, 128, 0), (0, 128, 128), (128, 0, 128) ]
 
 weights='./models/model_final.pth'
-
 predictor, cfg = init_config(str(weights), SCORE_THRESH_TEST = 0.5)
-
-calib_cam = 'settings/camera_parameters/stereo_params.pkl'
-
-mtx1, mtx2, R, T = load_calibration(calib_cam)
-
-# Calculate the projection martrix
+mtx1, mtx2, R, T = load_calibration('./settings/camera_parameters/stereo_params.pkl')
 P1, P2 = get_projection_matrix(mtx1, mtx2, R, T)
 
 
 # charger l'image
+img_cam1 = cv2.imread("./data/imm/GOPR1463.JPG")
 img_cam2 = cv2.imread("./data/imm/GOPR1463.JPG")
-img_cam1 = cv2.imread("./data/imm/GOPR1464.JPG")
 
 img_cam1 = imutils.resize(img_cam1, width=640, height=640)
 img_cam2 = imutils.resize(img_cam2, width=640, height=640)
 
-
 output_cam1, _ = inference(predictor, cfg, img_cam1)
 output_cam2, _ = inference(predictor, cfg, img_cam2)
+
+classes_cam1 = output_cam1["instances"].pred_classes
+classes_cam2 = output_cam2["instances"].pred_classes
 
 masks_cam1 = output_cam1["instances"].pred_masks.cpu().numpy().astype(np.uint8)
 masks_cam2 = output_cam2["instances"].pred_masks.cpu().numpy().astype(np.uint8)
 
-def center_of_gravity_distance(mask):
-    contours, _ = cv2.findContours(mask.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+def center_of_gravity_distance(index_mask):
+    _, mask = index_mask
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cnt = contours[0]
     moments = cv2.moments(cnt)
     cx = int(moments["m10"] / moments["m00"])
     cy = int(moments["m01"] / moments["m00"])
     return np.subtract((np.linalg.norm(((cx, cy)))), ((np.linalg.norm((cx, mask.shape[1]-cy)))))
-    # return np.linalg.norm(np.linalg.norm((cx, cy)), np.linalg.norm((mask.shape[0] // 2, mask.shape[1]//2)))
     
-masks_cam1 = sorted(masks_cam1, key=center_of_gravity_distance, reverse=True)
-masks_cam2 = sorted(masks_cam2, key=center_of_gravity_distance, reverse=True)
+sorted_args1 = [index for index, _ in sorted(enumerate(masks_cam1), key=center_of_gravity_distance, reverse=True)]
+sorted_args2 = [index for index, _ in sorted(enumerate(masks_cam2), key=center_of_gravity_distance, reverse=True)]
+    
 
-classes_cam1 = output_cam1["instances"].pred_classes
-classes_cam2 = output_cam2["instances"].pred_classes
-
-# Pour chaque especes dans l'image
-# p3dss = []
-# distances = []
-for mask_cam1, mask_cam2, class_cam1, classe_cam2 in zip(masks_cam1, masks_cam2, classes_cam1, classes_cam2):
+for arg1, arg2 in zip(sorted_args1, sorted_args2):
         
-    contours_cam1, _ = cv2.findContours(mask_cam1, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    contours_cam2, _ = cv2.findContours(mask_cam2, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours_cam1, _ = cv2.findContours(masks_cam1[arg1], cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours_cam2, _ = cv2.findContours(masks_cam2[arg2], cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     assert len(contours_cam1) == 1 and len(contours_cam1) == 1, \
     f'we are supposed to retrieve a single contour that represents a species in what we have {len(contours_cam1) and len(contours_cam2)}  contours.'
@@ -104,24 +96,14 @@ for mask_cam1, mask_cam2, class_cam1, classe_cam2 in zip(masks_cam1, masks_cam2,
             p3ds.append(p3d)
             if i!= 0 : temp_dist.append(np.linalg.norm(p3ds[-1] - p3ds[0]))
             
-        longueur = np.max(temp_dist)*2
-        largeur = np.min(temp_dist)*2
+        height = np.max(temp_dist)*2
+        width = np.min(temp_dist)*2
         # distances.append([longueur, largeur])
-        draw_text(img=img_cam1, text="W : {:.1f} cm L : {:.1f} cm".format(largeur, longueur), pos=tuple(sub_cam1[0]), 
+        draw_text(img=img_cam1, text="{} W : {:.1f} cm L : {:.1f} cm".format(classes_cam1[arg1], width, height), pos=tuple(sub_cam1[0]), 
                   font_scale=0.5, font_thickness=1, text_color=(255, 255, 255), text_color_bg=(0, 0, 0))
-        
-        # p3ds = np.array(p3ds)
-        # p3dss.append(p3ds)
     
     cv2.imshow("mask_cam1", img_cam1) # *255
     cv2.imshow("mask_cam2", img_cam2)
     cv2.waitKey(0)
 
 cv2.destroyAllWindows()
-
-
-# Trouver les extrémités du contour
-# leftmost = tuple(c[c[:,:,0].argmin()][0])
-# rightmost = tuple(c[c[:,:,0].argmax()][0])
-# topmost = tuple(c[c[:,:,1].argmin()][0])
-# bottommost = tuple(c[c[:,:,1].argmax()][0])

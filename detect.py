@@ -19,16 +19,22 @@ from utils.segmentation import *
 from utils.calibration import *
 from utils.dataloaders import (IMG_FORMATS, VID_FORMATS, check_file, increment_path, select_device, print_args, Profile, LoadImages)
 
+
+colors = [ (255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255), (0, 255, 255),
+           (255, 128, 0), (255, 0, 128), (0, 255, 128), (128, 255, 0), (0, 128, 255), (128, 0, 255),
+           (128, 128, 0), (0, 128, 128), (128, 0, 128) ]
+
+
 def run(
         weights=ROOT / 'models/model_final.pth',                                    # model path or triton URL
         save_rest=True,                                                             # save inference images
         src1=ROOT / 'data/imgs_c1',                                                 # file/dir/URL/glob/screen/0(webcam)
         src2=ROOT / 'data/imgs_c1',                                                 # file/dir/URL/glob/screen/0(webcam)
         imgsz=(640, 640),                                                           # inference size (height, width)
-        calib_cam=ROOT / 'settings/camera_parameters/stereo_params.pkl',  # stereo cameras path parameters 
+        calib_cam=ROOT / 'settings/camera_parameters/stereo_params.pkl',            # stereo cameras path parameters 
         conf_thres=0.25,                                                            # confidence threshold
         device='',                                                                  # cuda device, i.e. 0 or 0,1,2,3 or cpu
-        view_img=False,                                                              # visualize results
+        view_img=False,                                                             # visualize results
         visualize=False,                                                            # visualize features
         project=ROOT / 'runs/detect',                                               # save results to project/name
         name='exp',                                                                 # save results to project/name
