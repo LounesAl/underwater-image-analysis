@@ -94,7 +94,7 @@ def get_couleur(chemin_img, num_espece, duree_entre_frames) :
 
 if __name__ == "__main__":
     path_img = glob('data/outputs/*.jpg')
-    get_couleur(path_img, num_espece=0)
+    get_couleur(path_img, num_espece=0, duree_entre_frames=2)
 
 
 
