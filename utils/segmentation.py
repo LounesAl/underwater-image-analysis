@@ -15,6 +15,8 @@ def center_of_gravity_distance(index_mask):
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cnt = contours[0]
     moments = cv2.moments(cnt)
+    if moments["m00"] == 0:
+        return 0
     cx = int(moments["m10"] / moments["m00"])
     cy = int(moments["m01"] / moments["m00"])
     return np.subtract((np.linalg.norm(((cx, cy)))), ((np.linalg.norm((cx, mask.shape[1]-cy)))))
