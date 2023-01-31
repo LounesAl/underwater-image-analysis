@@ -20,7 +20,7 @@ ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 calibration_settings = parse_calibration_settings_file(os.path.join(ROOT, 'settings','calibration_settings.yaml'))
 
 # Calibrate single camera to obtain camera intrinsic parameters from saved frames.
-def calibrate_camera_for_intrinsic_parameters(path_image):
+def calibrate_camera_for_intrinsic_parameters(checkerboard_box_size_scale, checkerboard_rows, checkerboard_columns, path_image):
     
     #NOTE: images_prefix contains camera name: "frames/camera0*".
     images_names = (str(p.resolve()) for p in Path(path_image).glob("**/*") if p.suffix in {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", 
@@ -33,9 +33,9 @@ def calibrate_camera_for_intrinsic_parameters(path_image):
     #Change this if the code can't find the checkerboard. 
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.001)
 
-    rows = calibration_settings['checkerboard_rows']
-    columns = calibration_settings['checkerboard_columns']
-    world_scaling = calibration_settings['checkerboard_box_size_scale'] #this will change to user defined length scale
+    rows = checkerboard_rows #calibration_settings['checkerboard_rows']
+    columns = checkerboard_columns #calibration_settings['checkerboard_columns']
+    world_scaling = checkerboard_box_size_scale# calibration_settings['checkerboard_box_size_scale'] #this will change to user defined length scale
 
     #coordinates of squares in the checkerboard world space
     objp = np.zeros((rows*columns,3), np.float32)
@@ -96,7 +96,7 @@ def save_camera_intrinsics(camera_matrix, distortion_coefs, save_path, camera_na
 
 
 #open paired calibration frames and stereo calibrate for cam0 to cam1 coorindate transformations
-def stereo_calibrate(mtx0, dist0, mtx1, dist1, frames_prefix_c0, frames_prefix_c1):
+def stereo_calibrate(checkerboard_box_size_scale, checkerboard_rows, checkerboard_columns, mtx0, dist0, mtx1, dist1, frames_prefix_c0, frames_prefix_c1):
     #read the synched frames
     c0_images_names = (str(p.resolve()) for p in Path(frames_prefix_c0).glob("**/*") if p.suffix in {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", 
                                                                                                      ".JPG", ".JPEG", ".PNG", ".GIF", ".BMP", ".TIFF"})
@@ -111,9 +111,9 @@ def stereo_calibrate(mtx0, dist0, mtx1, dist1, frames_prefix_c0, frames_prefix_c
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.001)
 
     #calibration pattern settings
-    rows = calibration_settings['checkerboard_rows']
-    columns = calibration_settings['checkerboard_columns']
-    world_scaling = calibration_settings['checkerboard_box_size_scale']
+    rows = checkerboard_rows # calibration_settings['checkerboard_rows']
+    columns = checkerboard_columns #calibration_settings['checkerboard_columns']
+    world_scaling = checkerboard_box_size_scale # calibration_settings['checkerboard_box_size_scale']
 
     #coordinates of squares in the checkerboard world space
     objp = np.zeros((rows*columns,3), np.float32)
@@ -195,12 +195,12 @@ def save_extrinsic_calibration_parameters(R0, T0, R1, T1, save_path, prefix = ''
 
     return R0, T0, R1, T1
 
-def main(path_folder_cam1, path_folder_cam2):
+def main(path_folder_cam1, path_folder_cam2, checkerboard_box_size_scale, checkerboard_rows, checkerboard_columns):
     """Step1. Obtain camera intrinsic matrices and save them"""
     # # camera0 intrinsics
-    cmtx0, dist0, ret0 = calibrate_camera_for_intrinsic_parameters(path_folder_cam1) 
+    cmtx0, dist0, ret0 = calibrate_camera_for_intrinsic_parameters(checkerboard_box_size_scale, checkerboard_rows, checkerboard_columns, path_folder_cam1) 
     # camera1 intrinsics
-    cmtx1, dist1, ret1 = calibrate_camera_for_intrinsic_parameters(path_folder_cam2)
+    cmtx1, dist1, ret1 = calibrate_camera_for_intrinsic_parameters(checkerboard_box_size_scale, checkerboard_rows, checkerboard_columns, path_folder_cam2)
     
     #create folder if it does not exist
     if not os.path.exists(os.path.join('.' , 'settings', 'camera_parameters')):
@@ -216,7 +216,7 @@ def main(path_folder_cam1, path_folder_cam2):
         pickle.dump({'cmtx0': cmtx0, 'cmtx1': cmtx1, 'dist0': dist0, 'dist1': dist1, 'ret0': ret0, 'ret1': ret1}, f)
 
     """Step2. Use paired calibration pattern frames to obtain camera0 to camera1 rotation and translation"""
-    R, T = stereo_calibrate(cmtx0, dist0, cmtx1, dist1, path_folder_cam1, path_folder_cam2)
+    R, T = stereo_calibrate(checkerboard_box_size_scale, checkerboard_rows, checkerboard_columns, cmtx0, dist0, cmtx1, dist1, path_folder_cam1, path_folder_cam2)
 
     """Step3. Save calibration data where camera0 defines the world space origin."""
     #camera0 rotation and translation is identity matrix and zeros vector

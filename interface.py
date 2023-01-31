@@ -197,12 +197,16 @@ class calib_window(QWidget):
         self.setWindowTitle("Calibration")
         
         # Default path
-        self.folder_path1 = 'data/imgs_c1'
-        self.folder_path2 = 'data/imgs_c2'
+        self.folder_path1 = './data/camera0'
+        self.folder_path2 = './data/camera1'
         
         # Create labels to display "Sélectionner un dossier 1" and "Sélectionner un dossier 2"
         self.label1 = QLabel("Sélectionner le dossier la caméra 1")
         self.label2 = QLabel("Sélectionner le dossier la caméra 2")
+        # Create labels to display "Sélectionner un dossier 1" and "Sélectionner un dossier 2"
+        self.label3 = QLabel("Taille d'un carré de la mire (cm)")
+        self.label4 = QLabel("Nombre de lignes de la mire")
+        self.label5 = QLabel("Nombre de colones de la mire")
         
         # Create the browse buttons
         self.browse_button1 = QPushButton('Parcourir', self)
@@ -210,8 +214,23 @@ class calib_window(QWidget):
         self.browse_button2 = QPushButton('Parcourir', self)
         self.browse_button2.clicked.connect(lambda: browse_folder(self, 2))
         
+        # Create a double spin box with a default value
+        self.checkerboard_box_size_scale_box = QDoubleSpinBox()
+        self.checkerboard_box_size_scale_box.setSingleStep(0.1)
+        self.checkerboard_box_size_scale_box.setValue(2.19)
+        # Create a double spin box with a default value
+        self.checkerboard_rows_box = QDoubleSpinBox()
+        self.checkerboard_rows_box.setValue(6)
+        # Create a double spin box with a default value
+        self.checkerboard_columns_box = QDoubleSpinBox()
+        self.checkerboard_columns_box.setValue(9)
+        
         self.calib_button = QPushButton('Calibrer', self)
-        self.calib_button.clicked.connect(lambda: main(self.path1, self.path2))
+        self.calib_button.clicked.connect(lambda: main(self.path1, 
+                                                       self.path2,
+                                                       checkerboard_box_size_scale = self.checkerboard_box_size_scale_box.isChecked(), 
+                                                       checkerboard_rows = self.checkerboard_rows_box.isChecked(), 
+                                                       checkerboard_columns = self.checkerboard_columns_box.isChecked()))
         
         # Create a grid layout
         self.grid = QGridLayout()
@@ -222,7 +241,16 @@ class calib_window(QWidget):
         self.grid.addWidget(self.browse_button1, 0, 1)
         self.grid.addWidget(self.label2, 1, 0)
         self.grid.addWidget(self.browse_button2, 1, 1)
-        self.grid.addWidget(self.calib_button, 2, 0, 1, 2, QtCore.Qt.AlignCenter)
+        self.grid.addWidget(self.label3, 2, 0)
+        self.grid.addWidget(self.checkerboard_box_size_scale_box, 2, 1)
+        self.grid.addWidget(self.label4, 3, 0)
+        self.grid.addWidget(self.checkerboard_rows_box, 3, 1)
+        self.grid.addWidget(self.label5, 4, 0)
+        self.grid.addWidget(self.checkerboard_columns_box, 4, 1)
+        
+        
+        
+        self.grid.addWidget(self.calib_button, 5, 0, 1, 2, QtCore.Qt.AlignCenter)
         
         # Create a vertical layout
         self.layout = QVBoxLayout(self)
