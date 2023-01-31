@@ -1,6 +1,6 @@
 import cv2
 from utils.segmentation import *
-from utils.segmentation import inference
+from utils.calibration import *
 import random
 import imutils
 
@@ -10,7 +10,8 @@ colors = [ (255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255), 
 
 weights='./models/model_final.pth'
 predictor, cfg = init_config(str(weights), SCORE_THRESH_TEST = 0.5)
-
+mtx1, mtx2, R, T = load_calibration('./settings/camera_parameters/stereo_params.pkl')
+P1, P2 = get_projection_matrix(mtx1, mtx2, R, T)
 
 
 # charger l'image
@@ -41,6 +42,21 @@ def center_of_gravity_distance(index_mask):
 sorted_args1 = [index for index, _ in sorted(enumerate(masks_cam1), key=center_of_gravity_distance, reverse=True)]
 sorted_args2 = [index for index, _ in sorted(enumerate(masks_cam2), key=center_of_gravity_distance, reverse=True)]
 
+    
+def get_3D_distances(p3ds, gravity):
+    distances = []
+    for p3ds in p3ds:
+        dists = []
+        for _c in connections:
+            point1 = p3ds[_c[0]]
+            point2 = p3ds[_c[1]]
+            dist = np.linalg.norm(point2 - point1) # Euclidian default
+            dists.append(dist)
+        distances.append(dists)
+            
+    return distances, connections
+
+    
 
 for args1, args2 in zip(sorted_args1, sorted_args2):
         
@@ -79,10 +95,14 @@ for args1, args2 in zip(sorted_args1, sorted_args2):
         cv2.drawContours(img_cam1, [cnt_cam1], -1, (0, 255, 0), 1)
         cv2.drawContours(img_cam2, [cnt_cam2], -1, (0, 255, 0), 1)
         
+        p3ds = transforme_to_3D(P1, P2, subset_cam1, subset_cam2)
+        distances, connections = get_3D_distances(p3ds, connections = [[0,2], [1,3]])
+        
         for sub_cam1, sub_cam2, color in zip(subset_cam1, subset_cam2, colors):
             # color = random.choice(colors)
             cv2.line(img_cam1, (cx_cam1, cy_cam1), tuple(sub_cam1[0]), color, 1)
             cv2.line(img_cam2, (cx_cam2, cy_cam2), tuple(sub_cam2[0]), color, 1)
+            
         
     
     cv2.imshow("mask_cam1", img_cam1) # *255
