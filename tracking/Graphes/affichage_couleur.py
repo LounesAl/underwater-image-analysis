@@ -17,6 +17,10 @@ def affichage_nbr (path_npy, class_dict) :
 
     plt.show() 
 
+
+
+
+
 if __name__ == "__main__":
     
     path_npy = glob('data/outputs/*.npy')
