@@ -29,93 +29,72 @@ def convert_rgb_to_names(rgb_tuple):
 
     return f' {names[index]}'
 
-def get_nbr_image (chemin) : 
-    files = os.listdir(chemin)
-    num_files = len(files)/2
+# def get_nbr_image (chemin) : 
+#     files = os.listdir(chemin)
+#     num_files = len(files)/2
     
-    return num_files
+#     return num_files
 
 
 
-def get_couleur (chemin_img) : 
-#def get_couleur (num_files , chemin) : 
+def get_couleur(chemin_img, num_espece, duree_entre_frames) : 
 
     num_files = len(chemin_img) 
+    weights = 'models/model_final.pth'
+    # get config
+    predictor, cfg = init_config(weights, SCORE_THRESH_TEST = 0.8)
+
     moy_tot_couleur = []                        #vecteur de la couleur moyenne pour toute le images 
     for i in range(num_files) : 
         #chargement de l'image :
-        image = cv2.imread(chemin_img)
-
-        #print(outputs[0])
-        weights = 'models/model_final.pth'
-
-        # get config
-        predictor, cfg = init_config(weights, SCORE_THRESH_TEST = 0.8)
-        
+        image = cv2.imread(chemin_img[i])
         #recuperer tous les pixel de l'espèce souhaitée 
         outputs, im_seg1 = inference(predictor, cfg,  image.copy())
-        # mask_seg = outputs["instances"].pred_masks.cpu().numpy()
-        uvs1, cnt, boxes1 = get_segment_points(outputs, image)
-
-        #cnt = np.load(chemin + '\output_' + str(i*40)+ '.npy')
-        
+        mask_seg = outputs["instances"].pred_masks.cpu().numpy()
         intensite = []
-
-        for j in range(len(cnt)) :        
-            intensite.append(image[cnt[j][0],cnt[j][1]])   #recuperer les intensité des pixel d'interet 
-    
-        moy_couleur = np.empty((np.shape(intensite)[1],1)) #vecteur de la couleur moyenne de chaque image 
-
-        for j in range(np.shape(intensite)[1]):
-            #recuperer les colonnes de chaque intensité (R,G,B)
-            exec("colonne_" + str(j) + " = np.take(intensite, j, axis=0)")
-            #calculer leurs moyennes
-            exec("moy_couleur [j]  = np.mean(colonne_"+str(j)+")")
-        
+        # for mask in mask_seg :
+        indices = np.column_stack(np.where(mask_seg[num_espece] == True))       
+        # Get the intensity values of the pixels in the mask
+        intensite = [image[y, x] for y, x in indices]  #recuperer les intensité des pixel d'interet 
+        #vecteur de la couleur moyenne de chaque image
+        moy_couleur = np.empty((np.shape(intensite)[1],1))  
         moy_tot_couleur.append(moy_couleur)
-
-    #une fois la matrice de couleur remplie nous verrons si on a une difference entre les images 
-    #for i in range(len(moy_tot_couleur)):
-        #recuperer chaque colonne des intensités moyennes 
-        #exec("itens_" + str(i) + " = moy_tot_couleur[i]")
-        #exec("colonne_" + str(i) + " = tableau[i]")
-        #print (itens_1)
 
     itens_0 = np.take(moy_tot_couleur, 0, axis=1) 
     itens_1 = np.take(moy_tot_couleur, 1, axis=1) 
     itens_2 = np.take(moy_tot_couleur, 2, axis=1) 
     #recuperer la premiere couleur de l'espece :
     rgb = tuple(np.concatenate([itens_0[0],itens_1[0],itens_2[0]]))
-    print(rgb)
     color = convert_rgb_to_names(rgb)
-    print ("la couleur de l'espece est" , color)
+    print (f"la couleur de l'espece au debut est {color}")
 
-    for i in range (0,num_files-1) : 
-        s = 10                              #seuil de 10% pour chaque image 
+    for i in range (0,num_files-1) :
+        # seuil de 10% pour chaque image 
+        s = 10                               
         seuil_0 = (itens_0[i]*s)/100
         seuil_1 = (itens_1[i]*s)/100
         seuil_2 = (itens_2[i]*s)/100
         if (((itens_0[i+1] < seuil_0 + itens_0[i]) and (itens_0[i+1] > seuil_0 - itens_0[i])) or (itens_1[i+1] < seuil_1 + itens_1[i] and itens_1[i+1] > seuil_1 - itens_1[i]) or (itens_2[i+1] < seuil_2 + itens_2[i] and itens_2[i+1] > seuil_2 - itens_2[i]) ) : 
-            print("pas de changement de couleur")
+            pass
         else : 
             rgb = tuple(np.concatenate((itens_0[i+1],itens_1[i+1],itens_2[i+1])))
             #conversion en hexadécimal
             color = convert_rgb_to_names(rgb)
             #affichage de la couleur
-            print ("lespece change de couleur vers :" , color) 
+            print (f"lespece devient {color} à l'instant {i*duree_entre_frames} secondes:") 
             
-    color_1 = []
-    for i in range (0,num_files) : 
-        rgb_1 = tuple(np.concatenate((itens_0[i],itens_1[i],itens_2[i])))
-        #conversion en hexadécimal
-        color_1.append(convert_rgb_to_names(rgb_1))
-    return (color_1) 
+    # color_1 = []
+    # for i in range (0,num_files) : 
+    #     rgb_1 = tuple(np.concatenate((itens_0[i],itens_1[i],itens_2[i])))
+    #     #conversion en hexadécimal
+    #     color_1.append(convert_rgb_to_names(rgb_1))
+    # return (color_1) 
 
 
 
 if __name__ == "__main__":
-    path_img = glob('data/outputs/*.jpg')[0]
-    color = get_couleur(path_img)
+    path_img = glob('data/outputs/*.jpg')
+    get_couleur(path_img, num_espece=0)
 
 
 
