@@ -125,10 +125,3 @@ cv2.destroyAllWindows()
 # rightmost = tuple(c[c[:,:,0].argmax()][0])
 # topmost = tuple(c[c[:,:,1].argmin()][0])
 # bottommost = tuple(c[c[:,:,1].argmax()][0])
-            
-
-    
-
-
-
-
