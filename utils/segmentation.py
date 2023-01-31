@@ -10,6 +10,27 @@ from utils.calibration import *
 import imutils
 
 
+COLORS = [ (255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255), (0, 255, 255),
+           (255, 128, 0), (255, 0, 128), (0, 255, 128), (128, 255, 0), (0, 128, 255), (128, 0, 255),
+           (128, 128, 0), (0, 128, 128), (128, 0, 128) ]
+
+CLASSES_DICT = {
+                "0" : "PFE",
+                "1" : "Actinia fermee",
+                "2" : "Actinia ouverte",
+                "3" : "Gibbula"
+                }
+
+
+
+def detections_ok(classes1, classes2):
+    classes1 = classes1.cpu().numpy()
+    classes2 = classes2.cpu().numpy()
+    if ( not len(classes1) or not len(classes2)                    ) or \
+       ( not np.array_equal(np.sort(classes1), np.sort(classes2))  ):
+        return False
+    return True
+
 def center_of_gravity_distance(index_mask):
     _, mask = index_mask
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
