@@ -46,9 +46,6 @@ def get_nbr_espece (chemin_npy, classe_dict) :
     return classe_tot 
 
 
-
-
-
 if __name__ == "__main__":
 
     path_npy = glob('data/outputs/*.npy')
