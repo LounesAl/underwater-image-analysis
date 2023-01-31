@@ -24,6 +24,13 @@ colors = [ (255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255), 
            (255, 128, 0), (255, 0, 128), (0, 255, 128), (128, 255, 0), (0, 128, 255), (128, 0, 255),
            (128, 128, 0), (0, 128, 128), (128, 0, 128) ]
 
+class_dict = {
+                "0" : "PFE",
+                "1" : "Actinia fermee",
+                "2" : "Actinia ouverte",
+                "3" : "Gibbula"
+             }
+
 
 def run(
         weights=ROOT / 'models/model_final.pth',                                    # model path or triton URL
@@ -31,14 +38,17 @@ def run(
         src1=ROOT / 'data/imgs_c1',                                                 # file/dir/URL/glob/screen/0(webcam)
         src2=ROOT / 'data/imgs_c1',                                                 # file/dir/URL/glob/screen/0(webcam)
         imgsz=(640, 640),                                                           # inference size (height, width)
-        calib_cam=ROOT / 'settings/camera_parameters/stereo_params.pkl',  # stereo cameras path parameters 
+        calib_cam=ROOT / 'settings/camera_parameters/stereo_params.pkl',            # stereo cameras path parameters 
         conf_thres=0.25,                                                            # confidence threshold
         device='',                                                                  # cuda device, i.e. 0 or 0,1,2,3 or cpu
-        view_img=False,                                                              # visualize results
+        view_img=False,                                                             # visualize results
         visualize=False,                                                            # visualize features
         project=ROOT / 'runs/detect',                                               # save results to project/name
         name='exp',                                                                 # save results to project/name
         exist_ok=False,                                                             # existing project/name ok, do not increment
+        nb_lines=15,                                                                # number of lines/distance between the counter and the center of gravity 
+        draw_size=1,                                                                # the width of the markers 
+
 ):
     
     src1, src2, calib_cam = str(src1), str(src2), str(calib_cam)
@@ -87,59 +97,104 @@ def run(
         # , unit='%', total=len(dataset_1), bar_format='{percentage:3.0f}%|{bar}|'
         i += 1
         
+
         im1 = np.transpose(im1, (1, 2, 0))[:,:,::-1]
         im2 = np.transpose(im2, (1, 2, 0))[:,:,::-1]
-        
                 
         # Inferred with the images of each camera
-        output1, _ = inference(predictor, cfg,  im0s1)
-        output2, _ = inference(predictor, cfg,  im0s2)
+        output_cam1, _ = inference(predictor, cfg,  im0s1)
+        output_cam2, _ = inference(predictor, cfg,  im0s2)
         
         # voir les classes predites
         ## le resultat est de la forme : tensor([0, 1, 1, 2, 3, 3]), cela veut dire :
         ## une espces PFE, deux actinia fermées, une ouverte et deux gibbula
-        classes1 = output1["instances"].pred_classes
-        classes2 = output2["instances"].pred_classes
+        classes1 = output_cam1["instances"].pred_classes
+        classes2 = output_cam2["instances"].pred_classes
 
 
-        # Get segmentation points " A optimiser "
-        uvs1, seg1, boxes1 = get_segment_points(output1, im1)
-        uvs2, seg2, boxes2 = get_segment_points(output2, im2)
+        masks_cam1 = output_cam1["instances"].pred_masks.cpu().numpy().astype(np.uint8)
+        masks_cam2 = output_cam2["instances"].pred_masks.cpu().numpy().astype(np.uint8)
+
         
-        if (uvs1 == None or uvs2 == None) or (len(uvs1) != len(uvs2)):
+        if (not len(masks_cam1) or not len(masks_cam2)) or (len(masks_cam1) != len(masks_cam2)):
             continue
-                
-        # transforme the 2D points in the images to 3D points in the exit()world
-        p3ds = transforme_to_3D(P1, P2, uvs1, uvs2)
         
+    
+        sorted_args1 = [index for index, _ in sorted(enumerate(masks_cam1), key=center_of_gravity_distance, reverse=True)]
+        sorted_args2 = [index for index, _ in sorted(enumerate(masks_cam2), key=center_of_gravity_distance, reverse=True)]
         
-        class_dict = {
-                        "0" : "PFE",
-                        "1" : "Actinia fermee",
-                        "2" : "Actinia ouverte",
-                        "3" : "Gibbula"
-                     }
+        for arg1, arg2 in zip(sorted_args1, sorted_args2):
+        
+            contours_cam1, _ = cv2.findContours(masks_cam1[arg1], cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            contours_cam2, _ = cv2.findContours(masks_cam2[arg2], cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-        
-        distances, connections = get_3D_distances(p3ds, connections = [[0,2], [1,3]])
-        
-        im1_seg = dist_on_img(uvs1, boxes1, im0s1, distances, classes1, class_dict, copy=False)
-        im2_seg = dist_on_img(uvs2, boxes2, im0s2, distances, classes2, class_dict, copy=False)
-        
+            assert len(contours_cam1) == 1 and len(contours_cam1) == 1, \
+            f'we are supposed to retrieve a single contour that represents a species in what we have {len(contours_cam1) and len(contours_cam2)}  contours.'
+            
+            # pour chaque contour
+            cnt_cam1, cnt_cam2 = contours_cam1[0], contours_cam2[0]
+            
+            # trouver les moments de l'image
+            moments_cam1, moments_cam2 = cv2.moments(cnt_cam1), cv2.moments(cnt_cam2)
+            if moments_cam1["m00"] != 0 and moments_cam2["m00"] != 0:
+                # calculer le centre de gravité
+                cx_cam1 = int(moments_cam1["m10"] / moments_cam1["m00"])
+                cy_cam1 = int(moments_cam1["m01"] / moments_cam1["m00"])
+                cx_cam2 = int(moments_cam2["m10"] / moments_cam2["m00"])
+                cy_cam2 = int(moments_cam2["m01"] / moments_cam2["m00"])
+                
+                # Calcule le nombre de points dans le contour
+                n_points_cam1, n_points_cam2 = cnt_cam1.shape[0], cnt_cam2.shape[0]
+                
+                # Crée un tableau d'indices tous les 20 pas
+                spaced_indices_cam1 = np.round(np.linspace(0, len(cnt_cam1) - 1, nb_lines))[:-1].astype(int)
+                spaced_indices_cam2 = np.round(np.linspace(0, len(cnt_cam2) - 1, nb_lines))[:-1].astype(int)
+                
+                # Utilise les indices pour extraire les points du contour
+                subset_cam1 = cnt_cam1[spaced_indices_cam1]
+                subset_cam2 = cnt_cam2[spaced_indices_cam2]
+                
+                # dessiner un cercle autour du centre de gravité
+                # cv2.circle(img_cam1, (cx_cam1, cy_cam1), draw_size, (255, 0, 0), -1)
+                # cv2.circle(img_cam2, (cx_cam2, cy_cam2), draw_size, (255, 0, 0), -1)
+                cv2.drawContours(im0s1, [cnt_cam1], -1, (0, 255, 0), draw_size)
+                # cv2.drawContours(im0s2, [cnt_cam2], -1, (0, 255, 0), draw_size)
+                
+                p3ds = []
+                temp_dist = []
+                for i, sub_cam1, sub_cam2, color in zip(range(len(subset_cam1)), subset_cam1, subset_cam2, colors):
+                    
+                    # color = random.choice(colors)
+                    cv2.line(im0s1, (cx_cam1, cy_cam1), tuple(sub_cam1[0]), color, draw_size)
+                    cv2.line(im0s1, (cx_cam2, cy_cam2), tuple(sub_cam2[0]), color, draw_size)
+                    
+                    # calculer la distance le centre et les autres points autour
+                    u1 = (cx_cam1, cy_cam1) if i == 0 else tuple(sub_cam1[0])
+                    u2 = (cx_cam2, cy_cam2) if i == 0 else tuple(sub_cam2[0])
+                    p3d = DLT(P1, P2, u1, u2)
+                    p3ds.append(p3d)
+                    if i!= 0 : temp_dist.append(np.linalg.norm(p3ds[-1] - p3ds[0]))
+                    
+                height = np.max(temp_dist)*2
+                width = np.min(temp_dist)*2
+                # distances.append([longueur, largeur])
+                draw_text(img=im0s1, text="{} W : {:.1f} cm L : {:.1f} cm".format(class_dict[str(classes1[arg1].item())], width, height), pos=tuple(sub_cam1[0]), 
+                        font_scale=0.5, font_thickness=1, text_color=(255, 255, 255), text_color_bg=(0, 0, 0))
+                  
          # Stream results
         if view_img:
             if platform.system() == 'Linux' and path1 not in windows:
                 windows.append(path1)
                 cv2.namedWindow(str(path1), cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)  # allow window resize (Linux)
-                cv2.resizeWindow(str(path1), im1_seg.shape[1], im1_seg.shape[0])
-            cv2.imshow(str(path1), im1_seg)
+                cv2.resizeWindow(str(path1), im0s1.shape[1], im0s1.shape[0])
+            cv2.imshow(str(path1), im0s1)
             cv2.waitKey(1)  # 1 millisecond
         
         # Save results (image with detections)
         if save_rest:
             save_path = str(save_dir / Path(path1).name)
             if dataset_1.mode == 'image':
-                cv2.imwrite(save_path, im1_seg)
+                cv2.imwrite(save_path, im0s1)
             else:  # 'video' or 'stream'
                 if vid_path != save_path:  # new video
                     vid_path = save_path
@@ -150,10 +205,10 @@ def run(
                         w = int(vid_cap1.get(cv2.CAP_PROP_FRAME_WIDTH))
                         h = int(vid_cap1.get(cv2.CAP_PROP_FRAME_HEIGHT))
                     else:  # stream
-                        fps, w, h = 30, im1_seg.shape[1], im1_seg.shape[0]
+                        fps, w, h = 30, im0s1.shape[1], im0s1.shape[0]
                     save_path = str(Path(save_path).with_suffix('.mp4'))  # force *.mp4 suffix on results videos
                     vid_writer = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
-                vid_writer.write(im1_seg)
+                vid_writer.write(im0s1)
 
 
 def parse_opt():
@@ -171,6 +226,9 @@ def parse_opt():
     parser.add_argument('--project', default=ROOT / 'runs/detect', help='save results to project/name')
     parser.add_argument('--name', default='exp', help='save results to project/name')
     parser.add_argument('--exist-ok', action='store_true', help='existing project/name ok, do not increment')
+    parser.add_argument('--np-lignes', type=int, default=15, help='number of lines/distance between the counter and the center of gravity')
+    parser.add_argument('--draw-size', type=int, default=1, help='the width of the markers ')
+
     opt = parser.parse_args()
     opt.imgsz *= 2 if len(opt.imgsz) == 1 else 1  # expand
     print_args(vars(opt))

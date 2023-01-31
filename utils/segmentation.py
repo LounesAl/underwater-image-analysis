@@ -9,6 +9,17 @@ import torch
 from utils.calibration import *
 import imutils
 
+
+def center_of_gravity_distance(index_mask):
+    _, mask = index_mask
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cnt = contours[0]
+    moments = cv2.moments(cnt)
+    cx = int(moments["m10"] / moments["m00"])
+    cy = int(moments["m01"] / moments["m00"])
+    return np.subtract((np.linalg.norm(((cx, cy)))), ((np.linalg.norm((cx, mask.shape[1]-cy)))))
+        
+
 def visualiser(outputs, cfg, im):
     v = Visualizer(im[:, :, ::-1], MetadataCatalog.get(cfg.DATASETS.TEST[0]), scale=1)
     v = v.draw_instance_predictions(outputs["instances"].to("cpu"))
