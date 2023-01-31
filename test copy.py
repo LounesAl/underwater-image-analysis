@@ -30,6 +30,7 @@ classes_cam2 = output_cam2["instances"].pred_classes
 masks_cam1 = output_cam1["instances"].pred_masks.cpu().numpy().astype(np.uint8)
 masks_cam2 = output_cam2["instances"].pred_masks.cpu().numpy().astype(np.uint8)
 
+
 def center_of_gravity_distance(index_mask):
     _, mask = index_mask
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
