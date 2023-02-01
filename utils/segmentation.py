@@ -19,11 +19,12 @@ CLASSES_DICT = {
                 "1" : "Actinia fermee",
                 "2" : "Actinia ouverte",
                 "3" : "Gibbula"
-                }
+               }
 
 
 
 def detection_correction(output_cam1, output_cam2):
+    
     classes1 = output_cam1["instances"].pred_classes
     classes2 = output_cam2["instances"].pred_classes
 

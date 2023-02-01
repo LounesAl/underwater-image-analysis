@@ -8,7 +8,8 @@ from pathlib import Path
 import sys
 from tqdm import tqdm
 import argparse
-import imutils
+import pandas as pd
+from copy import deepcopy
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # UNDERWATER-IMAGE-ANALYSIS root directory
@@ -38,6 +39,7 @@ def run(self,
         exist_ok=False,                                                             # existing project/name ok, do not increment
         nb_lines=15,                                                                # number of lines/distance between the counter and the center of gravity 
         draw_size=1,                                                                # the width of the markers 
+        save_df=True,                                                               # save datafram of statistics
        ):
     
     src1, src2, calib_cam = str(src1), str(src2), str(calib_cam)
@@ -89,9 +91,6 @@ def run(self,
     for (path1, im1, im0s1, vid_cap1, s1), (path2, im2, im0s2, vid_cap2, s2) in zip(dataset_1, dataset_2):
         # , unit='%', total=len(dataset_1), bar_format='{percentage:3.0f}%|{bar}|'
         i += 1
-        print(f'--------------- i = {i}----------------')
-        percentage = (i * 100) / iterations
-        self.progress_bar.setValue(percentage)
         
         im1 = np.transpose(im1, (1, 2, 0))[:,:,::-1]
         im2 = np.transpose(im2, (1, 2, 0))[:,:,::-1]
@@ -101,8 +100,14 @@ def run(self,
         output_cam2, _ = inference(predictor, cfg,  im0s2)
         
         detection_ok, classes1, classes2, masks_cam1, masks_cam2 = detection_correction(output_cam1, output_cam2)
-
+        
+        keys = list(CLASSES_DICT.keys())
+        df = {int(key): [] for key in keys}
+        
         if detection_ok:
+            
+            for key, _ in df.items():
+                df[key].append((classes1 == key).sum().item())
                 
             sorted_args1 = [index for index, _ in sorted(enumerate(masks_cam1), key=center_of_gravity_distance, reverse=True)]
             sorted_args2 = [index for index, _ in sorted(enumerate(masks_cam2), key=center_of_gravity_distance, reverse=True)]
@@ -158,7 +163,7 @@ def run(self,
                         if i!= 0 : temp_dist.append(np.linalg.norm(p3ds[-1] - p3ds[0]))
                     
                     temp_dist = sorted(temp_dist, reverse=True)
-                    height = np.mean(temp_dist[:int(0.7*len(temp_dist))]) * 2 # 
+                    height = np.mean(temp_dist[:int(0.7*len(temp_dist))]) * 2 
                     width = np.mean(temp_dist[int(0.7*len(temp_dist)):]) * 2
                     draw_text(img=im0s1, text="{} W : {:.1f} cm L : {:.1f} cm".format(CLASSES_DICT[str(classes1[arg1].item())], width, height), 
                               pos=tuple(sub_cam1[0]), font_scale=1, font_thickness=1, text_color=(255, 255, 255), text_color_bg=(0, 0, 0))
@@ -194,7 +199,32 @@ def run(self,
                     save_path = str(Path(save_path).with_suffix('.mp4'))  # force *.mp4 suffix on results videos
                     vid_writer = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
                 vid_writer.write(im0s1)
+        
+        # if save_df:
+        #     new_df = {list(CLASSES_DICT.values())[i]: value for i, value in enumerate(df.values())}
+        #     new_df = pd.DataFrame(new_df, index=['image' + str(i)])
+        #     new_df.to_csv(str(save_dir / 'stat.cvs'), mode='a', header=False if dataset_1.count > 1 else True, index=)
+            # fig, axs = plt.subplots(1, 2, figsize=(12, 4))
 
+            # # Tracer les graphiques pour chaque colonne
+            # new_df.plot(kind='bar', ax=axs[0])
+            # new_df.plot(kind='line', ax=axs[1])
+            # plt.savefig(str(save_dir / 'stat_graphics.png'))
+        
+        i += 0
+    
+# if save_df:
+#     new_df = {list(CLASSES_DICT.values())[i]: value for i, value in enumerate(df.values())}
+#     new_df = pd.DataFrame(new_df, index=['image' + str(i) for i in range(len(df))])
+#     new_df.to_csv(str(save_dir / 'stat.cvs'), mode='a', index=True)
+#     fig, axs = plt.subplots(1, 2, figsize=(12, 4))
+
+#     # Tracer les graphiques pour chaque colonne
+#     new_df.plot(kind='bar', ax=axs[0])
+#     new_df.plot(kind='line', ax=axs[1])
+#     plt.savefig(str(save_dir / 'stat_graphics.png'))
+            
+    
 
 def parse_opt():
     parser = argparse.ArgumentParser()
@@ -213,6 +243,7 @@ def parse_opt():
     parser.add_argument('--exist-ok', action='store_true', help='existing project/name ok, do not increment')
     parser.add_argument('--nb-lines', type=int, default=15, help='number of lines/distance between the counter and the center of gravity')
     parser.add_argument('--draw-size', type=int, default=1, help='the width of the markers')
+    parser.add_argument('--save-df', action='store_false', help='save datafram of statistics')  
 
     opt = parser.parse_args()
     opt.imgsz *= 2 if len(opt.imgsz) == 1 else 1  # expand
