@@ -20,6 +20,9 @@ class MainWindow(QMainWindow):
         icon = random.choice(icons)
         ico = QtGui.QIcon(icon)
         self.setWindowIcon(ico)
+        
+        # Parametres par defaut
+        self.path_model = './models/model_final.pth'
 
         self.label = QLabel(self)
         self.label.setAlignment(QtCore.Qt.AlignCenter)
@@ -131,7 +134,7 @@ class MainWindow(QMainWindow):
         
         # I.5 Ajouter un bouton parametres
         self.params_action = QAction("Parametres")
-        self.params_action.triggered.connect(lambda : params(self))
+        self.params_action.triggered.connect(self.params)
         self.params_button = QToolButton()
         self.params_button.setDefaultAction(self.params_action)
         # I.6 Ajouter un bouton Aide
@@ -184,10 +187,16 @@ class MainWindow(QMainWindow):
         self.track = tracking_window()
         self.track.show()
     
+    def params(self):
+        # Create an instance of the PDFWindow class and pass the path to the PDF file
+        params_window = param_windows(self)
+        params_window.show()
+        
     def aide(self):
         # Create an instance of the PDFWindow class and pass the path to the PDF file
-        pdf_window = PDFWindow("rapport/Rapport.pdf")
-        pdf_window.show()
+        pass
+        # params_window = param_windows(self)
+        # params_window.show()
         
 class calib_window(QWidget):
     def __init__(self):
@@ -297,24 +306,31 @@ class tracking_window(QWidget):
         self.layout.addLayout(self.grid)
         self.setLayout(self.layout)
 
-class PDFWindow(QWidget):
-    def __init__(self, pdf_path):
+class param_windows(QWidget):
+    def __init__(self, other):
         super().__init__()
-        self.setGeometry(100, 100, 800, 600)
-        self.setWindowTitle("Aide")
+        self.setGeometry(650, 400, 600, 400)
+        self.setWindowTitle("Parametres")
+        self.label1 = QLabel("Changer le model .pth")
+        self.browse_button1 = QPushButton('Parcourir', self)
+        self.browse_button1.clicked.connect(lambda: self.parcourir_model(other))
+        # Create a grid layout
+        self.grid = QGridLayout()
+        self.grid.setSpacing(10)
 
-        # Create a QWebEngineView widget to display the PDF
-        self.web_view = QWebEngineView(self)
+        # Add the label and button to the grid layout
+        self.grid.addWidget(self.label1, 0, 0)
+        self.grid.addWidget(self.browse_button1, 0, 1)
+        # Create a vertical layout
+        self.layout = QVBoxLayout(self)
+        self.layout.addLayout(self.grid)
+        self.setLayout(self.layout)
+        
+    def parcourir_model(self, other):
+        path_model, _ = QFileDialog.getOpenFileName(self, 'Sélectionner un fichier', '', "Modèles PyTorch (*.pth)")
+        if path_model:
+            other.path_model = path_model
 
-        # Load the PDF file into the widget
-        pdf_file = QtCore.QFile(pdf_path)
-        pdf_file.open(QtCore.QIODevice.ReadOnly)
-        self.web_view.setHtml(pdf_file.readAll().data().decode('latin-1'))
-
-        # Create a vertical layout for the window
-        layout = QVBoxLayout(self)
-        # Add the QWebEngineView widget to the layout
-        layout.addWidget(self.web_view)
 
 class img_seg_window(QWidget):
     def __init__(self):

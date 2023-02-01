@@ -4,14 +4,6 @@ from PySide2 import QtCore, QtGui
 from PySide2.QtWidgets import (QApplication, QMainWindow, QAction, QToolBar, QGridLayout,
                                QHBoxLayout, QVBoxLayout, QPushButton, QLabel, QMenu, QToolButton, QFileDialog, QWidget, QMessageBox, QFileDialog)
 
-
-def seg_func(self):
-    # calib(self.folder_path1, self.folder_path2)
-    print(f"path1 : {self.path1} \npath2 : {self.path2}")
-    
-def calibration_func(self):
-    # calib(self.folder_path1, self.folder_path2)
-    print(f"path1 : {self.path1} \npath2 : {self.path2}")
     
 def browse_folder(self, button_id):
     folder_path = QFileDialog.getExistingDirectory(self, 'Sélectionner un dossier', '', QFileDialog.ShowDirsOnly)
@@ -44,9 +36,6 @@ def exit(self):
 
 def demarrer(self):
     print("Call demarrer")
-
-def params(self):
-    print("Call params")
 
 def a_propos(self):
     dlg = QMessageBox(self)
