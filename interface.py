@@ -476,7 +476,6 @@ class vid_seg_window(QWidget):
         self.grid.addWidget(self.browse_button1, 0, 1)
         self.grid.addWidget(self.label2, 1, 0)
         self.grid.addWidget(self.browse_button2, 1, 1)
-        self.grid.addWidget(self.seg_button, 6, 0, 1, 2, QtCore.Qt.AlignCenter)
         
         # Create a double spin box with a default value of 0.5
         self.double_spin_box = QDoubleSpinBox()
@@ -484,6 +483,10 @@ class vid_seg_window(QWidget):
         self.double_spin_box.setMaximum(1)
         self.double_spin_box.setSingleStep(0.1)
         self.double_spin_box.setValue(0.8)
+        
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setRange(0, 100)
+        self.progress_bar.setValue(0)
 
         # Add the double spin box to the grid layout
         self.grid.addWidget(self.label3, 2, 0)
@@ -494,6 +497,8 @@ class vid_seg_window(QWidget):
         self.grid.addWidget(self.checkbox1, 4, 1)
         # self.grid.addWidget(self.label6, 5, 0)
         # self.grid.addWidget(self.checkbox2, 5, 1)
+        self.grid.addWidget(self.seg_button, 5, 0, 1, 2, QtCore.Qt.AlignCenter)
+        self.grid.addWidget(self.progress_bar, 6, 0, 1, 2, QtCore.Qt.AlignCenter)
 
         # Create a vertical layout
         self.layout = QVBoxLayout(self)
@@ -501,7 +506,8 @@ class vid_seg_window(QWidget):
         self.setLayout(self.layout)
         
     def vid_segmentation(self):
-        run(src1 = self.path1,
+        run(self,
+            src1 = self.path1,
             src2 = self.path2,
             conf_thres = self.double_spin_box.value(), 
                         view_img = self.checkbox.isChecked(), 

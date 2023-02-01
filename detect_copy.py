@@ -22,7 +22,7 @@ from utils.dataloaders import (IMG_FORMATS, VID_FORMATS, check_file, increment_p
 
 
 
-def run(
+def run(self,
         weights=ROOT / 'models/model_final.pth',                                    # model path or triton URL
         save_rest=True,                                                             # save inference images
         src1=ROOT / 'data/imgs_c1',                                                 # file/dir/URL/glob/screen/0(webcam)
@@ -85,9 +85,14 @@ def run(
     #                    total=len(dataset_1) if dataset_1.mode=='image' else dataset_1.frames, \
     #                    desc=f'Detection of characteristics ')
     i = 0
+    iterations = len(dataset_1)
+    print(f'---------------------{iterations}------------------------')
     for (path1, im1, im0s1, vid_cap1, s1), (path2, im2, im0s2, vid_cap2, s2) in zip(dataset_1, dataset_2):
         # , unit='%', total=len(dataset_1), bar_format='{percentage:3.0f}%|{bar}|'
         i += 1
+        
+        percentage = (i * 100) / iterations
+        self.progress_bar.setValue(percentage)
         
         im1 = np.transpose(im1, (1, 2, 0))[:,:,::-1]
         im2 = np.transpose(im2, (1, 2, 0))[:,:,::-1]
