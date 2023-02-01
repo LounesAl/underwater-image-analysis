@@ -129,8 +129,6 @@ def run(
                     # Calcule le nombre de points dans le contour
                     n_points_cam1, n_points_cam2 = cnt_cam1.shape[0], cnt_cam2.shape[0]
                     
-                    print(len(cnt_cam1))
-                    print(len(cnt_cam2))
                     # Crée un tableau d'indices tous les 20 pas
                     spaced_indices_cam1 = np.round(np.linspace(0, len(cnt_cam1) - 1, nb_lines))[:-1].astype(int)
                     spaced_indices_cam2 = np.round(np.linspace(0, len(cnt_cam2) - 1, nb_lines))[:-1].astype(int)
