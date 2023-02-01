@@ -90,7 +90,7 @@ def run(progress_bar,                                                           
         # , unit='%', total=len(dataset_1), bar_format='{percentage:3.0f}%|{bar}|'
         
         progress_bar.setValue(100 * dataset_1.frame / dataset_1.frames)
-        print('---------------', 100 * dataset_1.frame / dataset_1.frames, '-----------------')
+        
         im1 = np.transpose(im1, (1, 2, 0))[:,:,::-1]
         im2 = np.transpose(im2, (1, 2, 0))[:,:,::-1]
                 
