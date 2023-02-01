@@ -23,7 +23,7 @@ from utils.dataloaders import (IMG_FORMATS, VID_FORMATS, check_file, increment_p
 
 
 
-def run(self,
+def run(progress_bar,                                                               # peogress bar for application
         weights=ROOT / 'models/model_final.pth',                                    # model path or triton URL
         save_rest=True,                                                             # save inference images
         src1=ROOT / 'data/imgs_c1',                                                 # file/dir/URL/glob/screen/0(webcam)
@@ -86,11 +86,10 @@ def run(self,
     # dataset = tqdm(zip(dataset_1, dataset_2), \
     #                    total=len(dataset_1) if dataset_1.mode=='image' else dataset_1.frames, \
     #                    desc=f'Detection of characteristics ')
-    i = 0
-    iterations = dataset_1.frames
     for (path1, im1, im0s1, vid_cap1, s1), (path2, im2, im0s2, vid_cap2, s2) in zip(dataset_1, dataset_2):
         # , unit='%', total=len(dataset_1), bar_format='{percentage:3.0f}%|{bar}|'
-        i += 1
+        
+        progress_bar.setValue(100 * dataset_1.frame / dataset_1.frames)
         
         im1 = np.transpose(im1, (1, 2, 0))[:,:,::-1]
         im2 = np.transpose(im2, (1, 2, 0))[:,:,::-1]
@@ -210,8 +209,6 @@ def run(self,
             # new_df.plot(kind='bar', ax=axs[0])
             # new_df.plot(kind='line', ax=axs[1])
             # plt.savefig(str(save_dir / 'stat_graphics.png'))
-        
-        i += 0
     
 # if save_df:
 #     new_df = {list(CLASSES_DICT.values())[i]: value for i, value in enumerate(df.values())}
