@@ -82,6 +82,7 @@ def get_couleur(chemin_img, num_espece, duree_entre_frames, seuil_couleur) :
             #affichage de la couleur
             print (f"lespece devient {color} à l'instant {i*duree_entre_frames} secondes:") 
             
+            
     color_1 = []
     for i in range (0,num_files) : 
          rgb_1 = tuple(np.concatenate((itens_0[i],itens_1[i],itens_2[i])))
