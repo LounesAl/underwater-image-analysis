@@ -85,12 +85,11 @@ def run(self,
     #                    total=len(dataset_1) if dataset_1.mode=='image' else dataset_1.frames, \
     #                    desc=f'Detection of characteristics ')
     i = 0
-    iterations = len(dataset_1)
-    print(f'---------------------{iterations}------------------------')
+    iterations = dataset_1.frames
     for (path1, im1, im0s1, vid_cap1, s1), (path2, im2, im0s2, vid_cap2, s2) in zip(dataset_1, dataset_2):
         # , unit='%', total=len(dataset_1), bar_format='{percentage:3.0f}%|{bar}|'
         i += 1
-        
+        print(f'--------------- i = {i}----------------')
         percentage = (i * 100) / iterations
         self.progress_bar.setValue(percentage)
         
