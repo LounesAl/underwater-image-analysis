@@ -13,10 +13,7 @@ from scipy.spatial import KDTree
 import cv2
 import numpy as np
 import os 
-
-
-import cv2
-import os
+import shutil
 
 
 def extract_images(video_path, output_folder, n_seconds):
