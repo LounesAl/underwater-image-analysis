@@ -23,13 +23,28 @@ CLASSES_DICT = {
 
 
 
-def detections_ok(classes1, classes2):
-    classes1 = classes1.cpu().numpy()
-    classes2 = classes2.cpu().numpy()
-    if ( not len(classes1) or not len(classes2)                    ) or \
-       ( not np.array_equal(np.sort(classes1), np.sort(classes2))  ):
-        return False
-    return True
+def detection_correction(output_cam1, output_cam2):
+    classes1 = output_cam1["instances"].pred_classes
+    classes2 = output_cam2["instances"].pred_classes
+
+    masks_cam1 = output_cam1["instances"].pred_masks.cpu().numpy().astype(np.uint8)
+    masks_cam2 = output_cam2["instances"].pred_masks.cpu().numpy().astype(np.uint8)
+    
+    len1, len2 = len(classes1), len(classes2)
+    
+    if ( not len1 or not len2):
+        return False, classes1, classes2
+    elif len1 > len2:
+        classes1 = classes1[:-(len1 - len2)]
+        masks_cam1 = masks_cam1[:-(len1 - len2)]
+    elif len1 < len2:
+        classes2 = classes2[:-(len2 - len1)]
+        masks_cam2 = masks_cam2[:-(len2 - len1)] 
+        
+    return np.array_equal(np.sort(classes1.cpu().numpy()), 
+                          np.sort(classes2.cpu().numpy())), \
+                          classes1, classes2, \
+                          masks_cam1, masks_cam2
 
 def center_of_gravity_distance(index_mask):
     _, mask = index_mask

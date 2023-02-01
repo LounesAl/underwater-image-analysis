@@ -96,76 +96,71 @@ def run(
         output_cam1, _ = inference(predictor, cfg,  im0s1)
         output_cam2, _ = inference(predictor, cfg,  im0s2)
         
-        # voir les classes predites
-        ## le resultat est de la forme : tensor([0, 1, 1, 2, 3, 3]), cela veut dire :
-        ## une espces PFE, deux actinia fermées, une ouverte et deux gibbula
-        classes1 = output_cam1["instances"].pred_classes
-        classes2 = output_cam2["instances"].pred_classes
+        detection_ok, classes1, classes2, masks_cam1, masks_cam2 = detection_correction(output_cam1, output_cam2)
 
-        masks_cam1 = output_cam1["instances"].pred_masks.cpu().numpy().astype(np.uint8)
-        masks_cam2 = output_cam2["instances"].pred_masks.cpu().numpy().astype(np.uint8)
-
-        if not detections_ok(classes1, classes2):
-            continue
-        
-        sorted_args1 = [index for index, _ in sorted(enumerate(masks_cam1), key=center_of_gravity_distance, reverse=True)]
-        sorted_args2 = [index for index, _ in sorted(enumerate(masks_cam2), key=center_of_gravity_distance, reverse=True)]
-        
-        for arg1, arg2 in zip(sorted_args1, sorted_args2):
-        
-            contours_cam1, _ = cv2.findContours(masks_cam1[arg1], cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-            contours_cam2, _ = cv2.findContours(masks_cam2[arg2], cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        if detection_ok:
+                
+            sorted_args1 = [index for index, _ in sorted(enumerate(masks_cam1), key=center_of_gravity_distance, reverse=True)]
+            sorted_args2 = [index for index, _ in sorted(enumerate(masks_cam2), key=center_of_gravity_distance, reverse=True)]
             
-            if not (len(contours_cam1) == len(contours_cam2) == 1):
-                continue
-            # assert len(contours_cam1) == 1 and len(contours_cam2) == 1, \
-            # f'we are supposed to retrieve a single contour that represents a species in what we have \
-            #  {len(contours_cam1)} contours in camera0 and {len(contours_cam2)} in contour1  .'
+            for arg1, arg2 in zip(sorted_args1, sorted_args2):
             
-            # pour chaque contour
-            cnt_cam1, cnt_cam2 = contours_cam1[0], contours_cam2[0]
+                contours_cam1, _ = cv2.findContours(masks_cam1[arg1], cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                contours_cam2, _ = cv2.findContours(masks_cam2[arg2], cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                
+                if not (len(contours_cam1) == len(contours_cam2) == 1):
+                    continue
+                # assert len(contours_cam1) == 1 and len(contours_cam2) == 1, \
+                # f'we are supposed to retrieve a single contour that represents a species in what we have \
+                #  {len(contours_cam1)} contours in camera0 and {len(contours_cam2)} in contour1  .'
+                
+                # pour chaque contour
+                cnt_cam1, cnt_cam2 = contours_cam1[0], contours_cam2[0]
+                
+                # trouver les moments de l'image
+                moments_cam1, moments_cam2 = cv2.moments(cnt_cam1), cv2.moments(cnt_cam2)
+                if moments_cam1["m00"] != 0 and moments_cam2["m00"] != 0:
+                    # calculer le centre de gravité
+                    cx_cam1 = int(moments_cam1["m10"] / moments_cam1["m00"])
+                    cy_cam1 = int(moments_cam1["m01"] / moments_cam1["m00"])
+                    cx_cam2 = int(moments_cam2["m10"] / moments_cam2["m00"])
+                    cy_cam2 = int(moments_cam2["m01"] / moments_cam2["m00"])
+                    
+                    # Calcule le nombre de points dans le contour
+                    n_points_cam1, n_points_cam2 = cnt_cam1.shape[0], cnt_cam2.shape[0]
+                    
+                    print(len(cnt_cam1))
+                    print(len(cnt_cam2))
+                    # Crée un tableau d'indices tous les 20 pas
+                    spaced_indices_cam1 = np.round(np.linspace(0, len(cnt_cam1) - 1, nb_lines))[:-1].astype(int)
+                    spaced_indices_cam2 = np.round(np.linspace(0, len(cnt_cam2) - 1, nb_lines))[:-1].astype(int)
+                    
+                    # Utilise les indices pour extraire les points du contour
+                    subset_cam1 = cnt_cam1[spaced_indices_cam1]
+                    subset_cam2 = cnt_cam2[spaced_indices_cam2]
+                    
+                    # dessiner un cercle autour du centre de gravité
+                    cv2.drawContours(im0s1, [cnt_cam1], -1, (0, 255, 0), draw_size)
+                    
+                    p3ds = []
+                    temp_dist = []
+                    for i, sub_cam1, sub_cam2, color in zip(range(len(subset_cam1)), subset_cam1, subset_cam2, COLORS):
+                        
+                        cv2.line(im0s1, (cx_cam1, cy_cam1), tuple(sub_cam1[0]), color, draw_size)
+                        
+                        # calculer la distance le centre et les autres points autour
+                        u1 = (cx_cam1, cy_cam1) if i == 0 else tuple(sub_cam1[0])
+                        u2 = (cx_cam2, cy_cam2) if i == 0 else tuple(sub_cam2[0])
+                        p3d = DLT(P1, P2, u1, u2)
+                        p3ds.append(p3d)
+                        if i!= 0 : temp_dist.append(np.linalg.norm(p3ds[-1] - p3ds[0]))
+                    
+                    temp_dist = sorted(temp_dist, reverse=True)
+                    height = np.mean(temp_dist[:int(0.7*len(temp_dist))]) * 2 # 
+                    width = np.mean(temp_dist[int(0.7*len(temp_dist)):]) * 2
+                    draw_text(img=im0s1, text="{} W : {:.1f} cm L : {:.1f} cm".format(CLASSES_DICT[str(classes1[arg1].item())], width, height), 
+                              pos=tuple(sub_cam1[0]), font_scale=1, font_thickness=1, text_color=(255, 255, 255), text_color_bg=(0, 0, 0))
             
-            # trouver les moments de l'image
-            moments_cam1, moments_cam2 = cv2.moments(cnt_cam1), cv2.moments(cnt_cam2)
-            if moments_cam1["m00"] != 0 and moments_cam2["m00"] != 0:
-                # calculer le centre de gravité
-                cx_cam1 = int(moments_cam1["m10"] / moments_cam1["m00"])
-                cy_cam1 = int(moments_cam1["m01"] / moments_cam1["m00"])
-                cx_cam2 = int(moments_cam2["m10"] / moments_cam2["m00"])
-                cy_cam2 = int(moments_cam2["m01"] / moments_cam2["m00"])
-                
-                # Calcule le nombre de points dans le contour
-                n_points_cam1, n_points_cam2 = cnt_cam1.shape[0], cnt_cam2.shape[0]
-                
-                # Crée un tableau d'indices tous les 20 pas
-                spaced_indices_cam1 = np.round(np.linspace(0, len(cnt_cam1) - 1, nb_lines))[:-1].astype(int)
-                spaced_indices_cam2 = np.round(np.linspace(0, len(cnt_cam2) - 1, nb_lines))[:-1].astype(int)
-                
-                # Utilise les indices pour extraire les points du contour
-                subset_cam1 = cnt_cam1[spaced_indices_cam1]
-                subset_cam2 = cnt_cam2[spaced_indices_cam2]
-                
-                # dessiner un cercle autour du centre de gravité
-                cv2.drawContours(im0s1, [cnt_cam1], -1, (0, 255, 0), draw_size)
-                
-                p3ds = []
-                temp_dist = []
-                for i, sub_cam1, sub_cam2, color in zip(range(len(subset_cam1)), subset_cam1, subset_cam2, COLORS):
-                    
-                    cv2.line(im0s1, (cx_cam1, cy_cam1), tuple(sub_cam1[0]), color, draw_size)
-                    
-                    # calculer la distance le centre et les autres points autour
-                    u1 = (cx_cam1, cy_cam1) if i == 0 else tuple(sub_cam1[0])
-                    u2 = (cx_cam2, cy_cam2) if i == 0 else tuple(sub_cam2[0])
-                    p3d = DLT(P1, P2, u1, u2)
-                    p3ds.append(p3d)
-                    if i!= 0 : temp_dist.append(np.linalg.norm(p3ds[-1] - p3ds[0]))
-                    
-                height = np.max(temp_dist)*2
-                width = np.min(temp_dist)*2
-                draw_text(img=im0s1, text="{} W : {:.1f} cm L : {:.1f} cm".format(CLASSES_DICT[str(classes1[arg1].item())], width, height), pos=tuple(sub_cam1[0]), 
-                        font_scale=0.5, font_thickness=1, text_color=(255, 255, 255), text_color_bg=(0, 0, 0))
-        
         # s1 += '%gx%g ' % im0s1.shape[2:]
         print(s1)
         
