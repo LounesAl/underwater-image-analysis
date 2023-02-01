@@ -211,8 +211,17 @@ def get_segment_points(outputs, im):
     return segment_points, coords, boxes
 
 def seg_img(self, SCORE_THRESH_TEST = 0.8, show_inf = False, show_3d = False, show_final = True):
+    iterations = 10
+    # Calculate the percentage of completion
+    percentage = (0.1 * 100) / iterations
+    self.progress_bar.setValue(percentage)
+    
     im2 = cv2.imread(self.path1)
     im1 = cv2.imread(self.path2)
+    
+    percentage = (1 * 100) / iterations
+    self.progress_bar.setValue(percentage)
+    
     im1 = imutils.resize(im1, width=640, height=640)
     im2 = imutils.resize(im2, width=640, height=640)
 
@@ -224,6 +233,9 @@ def seg_img(self, SCORE_THRESH_TEST = 0.8, show_inf = False, show_3d = False, sh
 
     # Calculate the projection martrix
     P1, P2 = get_projection_matrix(mtx1, mtx2, R, T)
+    
+    percentage = (3 * 100) / iterations
+    self.progress_bar.setValue(percentage)
 
     # get config
     predictor, cfg = init_config(weights, SCORE_THRESH_TEST)
@@ -232,6 +244,9 @@ def seg_img(self, SCORE_THRESH_TEST = 0.8, show_inf = False, show_3d = False, sh
     # Inferred with the images of each camera
     output1, im_seg1 = inference(predictor, cfg,  im1.copy())
     output2, im_seg2 = inference(predictor, cfg,  im2.copy())
+    
+    percentage = (6 * 100) / iterations
+    self.progress_bar.setValue(percentage)
     
     if show_inf:
         cv2.imshow("Image segmentee 1", im_seg1)
@@ -256,6 +271,9 @@ def seg_img(self, SCORE_THRESH_TEST = 0.8, show_inf = False, show_3d = False, sh
     uvs1, seg1, boxes1 = get_segment_points(output1, im1)
     uvs2, seg2, boxes2 = get_segment_points(output2, im2)
     
+    percentage = (7 * 100) / iterations
+    self.progress_bar.setValue(percentage)
+    
     if uvs1==None:
         self.error.error_msg = f"Aucune detection dans l'image 1 \nVeuillez diminuer le seuil de detection"
         self.error.check_error = True
@@ -273,6 +291,9 @@ def seg_img(self, SCORE_THRESH_TEST = 0.8, show_inf = False, show_3d = False, sh
         self.error.error_msg = "Nombre de pairs de points dans les deux images est different \nVeuillez changer d'image ou modifier le seuil de detectrion"
         self.error.check_error = True
         return 
+    
+    percentage = (8 * 100) / iterations
+    self.progress_bar.setValue(percentage)
         
     ######################
     ## len(p3dss) = 2   ## => car il y'a deux espces detectées
@@ -293,9 +314,14 @@ def seg_img(self, SCORE_THRESH_TEST = 0.8, show_inf = False, show_3d = False, sh
             "2" : "Actinia ouverte",
             "3" : "Gibbula"
         }
+        
+        percentage = (9 * 100) / iterations
+        self.progress_bar.setValue(percentage)
 
         im1_dist = dist_on_img(uvs1, boxes1, im_seg1, distances, classes1, class_dict)
         # im2_dist = dist_on_img(uvs2, boxes2, im_seg2, distances, classes2, class_dict)
+        
+        self.progress_bar.setValue(100)
         
         cv2.imshow("Image 1 segmentee avec distances", im1_dist)
         # cv2.imshow("Image 2 segmentee avec distances", im2_dist)

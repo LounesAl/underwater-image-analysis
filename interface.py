@@ -3,6 +3,7 @@ from PySide2 import QtCore, QtGui
 from calib import main
 from utils.ui_fonctions import *
 from utils.segmentation import seg_img
+from detect_copy import run
 from PySide2.QtWidgets import *
 import random
 import glob
@@ -368,6 +369,10 @@ class img_seg_window(QWidget):
         self.seg_button = QPushButton('Detecter et segmenter', self)
         self.seg_button.clicked.connect(self.segmentation)
         
+        self.progress_bar = QProgressBar(self)
+        self.progress_bar.setRange(0, 100)
+        self.progress_bar.setValue(0)
+        
         # Create a grid layout
         self.grid = QGridLayout()
         self.grid.setSpacing(10)
@@ -382,7 +387,6 @@ class img_seg_window(QWidget):
         self.grid.addWidget(self.browse_button1, 0, 1)
         self.grid.addWidget(self.label2, 1, 0)
         self.grid.addWidget(self.browse_button2, 1, 1)
-        self.grid.addWidget(self.seg_button, 6, 0, 1, 2, QtCore.Qt.AlignCenter)
         
         # Create a double spin box with a default value of 0.5
         self.double_spin_box = QDoubleSpinBox()
@@ -400,6 +404,8 @@ class img_seg_window(QWidget):
         self.grid.addWidget(self.checkbox1, 4, 1)
         self.grid.addWidget(self.label6, 5, 0)
         self.grid.addWidget(self.checkbox2, 5, 1)
+        self.grid.addWidget(self.seg_button, 6, 0, 1, 2, QtCore.Qt.AlignCenter)
+        self.grid.addWidget(self.progress_bar, 7, 0, 1, 2, QtCore.Qt.AlignCenter)
 
         # Create a vertical layout
         self.layout = QVBoxLayout(self)
@@ -436,15 +442,15 @@ class vid_seg_window(QWidget):
         self.error = error()
         
         # Default path
-        self.path1 = 'data/imgs_c1/image1842_jpg.rf.fc8794fa0e45edf088fbd294b4b66188.jpg'
-        self.path2 = 'data/imgs_c1/image1856_jpg.rf.7ced282377b524c9ed4e9c301f4ce73c.jpg'
+        self.path1 = './data/video_c0/camera_0.MP4'
+        self.path2 = './data/video_c1/camera_1.MP4'
         
         # Create labels to display "Sélectionner un dossier 1" and "Sélectionner un dossier 2"
         self.label1 = QLabel("Sélectionner la video depuis la caméra 1")
         self.label2 = QLabel("Sélectionner la video depuis la caméra 2")
         self.label3 = QLabel("Definir le seuil de detection")
         self.label4 = QLabel("Afficher la segmentation")
-        self.label5 = QLabel("Afficher la presentation en 3D")
+        self.label5 = QLabel("Enregistrer les images")
         self.label6 = QLabel("Afficher l'image avec les dimentions")
         
         # Create the browse buttons
@@ -462,7 +468,7 @@ class vid_seg_window(QWidget):
         
         # Create a checkbox
         self.checkbox = QCheckBox("Avant d'afficher la distance", self)
-        self.checkbox1 = QCheckBox("en 3D", self)
+        self.checkbox1 = QCheckBox("à la fin", self)
         self.checkbox2 = QCheckBox("Final", self, checked=True)
 
         # Add the label and button to the grid layout
@@ -495,9 +501,11 @@ class vid_seg_window(QWidget):
         self.setLayout(self.layout)
         
     def vid_segmentation(self):
-        seg_img(self, SCORE_THRESH_TEST = self.double_spin_box.value(), 
-                        show_inf = self.checkbox.isChecked(), 
-                        show_3d = self.checkbox1.isChecked(), 
+        run(src1 = self.path1,
+            src2 = self.path2,
+            conf_thres = self.double_spin_box.value(), 
+                        view_img = self.checkbox.isChecked(), 
+                        save_rest = self.checkbox1.isChecked(), 
                         show_final = self.checkbox2.isChecked() )
         
         if self.error.check_error:
