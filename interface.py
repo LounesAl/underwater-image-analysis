@@ -506,7 +506,7 @@ class vid_seg_window(QWidget):
         self.setLayout(self.layout)
         
     def vid_segmentation(self):
-        run(self,
+        run(self.progress_bar,
             src1 = self.path1,
             src2 = self.path2,
             conf_thres = self.double_spin_box.value(), 
