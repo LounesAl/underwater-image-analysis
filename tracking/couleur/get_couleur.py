@@ -169,6 +169,9 @@ def track(path_video, N, output_folder, num_espece, seuil_couleur = 10) :
     color = convert_rgb_to_names(rgb)
     print (f"la couleur de l'espece au debut est {color}")
 
+    color_tot = convert_rgb_to_names(rgb)
+    temps = 0
+
     for i in range (0,num_files-1) :
 
         # seuil de 10% par defaut pour chaque image                              
@@ -178,18 +181,20 @@ def track(path_video, N, output_folder, num_espece, seuil_couleur = 10) :
         if (((itens_0[i+1] < seuil_0 + itens_0[i]) and (itens_0[i+1] > seuil_0 - itens_0[i])) or (itens_1[i+1] < seuil_1 + itens_1[i] and itens_1[i+1] > seuil_1 - itens_1[i]) or (itens_2[i+1] < seuil_2 + itens_2[i] and itens_2[i+1] > seuil_2 - itens_2[i]) ) : 
             pass
         else : 
+            temps.append(i*N)
             rgb = tuple(np.concatenate((itens_0[i+1],itens_1[i+1],itens_2[i+1])))
             #conversion en hexadécimal
             color = convert_rgb_to_names(rgb)
+            color_tot.append(color)
             #affichage de la couleur
             print (f"lespece devient {color} à l'instant {i*duree_entre_frames} secondes:") 
             
             
-    color_1 = []
-    for i in range (0,num_files) : 
-         rgb_1 = tuple(np.concatenate((itens_0[i],itens_1[i],itens_2[i])))
+    
+    #for i in range (0,num_files) : 
+    #     rgb_1 = tuple(np.concatenate((itens_0[i],itens_1[i],itens_2[i])))
          #conversion en hexadécimal
-         color_1.append(convert_rgb_to_names(rgb_1))
+    #     color_1.append(convert_rgb_to_names(rgb_1))
 
 
     #####################
