@@ -469,7 +469,7 @@ class vid_seg_window(QWidget):
         # Create a checkbox
         self.checkbox = QCheckBox("Avant d'afficher la distance", self)
         self.checkbox1 = QCheckBox("à la fin", self)
-        self.checkbox2 = QCheckBox("Final", self, checked=True)
+        # self.checkbox2 = QCheckBox("Final", self, checked=True)
 
         # Add the label and button to the grid layout
         self.grid.addWidget(self.label1, 0, 0)
@@ -492,8 +492,8 @@ class vid_seg_window(QWidget):
         self.grid.addWidget(self.checkbox, 3, 1)
         self.grid.addWidget(self.label5, 4, 0)
         self.grid.addWidget(self.checkbox1, 4, 1)
-        self.grid.addWidget(self.label6, 5, 0)
-        self.grid.addWidget(self.checkbox2, 5, 1)
+        # self.grid.addWidget(self.label6, 5, 0)
+        # self.grid.addWidget(self.checkbox2, 5, 1)
 
         # Create a vertical layout
         self.layout = QVBoxLayout(self)
@@ -505,8 +505,7 @@ class vid_seg_window(QWidget):
             src2 = self.path2,
             conf_thres = self.double_spin_box.value(), 
                         view_img = self.checkbox.isChecked(), 
-                        save_rest = self.checkbox1.isChecked(), 
-                        show_final = self.checkbox2.isChecked() )
+                        save_rest = self.checkbox1.isChecked()) #, show_final = self.checkbox2.isChecked() )
         
         if self.error.check_error:
             dlg = QMessageBox(self)
