@@ -194,9 +194,8 @@ class MainWindow(QMainWindow):
         
     def aide(self):
         # Create an instance of the PDFWindow class and pass the path to the PDF file
-        pass
-        # params_window = param_windows(self)
-        # params_window.show()
+        url = QtCore.QUrl('https://github.com/LounesAl/underwater-image-analysis/blob/main/docs/Rapport.pdf')
+        QtGui.QDesktopServices.openUrl(url)
         
 class calib_window(QWidget):
     def __init__(self):
@@ -206,8 +205,8 @@ class calib_window(QWidget):
         self.setWindowTitle("Calibration")
         
         # Default path
-        self.folder_path1 = './data/camera0'
-        self.folder_path2 = './data/camera1'
+        self.path1 = './data/camera0'
+        self.path2 = './data/camera1'
         
         # Create labels to display "Sélectionner un dossier 1" and "Sélectionner un dossier 2"
         self.label1 = QLabel("Sélectionner le dossier la caméra 1")
@@ -235,11 +234,20 @@ class calib_window(QWidget):
         self.checkerboard_columns_box.setValue(9)
         
         self.calib_button = QPushButton('Calibrer', self)
-        self.calib_button.clicked.connect(lambda: main(self.path1, 
+        # Create a progress bar widget
+        self.progress_bar = QProgressBar()
+        
+        self.calib_button.clicked.connect(lambda: main(self.progress_bar, 
+                                                       self.path1, 
                                                        self.path2,
-                                                       checkerboard_box_size_scale = self.checkerboard_box_size_scale_box.isChecked(), 
-                                                       checkerboard_rows = self.checkerboard_rows_box.isChecked(), 
-                                                       checkerboard_columns = self.checkerboard_columns_box.isChecked()))
+                                                       checkerboard_box_size_scale = self.checkerboard_box_size_scale_box.value(), 
+                                                       checkerboard_rows = int(self.checkerboard_rows_box.value()), 
+                                                       checkerboard_columns = int(self.checkerboard_columns_box.value())))
+        
+        # Set the range of the progress bar (minimum and maximum values)
+        self.progress_bar.setRange(0, 100)
+        # Set the initial value of the progress bar
+        self.progress_bar.setValue(0)
         
         # Create a grid layout
         self.grid = QGridLayout()
@@ -256,10 +264,8 @@ class calib_window(QWidget):
         self.grid.addWidget(self.checkerboard_rows_box, 3, 1)
         self.grid.addWidget(self.label5, 4, 0)
         self.grid.addWidget(self.checkerboard_columns_box, 4, 1)
-        
-        
-        
         self.grid.addWidget(self.calib_button, 5, 0, 1, 2, QtCore.Qt.AlignCenter)
+        self.grid.addWidget(self.progress_bar, 6, 0, 1, 2, QtCore.Qt.AlignCenter)
         
         # Create a vertical layout
         self.layout = QVBoxLayout(self)

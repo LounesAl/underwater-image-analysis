@@ -195,42 +195,59 @@ def save_extrinsic_calibration_parameters(R0, T0, R1, T1, save_path, prefix = ''
 
     return R0, T0, R1, T1
 
-def main(path_folder_cam1, path_folder_cam2, checkerboard_box_size_scale, checkerboard_rows, checkerboard_columns):
-    """Step1. Obtain camera intrinsic matrices and save them"""
-    # # camera0 intrinsics
-    cmtx0, dist0, ret0 = calibrate_camera_for_intrinsic_parameters(checkerboard_box_size_scale, checkerboard_rows, checkerboard_columns, path_folder_cam1) 
-    # camera1 intrinsics
-    cmtx1, dist1, ret1 = calibrate_camera_for_intrinsic_parameters(checkerboard_box_size_scale, checkerboard_rows, checkerboard_columns, path_folder_cam2)
-    
-    #create folder if it does not exist
-    if not os.path.exists(os.path.join('.' , 'settings', 'camera_parameters')):
-        os.mkdir(os.path.join('.' , 'settings', 'camera_parameters'))
-    
-    save_path = os.path.join('.' , 'settings', 'camera_parameters')
-    save_camera_intrinsics(cmtx0, dist0, save_path, 'camera0') #this will write cmtx and dist to disk
-    save_camera_intrinsics(cmtx1, dist1, save_path, 'camera1') #this will write cmtx and dist to disk
+def main(progress_bar, path_folder_cam1, path_folder_cam2, checkerboard_box_size_scale, checkerboard_rows, checkerboard_columns):
+    try:
+        iterations = 3
+        # Calculate the percentage of completion
+        percentage = (0.1 * 100) / iterations
+        progress_bar.setValue(percentage)
         
-    # Open a file to save the dictionary contane cmtx, dist and ret to disk in pkl file
-    with open(os.path.join(save_path, 'mono_params.pkl'), 'wb') as f:
-        # Save the dictionary to the file
-        pickle.dump({'cmtx0': cmtx0, 'cmtx1': cmtx1, 'dist0': dist0, 'dist1': dist1, 'ret0': ret0, 'ret1': ret1}, f)
+        """Step1. Obtain camera intrinsic matrices and save them"""
+        # # camera0 intrinsics
+        cmtx0, dist0, ret0 = calibrate_camera_for_intrinsic_parameters(checkerboard_box_size_scale, checkerboard_rows, checkerboard_columns, path_folder_cam1) 
+        # Calculate the percentage of completion
+        percentage = (1 * 100) / iterations
+        progress_bar.setValue(percentage)
+        
+        # camera1 intrinsics
+        cmtx1, dist1, ret1 = calibrate_camera_for_intrinsic_parameters(checkerboard_box_size_scale, checkerboard_rows, checkerboard_columns, path_folder_cam2)
+        percentage = (2 * 100) / iterations
+        progress_bar.setValue(percentage)
+        
+        #create folder if it does not exist
+        if not os.path.exists(os.path.join('.' , 'settings', 'camera_parameters')):
+            os.mkdir(os.path.join('.' , 'settings', 'camera_parameters'))
+        
+        save_path = os.path.join('.' , 'settings', 'camera_parameters')
+        save_camera_intrinsics(cmtx0, dist0, save_path, 'camera0') #this will write cmtx and dist to disk
+        save_camera_intrinsics(cmtx1, dist1, save_path, 'camera1') #this will write cmtx and dist to disk
+            
+        # Open a file to save the dictionary contane cmtx, dist and ret to disk in pkl file
+        with open(os.path.join(save_path, 'mono_params.pkl'), 'wb') as f:
+            # Save the dictionary to the file
+            pickle.dump({'cmtx0': cmtx0, 'cmtx1': cmtx1, 'dist0': dist0, 'dist1': dist1, 'ret0': ret0, 'ret1': ret1}, f)
 
-    """Step2. Use paired calibration pattern frames to obtain camera0 to camera1 rotation and translation"""
-    R, T = stereo_calibrate(checkerboard_box_size_scale, checkerboard_rows, checkerboard_columns, cmtx0, dist0, cmtx1, dist1, path_folder_cam1, path_folder_cam2)
+        """Step2. Use paired calibration pattern frames to obtain camera0 to camera1 rotation and translation"""
+        R, T = stereo_calibrate(checkerboard_box_size_scale, checkerboard_rows, checkerboard_columns, cmtx0, dist0, cmtx1, dist1, path_folder_cam1, path_folder_cam2)
+        percentage = (3 * 100) / iterations
+        progress_bar.setValue(percentage)
+        """Step3. Save calibration data where camera0 defines the world space origin."""
+        #camera0 rotation and translation is identity matrix and zeros vector
+        R0 = np.eye(3, dtype=np.float32)
+        T0 = np.array([0., 0., 0.]).reshape((3, 1))
 
-    """Step3. Save calibration data where camera0 defines the world space origin."""
-    #camera0 rotation and translation is identity matrix and zeros vector
-    R0 = np.eye(3, dtype=np.float32)
-    T0 = np.array([0., 0., 0.]).reshape((3, 1))
-
-    save_extrinsic_calibration_parameters(R0, T0, R, T, save_path) #this will write R and T to disk
-    R1 = R; T1 = T #to avoid confusion, camera1 R and T are labeled R1 and T1
-    
-    # Open a file to save the dictionary contane cmtx, dist and ret to disk in pkl file
-    with open(os.path.join(save_path, 'stereo_params.pkl'), 'wb') as f:
-        # Save the dictionary to the file
-        pickle.dump({'cmtx0': cmtx0, 'cmtx1': cmtx1, 'R': R, 'T': T}, f)
-    
+        save_extrinsic_calibration_parameters(R0, T0, R, T, save_path) #this will write R and T to disk
+        R1 = R; T1 = T #to avoid confusion, camera1 R and T are labeled R1 and T1
+        
+        # Open a file to save the dictionary contane cmtx, dist and ret to disk in pkl file
+        with open(os.path.join(save_path, 'stereo_params.pkl'), 'wb') as f:
+            # Save the dictionary to the file
+            pickle.dump({'cmtx0': cmtx0, 'cmtx1': cmtx1, 'R': R, 'T': T}, f)
+        progress_bar.setValue(100)
+        
+    except Exception as e:
+        print("Une erreur s'est produite :", e)
+        progress_bar.setValue(0)
 
 if __name__ == '__main__':
     main('data/camera0', 'data/camera1')
