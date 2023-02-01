@@ -208,7 +208,7 @@ def run(progress_bar,                                                           
             # # Tracer les graphiques pour chaque colonne
             # new_df.plot(kind='bar', ax=axs[0])
             # new_df.plot(kind='line', ax=axs[1])
-            # plt.savefig(str(save_dir / 'stat_graphics.png'))
+            # plt.savefig(str(save_dir / 'stat_graphics.png'))          
     
 # if save_df:
 #     new_df = {list(CLASSES_DICT.values())[i]: value for i, value in enumerate(df.values())}
