@@ -154,7 +154,7 @@ def stereo_calibrate(checkerboard_box_size_scale, checkerboard_rows, checkerboar
                                                                  mtx1, dist1, (width, height), criteria = criteria, flags = stereocalibration_flags)
 
     logging.info(f'rmse: {ret}')
-    return R, T
+    return R, T, ret
 
 
 
@@ -228,7 +228,7 @@ def main(progress_bar, path_folder_cam1, path_folder_cam2, checkerboard_box_size
             pickle.dump({'cmtx0': cmtx0, 'cmtx1': cmtx1, 'dist0': dist0, 'dist1': dist1, 'ret0': ret0, 'ret1': ret1}, f)
 
         """Step2. Use paired calibration pattern frames to obtain camera0 to camera1 rotation and translation"""
-        R, T = stereo_calibrate(checkerboard_box_size_scale, checkerboard_rows, checkerboard_columns, cmtx0, dist0, cmtx1, dist1, path_folder_cam1, path_folder_cam2)
+        R, T, ret = stereo_calibrate(checkerboard_box_size_scale, checkerboard_rows, checkerboard_columns, cmtx0, dist0, cmtx1, dist1, path_folder_cam1, path_folder_cam2)
         percentage = (3 * 100) / iterations
         progress_bar.setValue(percentage)
         """Step3. Save calibration data where camera0 defines the world space origin."""
@@ -242,7 +242,7 @@ def main(progress_bar, path_folder_cam1, path_folder_cam2, checkerboard_box_size
         # Open a file to save the dictionary contane cmtx, dist and ret to disk in pkl file
         with open(os.path.join(save_path, 'stereo_params.pkl'), 'wb') as f:
             # Save the dictionary to the file
-            pickle.dump({'cmtx0': cmtx0, 'cmtx1': cmtx1, 'R': R, 'T': T}, f)
+            pickle.dump({'cmtx0': cmtx0, 'cmtx1': cmtx1, 'R': R, 'T': T, 'ret': ret}, f)
         progress_bar.setValue(100)
         
     except Exception as e:

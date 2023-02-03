@@ -74,7 +74,7 @@ def run(progress_bar,                                                           
     
     vid_path, vid_writer = None, None         
     
-    mtx1, mtx2, R, T = load_calibration(calib_cam)
+    mtx1, mtx2, R, T, _ = load_calibration(calib_cam)
     # Calculate the projection martrix
     P1, P2 = get_projection_matrix(mtx1, mtx2, R, T)
     
