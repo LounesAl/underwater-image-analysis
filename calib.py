@@ -195,7 +195,7 @@ def save_extrinsic_calibration_parameters(R0, T0, R1, T1, save_path, prefix = ''
 
     return R0, T0, R1, T1
 
-def main(progress_bar, path_folder_cam1, path_folder_cam2, checkerboard_box_size_scale, checkerboard_rows, checkerboard_columns):
+def main(progress_bar, path_folder_cam1, rmse, path_folder_cam2, checkerboard_box_size_scale, checkerboard_rows, checkerboard_columns):
     try:
         iterations = 3
         # Calculate the percentage of completion
