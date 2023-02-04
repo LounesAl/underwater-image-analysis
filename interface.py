@@ -4,6 +4,7 @@ from calib import main
 from utils.ui_fonctions import *
 from utils.segmentation import seg_img
 from detect_copy import run
+from one_only_camera import one_only_camera
 from PySide2.QtWidgets import *
 import random
 import glob
@@ -47,35 +48,46 @@ class MainWindow(QMainWindow):
         # Ajouter un rectangle gris transparent pour le texte de bienvenue
         self.button_rect_g = QLabel(self)
         self.button_rect_g.setAlignment(QtCore.Qt.AlignCenter)
-        self.button_rect_g.setGeometry(QtCore.QRect(self.width()/2 - 125, 400, 500, 300))
+        self.button_rect_g.setGeometry(QtCore.QRect(self.width()/2 - 125, 350, 500, 350))
         self.button_rect_g.setStyleSheet("background-color: rgba(60, 60, 60, 0.9); border-radius:15px;")
         
         # Ajouter le texte de que voullez vous faire
-        self.welcome_label = QLabel("Que voullez vous faire ?", self)
+        self.welcome_label = QLabel("Menu principal", self)
         self.welcome_label.setStyleSheet("font: bold 15px; color: rgba(255, 255, 255, 0.9);")
         self.welcome_label.setAlignment(QtCore.Qt.AlignCenter)
-        self.welcome_label.setGeometry(self.width()/2 - 125, 280, 500, 300)
+        self.welcome_label.setGeometry(self.width()/2 - 125, 230, 500, 300)
+    
+        # Ajouter le texte de une camera
+        self.unecamera_label = QLabel("Vous avez une seule camera ?", self)
+        self.unecamera_label.setStyleSheet("font: bold 15px; color: rgba(255, 255, 255, 0.9);")
+        self.unecamera_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.unecamera_label.setGeometry(self.width()/2 - 125, 440, 500, 300)
         
         # Ajouter les boutons d'action
         self.button1 = QPushButton("Calibration", self)
-        self.button1.setGeometry(170, 500, 200, 50)
+        self.button1.setGeometry(170, 425, 200, 50)
         self.button1.setStyleSheet("background-color: lightblue; border-radius: 10px; font: bold 15px;")
         self.button1.clicked.connect(self.calibration_func_windows)
 
         self.button2 = QPushButton("Tracking", self)
-        self.button2.setGeometry(400, 500, 200, 50)
+        self.button2.setGeometry(400, 425, 200, 50)
         self.button2.setStyleSheet("background-color: lightblue; border-radius: 10px; font: bold 15px;")
         self.button2.clicked.connect(self.tracking)
 
-        self.button3 = QPushButton("Image segmantion", self)
-        self.button3.setGeometry(170, 600, 200, 50)
+        self.button3 = QPushButton("Image segmention", self)
+        self.button3.setGeometry(170, 500, 200, 50)
         self.button3.setStyleSheet("background-color: lightblue; border-radius: 10px; font: bold 15px;")
         self.button3.clicked.connect(self.segmentation)
 
         self.button4 = QPushButton("Video segmentation", self)
-        self.button4.setGeometry(400, 600, 200, 50)
+        self.button4.setGeometry(400, 500, 200, 50)
         self.button4.setStyleSheet("background-color: lightblue; border-radius: 10px; font: bold 15px;")
         self.button4.clicked.connect(self.video_segmentation)
+        
+        self.button5 = QPushButton("Segmenter", self)
+        self.button5.setGeometry(280, 620, 200, 50)
+        self.button5.setStyleSheet("background-color: lightblue; border-radius: 10px; font: bold 15px;")
+        self.button5.clicked.connect(self.one_camera)
 
         # I. Initialisation de la barre d'outils
         self.toolbar = QToolBar("Bar d'outils")
@@ -175,6 +187,11 @@ class MainWindow(QMainWindow):
     def segmentation(self):
         self.img_seg = img_seg_window()
         self.img_seg.show()    
+    
+    
+    def one_camera(self):
+        self.one_cam = one_camera_window()
+        self.one_cam.show() 
         
     def video_segmentation(self):
         self.vid_seg = vid_seg_window()
@@ -522,6 +539,90 @@ class vid_seg_window(QWidget):
                 self.error.check_error = False
                 self.error.error_msg = ''
          
+class one_camera_window(QWidget):
+    def __init__(self):
+        super(one_camera_window, self).__init__()
+        
+        self.setGeometry(650, 400, 600, 400)
+        self.setWindowTitle("Une camera")
+        # Initialiser de la variable erreur
+        self.error = error()
+        
+        # Default path
+        self.path1 = './data/video_c0/camera_0.MP4'
+        self.path2 = './data/video_c1/camera_1.MP4'
+        
+        # Create labels to display "Sélectionner un dossier 1" and "Sélectionner un dossier 2"
+        self.label1 = QLabel("Sélectionner la video ou l'image depuis la caméra 1")
+        self.label3 = QLabel("Definir le seuil de detection")
+        self.label4 = QLabel("Afficher la segmentation")
+        self.label5 = QLabel("Enregistrer les images")
+        self.label6 = QLabel("Afficher l'image avec les dimentions")
+        
+        # Create the browse buttons
+        self.browse_button1 = QPushButton('Parcourir', self)
+        self.browse_button1.clicked.connect(lambda: browse_file(self, 1))
+        
+        self.seg_button = QPushButton('Detecter et segmenter', self)
+        self.seg_button.clicked.connect(self.vid_segmentation)
+        
+        # Create a grid layout
+        self.grid = QGridLayout()
+        self.grid.setSpacing(10)
+        
+        # Create a checkbox
+        self.checkbox = QCheckBox("Avant d'afficher la distance", self, checked=True)
+        self.checkbox1 = QCheckBox("à la fin", self)
+        # self.checkbox2 = QCheckBox("Final", self, checked=True)
+
+        # Add the label and button to the grid layout
+        self.grid.addWidget(self.label1, 0, 0)
+        self.grid.addWidget(self.browse_button1, 0, 1)
+        
+        # Create a double spin box with a default value of 0.5
+        self.double_spin_box = QDoubleSpinBox()
+        self.double_spin_box.setMinimum(0.1)
+        self.double_spin_box.setMaximum(1)
+        self.double_spin_box.setSingleStep(0.1)
+        self.double_spin_box.setValue(0.8)
+        
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setRange(0, 100)
+        self.progress_bar.setValue(0)
+
+        # Add the double spin box to the grid layout
+        self.grid.addWidget(self.label3, 1, 0)
+        self.grid.addWidget(self.double_spin_box, 1, 1, 1, 1)
+        self.grid.addWidget(self.label4, 2, 0)
+        self.grid.addWidget(self.checkbox, 2, 1)
+        self.grid.addWidget(self.label5, 3, 0)
+        self.grid.addWidget(self.checkbox1, 3, 1)
+        # self.grid.addWidget(self.label6, 5, 0)
+        # self.grid.addWidget(self.checkbox2, 5, 1)
+        self.grid.addWidget(self.seg_button, 4, 0, 1, 2, QtCore.Qt.AlignCenter)
+        self.grid.addWidget(self.progress_bar, 5, 0, 1, 2, QtCore.Qt.AlignCenter)
+
+        # Create a vertical layout
+        self.layout = QVBoxLayout(self)
+        self.layout.addLayout(self.grid)
+        self.setLayout(self.layout)
+        
+    def vid_segmentation(self):
+        one_only_camera(self.progress_bar,
+            src1 = self.path1,
+            src2 = self.path2,
+            conf_thres = self.double_spin_box.value(), 
+                        view_img = self.checkbox.isChecked(), 
+                        save_rest = self.checkbox1.isChecked()) #, show_final = self.checkbox2.isChecked() )
+        
+        if self.error.check_error:
+            dlg = QMessageBox(self)
+            dlg.setWindowTitle("Erreur lors de la segmentation")
+            dlg.setText(self.error.error_msg)
+            button = dlg.exec_()
+            if button == QMessageBox.Ok:
+                self.error.check_error = False
+                self.error.error_msg = ''
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MainWindow()

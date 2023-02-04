@@ -74,7 +74,7 @@ def run(progress_bar,                                                           
     
     vid_path, vid_writer = None, None         
     
-    mtx1, mtx2, R, T = load_calibration(calib_cam)
+    mtx1, mtx2, R, T, _ = load_calibration(calib_cam)
     # Calculate the projection martrix
     P1, P2 = get_projection_matrix(mtx1, mtx2, R, T)
     
@@ -208,7 +208,7 @@ def run(progress_bar,                                                           
             # # Tracer les graphiques pour chaque colonne
             # new_df.plot(kind='bar', ax=axs[0])
             # new_df.plot(kind='line', ax=axs[1])
-            # plt.savefig(str(save_dir / 'stat_graphics.png'))
+            # plt.savefig(str(save_dir / 'stat_graphics.png'))          
     
 # if save_df:
 #     new_df = {list(CLASSES_DICT.values())[i]: value for i, value in enumerate(df.values())}

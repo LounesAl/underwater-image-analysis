@@ -1,5 +1,5 @@
 import numpy as np
-from segmentation import *
+from one_only_camera import *
 from glob import glob
 
 def get_nbr_espece (chemin_npy, classe_dict) : 

@@ -27,7 +27,7 @@ def extract_images(video_path, output_folder, n_seconds):
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
     #else :
-        #folder = r'\Users\Amel\Desktop\PFE\Re Réunion de lancement projet PFE'
+        
     #    for the_file in os.listdir(output_folder):
     #       file_path = os.path.join(output_folder, the_file)
     #        try:
@@ -110,7 +110,7 @@ def track(path_video, N, output_folder, num_espece, seuil_couleur = 10) :
 
 
     nbr_classe = len(classe_dict)                           #recuperer le nbr de classe à detecter 
-    num_files = len(chemin_npy)                             #recuperer le nbr d'image à traiter 
+    #num_files_npy = len(chemin_npy)                             #recuperer le nbr d'image à traiter 
 
     for i in range(num_files) : 
         #chargement de l'image :

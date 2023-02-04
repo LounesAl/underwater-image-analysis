@@ -15,10 +15,10 @@ COLORS = [ (255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255), 
            (128, 128, 0), (0, 128, 128), (128, 0, 128) ]
 
 CLASSES_DICT = {
-                "0" : "PFE",
-                "1" : "Actinia fermee",
-                "2" : "Actinia ouverte",
-                "3" : "Gibbula"
+                0 : "PFE",
+                1 : "Actinia fermee",
+                2 : "Actinia ouverte",
+                3 : "Gibbula"
                }
 
 
@@ -81,6 +81,9 @@ def init_config(path_model, SCORE_THRESH_TEST = 0.8):
 
 def inference(predictor, cfg,  im):
     outputs = predictor(im)
+    # Remplacer les entiers par les chaînes de caractères correspondantes
+    # new_pred_classes = [CLASSES_DICT[x] for x in outputs['instances'].pred_classes.cpu().numpy()]
+    # outputs['instances'].pred_classes = torch.tensor(new_pred_classes, device='cuda:0') #.to(device='cuda:0')
     im_seg = visualiser(outputs, cfg, im)
     
     return outputs, im_seg
