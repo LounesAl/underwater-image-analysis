@@ -23,11 +23,7 @@ from utils.dataloaders import (IMG_FORMATS, VID_FORMATS, check_file, increment_p
 
 
 # progress_bar,                                                               # peogress bar for application
-<<<<<<< HEAD
 def one_only_camera(progress_bar,
-=======
-def run(
->>>>>>> fa37a3d83960d80f9ba188648c2c72a408d85991
         weights=ROOT / 'models/model_final.pth',                                    # model path or triton URL
         save_rest=True,                                                             # save inference images
         src1=ROOT / 'data/imgs_c1',                                                 # file/dir/URL/glob/screen/0(webcam)
@@ -53,11 +49,8 @@ def run(
     screenshot = src1.lower().startswith('screen')
     if is_url and is_file:
         src1 = check_file(src1)  # download
-<<<<<<< HEAD
         
     progress_bar.setValue(10)
-=======
->>>>>>> fa37a3d83960d80f9ba188648c2c72a408d85991
 
     # Directories
     save_dir = increment_path(Path(project) / name, exist_ok=exist_ok)  # increment run
@@ -76,11 +69,8 @@ def run(
         sys.exit()
     else:
         dataset = LoadImages(src1, img_size=imgsz)
-<<<<<<< HEAD
         
     progress_bar.setValue(20)
-=======
->>>>>>> fa37a3d83960d80f9ba188648c2c72a408d85991
     
     assert len(dataset) > 0, 'no file was found .'
     
@@ -91,11 +81,7 @@ def run(
     
     predictor, cfg = init_config(str(weights), SCORE_THRESH_TEST = conf_thres)
     
-<<<<<<< HEAD
     progress_bar.setValue(40)
-    
-=======
->>>>>>> fa37a3d83960d80f9ba188648c2c72a408d85991
     # dataset = tqdm(zip(dataset_1, dataset_2), \
     #                    total=len(dataset_1) if dataset_1.mode=='image' else dataset_1.frames, \
     #                    desc=f'Detection of characteristics ')
@@ -139,13 +125,9 @@ def run(
                         fps, w, h = 30, im0s.shape[1], im0s.shape[0]
                     save_path = str(Path(save_path).with_suffix('.mp4'))  # force *.mp4 suffix on results videos
                     vid_writer = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
-<<<<<<< HEAD
                 vid_writer.write(im0s) 
                   
     progress_bar.setValue(100)         
-=======
-                vid_writer.write(im0s)            
->>>>>>> fa37a3d83960d80f9ba188648c2c72a408d85991
     
 
 def parse_opt():
@@ -174,11 +156,7 @@ def parse_opt():
 
 def main():
     opt = parse_opt()
-<<<<<<< HEAD
     one_only_camera(**vars(opt))
-=======
-    run(**vars(opt))
->>>>>>> fa37a3d83960d80f9ba188648c2c72a408d85991
            
 
 if __name__ == '__main__':
