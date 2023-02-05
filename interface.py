@@ -3,12 +3,12 @@ from PySide2 import QtCore, QtGui
 from calib import main
 from utils.ui_fonctions import *
 from utils.segmentation import seg_img
+from utils.tracking import track
 from detect_copy import run
 from one_only_camera import one_only_camera
 from PySide2.QtWidgets import *
 import random
 import glob
-# from PySide2.QtWebEngineWidgets import QWebEngineView
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -299,25 +299,22 @@ class tracking_window(QWidget):
     def __init__(self):
         super(tracking_window, self).__init__()
         
-        self.setGeometry(650, 400, 600, 400)
+        self.setGeometry(650, 400, 800, 400)
         self.setWindowTitle("Tracking")
         
         # Default path
         self.folder_path1 = 'data/imgs_c1'
-        self.folder_path2 = 'data/imgs_c2'
+        output_folder = "./data/outputs"
         
         # Create labels to display "Sélectionner un dossier 1" and "Sélectionner un dossier 2"
-        self.label1 = QLabel("Sélectionner le dossier la caméra 1")
-        self.label2 = QLabel("Sélectionner le dossier la caméra 2")
+        self.label1 = QLabel("Sélectionner la video")
         
         # Create the browse buttons
         self.browse_button1 = QPushButton('Parcourir', self)
         self.browse_button1.clicked.connect(lambda: browse_folder(self, 1))
-        self.browse_button2 = QPushButton('Parcourir', self)
-        self.browse_button2.clicked.connect(lambda: browse_folder(self, 2))
         
         self.calib_button = QPushButton('Demarrer', self)
-        # self.calib_button.clicked.connect(lambda: main(self.path1, self.path2))
+        self.calib_button.clicked.connect(lambda: track(path_video=self.folder_path1, N=1, output_folder=output_folder, num_espece=0,text_edit=self.text_edit, seuil_couleur = 10))
         
         # Create a grid layout
         self.grid = QGridLayout()
@@ -326,9 +323,12 @@ class tracking_window(QWidget):
         # Add the label and button to the grid layout
         self.grid.addWidget(self.label1, 0, 0)
         self.grid.addWidget(self.browse_button1, 0, 1)
-        self.grid.addWidget(self.label2, 1, 0)
-        self.grid.addWidget(self.browse_button2, 1, 1)
-        self.grid.addWidget(self.calib_button, 2, 0, 1, 2, QtCore.Qt.AlignCenter)
+        self.grid.addWidget(self.calib_button, 1, 0, 1, 0, QtCore.Qt.AlignCenter)
+        
+        self.text_edit = QTextEdit(self)
+        self.text_edit.setReadOnly(True)
+        self.text_edit.setGeometry(100, 200, 400, 100)
+        # self.setCentralWidget(self.text_edit)
         
         # Create a vertical layout
         self.layout = QVBoxLayout(self)
