@@ -195,7 +195,7 @@ def save_extrinsic_calibration_parameters(R0, T0, R1, T1, save_path, prefix = ''
 
     return R0, T0, R1, T1
 
-def main(progress_bar, path_folder_cam1, rmse, path_folder_cam2, checkerboard_box_size_scale, checkerboard_rows, checkerboard_columns):
+def main(progress_bar, rmse, path_folder_cam1, path_folder_cam2, checkerboard_box_size_scale, checkerboard_rows, checkerboard_columns):
     try:
         iterations = 3
         # Calculate the percentage of completion
@@ -244,6 +244,7 @@ def main(progress_bar, path_folder_cam1, rmse, path_folder_cam2, checkerboard_bo
             # Save the dictionary to the file
             pickle.dump({'cmtx0': cmtx0, 'cmtx1': cmtx1, 'R': R, 'T': T, 'ret': ret}, f)
         progress_bar.setValue(100)
+        rmse.setText("Erreur de calibration : {:.2f}".format(ret))
         
     except Exception as e:
         print("Une erreur s'est produite :", e)

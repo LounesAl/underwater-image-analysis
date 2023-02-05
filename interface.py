@@ -256,6 +256,7 @@ class calib_window(QWidget):
         self.progress_bar = QProgressBar()
         
         self.calib_button.clicked.connect(lambda: main(self.progress_bar, 
+                                                       self.rmse,
                                                        self.path1, 
                                                        self.path2,
                                                        checkerboard_box_size_scale = self.checkerboard_box_size_scale_box.value(), 
@@ -266,6 +267,9 @@ class calib_window(QWidget):
         self.progress_bar.setRange(0, 100)
         # Set the initial value of the progress bar
         self.progress_bar.setValue(0)
+        
+        # Ajout du texte pour l'erreur
+        self.rmse = QLabel("", self)
         
         # Create a grid layout
         self.grid = QGridLayout()
@@ -284,6 +288,7 @@ class calib_window(QWidget):
         self.grid.addWidget(self.checkerboard_columns_box, 4, 1)
         self.grid.addWidget(self.calib_button, 5, 0, 1, 2, QtCore.Qt.AlignCenter)
         self.grid.addWidget(self.progress_bar, 6, 0, 1, 2, QtCore.Qt.AlignCenter)
+        self.grid.addWidget(self.rmse, 7, 0, 1, 2, QtCore.Qt.AlignCenter)
         
         # Create a vertical layout
         self.layout = QVBoxLayout(self)
