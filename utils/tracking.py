@@ -13,7 +13,14 @@ from scipy.spatial import KDTree
 import cv2
 import numpy as np
 import os 
-import shutil
+import logging
+
+CURRENT_PATH = os.path.dirname(os.path.abspath('__file__'))
+
+logging.basicConfig(level=logging.DEBUG, 
+                    filename=os.path.join(CURRENT_PATH, 'tackinglogFile.log'),
+                    filemode='w',
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 def extract_images(video_path, output_folder, n_seconds):
@@ -91,14 +98,19 @@ def convert_rgb_to_names(rgb_tuple):
 
 def track(path_video, N, output_folder, num_espece, self, seuil_couleur = 10) : 
     
+    self.progress_bar.setValue(1)
+    
     self.text_edit.append("Initialisation de l'algorithme du tracking")
-
+    self.text_edit.append("------------------------------------------")
+    self.text_edit.append(f"Traitement de la video {path_video} en cours ...")
+    
     chemin_img = extract_images(path_video, output_folder, N)
 
     num_files = len(chemin_img) 
 
     weights = 'models/model_final.pth'
     # get config
+    self.progress_bar.setValue(5)
     predictor, cfg = init_config(weights, SCORE_THRESH_TEST = 0.8)
 
     moy_tot_couleur = []                        #vecteur de la couleur moyenne pour toute le images 
@@ -115,8 +127,11 @@ def track(path_video, N, output_folder, num_espece, self, seuil_couleur = 10) :
     #num_files_npy = len(chemin_npy)                             #recuperer le nbr d'image à traiter 
     classe_tot = []
     
+    self.progress_bar.setValue(10)
+    
     for i in range(num_files) : 
-        self.progress_bar.setValue(i*100/num_files)
+        if (i*100/num_files) > 10 and (i*100/num_files) < 80:
+            self.progress_bar.setValue(i*100/num_files)
         #chargement de l'image :
         image = cv2.imread(chemin_img[i])
         #recuperer tous les pixel de l'espèce souhaitée 
@@ -151,14 +166,14 @@ def track(path_video, N, output_folder, num_espece, self, seuil_couleur = 10) :
 
         classe_tot.append( nbr_classe_ )
 
-        for classe, nom in class_dict.items():
-            if (int(classe) != 0 ) : 
-                # print("l'image " , j , ":")
-                if (nbr_classe_[int(classe)] != 0) : 
-                    self.text_edit.append(f"l'espece {nom} a ete detectee {nbr_classe_[int(classe)]} fois")
-                    print(f"l'espece {nom} a ete detectee {nbr_classe_[int(classe)]} fois")
-                else : 
-                    self.text_edit.append(f"l'espece {nom} n'a pas ete detectee")
+        # for classe, nom in class_dict.items():
+        #     if (int(classe) != 0 ) : 
+        #         # print("l'image " , j , ":")
+        #         if (nbr_classe_[int(classe)] != 0) : 
+        #             self.text_edit.append(f"l'espece {nom} a ete detectee {nbr_classe_[int(classe)]} fois")
+        #             print(f"l'espece {nom} a ete detectee {nbr_classe_[int(classe)]} fois")
+        #         else : 
+        #             self.text_edit.append(f"l'espece {nom} n'a pas ete detectee")
         
         ################
     ##############
@@ -169,10 +184,12 @@ def track(path_video, N, output_folder, num_espece, self, seuil_couleur = 10) :
     #recuperer la premiere couleur de l'espece :
     rgb = tuple(np.concatenate([itens_0[0],itens_1[0],itens_2[0]]))
     color = convert_rgb_to_names(rgb)
-    print (f"la couleur de l'espece choisis au debut est {color}")
+    self.text_edit.append(f"la couleur de l'espece choisis au debut est {color}")
 
     # color_tot = convert_rgb_to_names(rgb)
     temps = []
+    
+    self.progress_bar.setValue(90)
 
     for i in range (0,num_files-1) :
 
@@ -191,7 +208,7 @@ def track(path_video, N, output_folder, num_espece, self, seuil_couleur = 10) :
             #affichage de la couleur
             self.text_edit.append(f"lespece devient {color} à l'instant {i*N} secondes:")
             
-            
+    self.progress_bar.setValue(95)
     
     #for i in range (0,num_files) : 
     #     rgb_1 = tuple(np.concatenate((itens_0[i],itens_1[i],itens_2[i])))
@@ -201,17 +218,20 @@ def track(path_video, N, output_folder, num_espece, self, seuil_couleur = 10) :
 
     #####################
     # nbr despece : 
+    
+    # classe_tot = np.array(classe_tot)
 
-    classes_tot_ = classe_tot.reshape(num_files, classe_tot)
-    classes_tot_ = classes_tot_.transpose()
+    # classes_tot_ = classe_tot.reshape(num_files, classe_tot)
+    # classes_tot_ = classes_tot_.transpose()
 
     moy_classe = []
 
-    for ligne in classes_tot_ :
+    for ligne in classe_tot :
         moy_classe.append(np.mean(ligne))  
 
     for classe, nom in class_dict.items():
-            if (int(classe) != 0 ) : 
+            if int(classe) : 
                 self.text_edit.append(f"l'espece {nom} a ete detectee en moyenne {moy_classe[int(classe)]} fois")
-    
+                
+    self.progress_bar.setValue(100)
     #return (color_1) 
