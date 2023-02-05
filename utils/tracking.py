@@ -116,6 +116,7 @@ def track(path_video, N, output_folder, num_espece, self, seuil_couleur = 10) :
     classe_tot = []
     
     for i in range(num_files) : 
+        self.progress_bar.setValue(i*100/num_files)
         #chargement de l'image :
         image = cv2.imread(chemin_img[i])
         #recuperer tous les pixel de l'espèce souhaitée 
