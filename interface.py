@@ -633,6 +633,9 @@ class one_camera_window(QWidget):
             if button == QMessageBox.Ok:
                 self.error.check_error = False
                 self.error.error_msg = ''
+                
+                
+                
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MainWindow()
