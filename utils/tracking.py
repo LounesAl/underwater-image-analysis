@@ -227,7 +227,7 @@ def track(path_video, N, output_folder, num_espece, self, seuil_couleur = 10) :
     moy_classe = []
 
     for ligne in classe_tot :
-        moy_classe.append(np.mean(ligne))  
+        moy_classe.append(np.mean(ligne, axis=0))  
 
     for classe, nom in class_dict.items():
             if int(classe) : 

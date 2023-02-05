@@ -308,6 +308,7 @@ class tracking_window(QWidget):
         
         # Create labels to display "Sélectionner un dossier 1" and "Sélectionner un dossier 2"
         self.label1 = QLabel("Sélectionner la video")
+        self.label2 = QLabel("Numero de l'espèces à suivre")
         
         # Create the browse buttons
         self.browse_button1 = QPushButton('Parcourir', self)
