@@ -89,7 +89,7 @@ def convert_rgb_to_names(rgb_tuple):
 
 
 
-def track(path_video, N, output_folder, num_espece,self, seuil_couleur = 10) : 
+def track(path_video, N, output_folder, num_espece, self, seuil_couleur = 10) : 
     
     self.text_edit.append("Initialisation de l'algorithme du tracking")
 
@@ -170,7 +170,7 @@ def track(path_video, N, output_folder, num_espece,self, seuil_couleur = 10) :
     color = convert_rgb_to_names(rgb)
     print (f"la couleur de l'espece choisis au debut est {color}")
 
-    color_tot = convert_rgb_to_names(rgb)
+    # color_tot = convert_rgb_to_names(rgb)
     temps = []
 
     for i in range (0,num_files-1) :
@@ -186,7 +186,7 @@ def track(path_video, N, output_folder, num_espece,self, seuil_couleur = 10) :
             rgb = tuple(np.concatenate((itens_0[i+1],itens_1[i+1],itens_2[i+1])))
             #conversion en hexadécimal
             color = convert_rgb_to_names(rgb)
-            color_tot.append(color)
+            # color_tot.append(color)
             #affichage de la couleur
             self.text_edit.append(f"lespece devient {color} à l'instant {i*N} secondes:")
             

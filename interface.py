@@ -303,8 +303,8 @@ class tracking_window(QWidget):
         self.setWindowTitle("Tracking")
         
         # Default path
-        self.folder_path1 = './data/video_c0/camera_0.MP4'
-        output_folder = "./data/outputs"
+        self.folder_path1 = './videos/Actinia/actinia2-.mp4'
+        output_folder = './data/outputs'
         
         # Create labels to display "Sélectionner un dossier 1" and "Sélectionner un dossier 2"
         self.label1 = QLabel("Sélectionner la video")
@@ -312,6 +312,10 @@ class tracking_window(QWidget):
         # Create the browse buttons
         self.browse_button1 = QPushButton('Parcourir', self)
         self.browse_button1.clicked.connect(lambda: browse_file(self, 1))
+        
+        self.progress_bar = QProgressBar(self)
+        self.progress_bar.setRange(0, 100)
+        self.progress_bar.setValue(0)
         
         self.calib_button = QPushButton('Demarrer', self)
         self.calib_button.clicked.connect(lambda: track(self.folder_path1, 1, output_folder, 0,self, 10))
@@ -323,6 +327,8 @@ class tracking_window(QWidget):
         self.grid.addWidget(self.label1, 0, 0)
         self.grid.addWidget(self.browse_button1, 0, 1)
         self.grid.addWidget(self.calib_button, 1, 0, 1, 2, QtCore.Qt.AlignCenter)
+        self.grid.addWidget(self.progress_bar, 2, 0, 1, 2, QtCore.Qt.AlignCenter)
+        
         
         # self.setCentralWidget(self.text_edit)
         self.text_edit = QTextEdit(self)
