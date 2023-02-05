@@ -31,7 +31,7 @@ pip install -r requirements_cpu.txt
 1. Ouvrez un terminal et accédez au répertoire du projet.
 2. Exécutez le fichier Interface.py avec la commande suivante :
 ```
-python Interface.py
+python interface.py
 ```
 3. Utilisez l'interface graphique pour interagir avec les données.
 
