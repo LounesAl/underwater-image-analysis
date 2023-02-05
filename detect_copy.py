@@ -23,7 +23,7 @@ from utils.dataloaders import (IMG_FORMATS, VID_FORMATS, check_file, increment_p
 
 
 
-def run(#progress_bar,                                                               # peogress bar for application
+def run(progress_bar,                                                               # peogress bar for application
         weights=ROOT / 'models/model_final.pth',                                    # model path or triton URL
         save_rest=True,                                                             # save inference images
         src1=ROOT / 'data/imgs_c1',                                                 # file/dir/URL/glob/screen/0(webcam)
@@ -89,7 +89,7 @@ def run(#progress_bar,                                                          
     for (path1, im1, im0s1, vid_cap1, s1), (path2, im2, im0s2, vid_cap2, s2) in zip(dataset_1, dataset_2):
         # , unit='%', total=len(dataset_1), bar_format='{percentage:3.0f}%|{bar}|'
         
-        # progress_bar.setValue(100 * dataset_1.frame / dataset_1.frames)
+        progress_bar.setValue(100 * dataset_1.count / dataset_1.nf if dataset_1.model == 'image' else 100 * dataset_1.frame / dataset_1.frames)
         
         im1 = np.transpose(im1, (1, 2, 0))[:,:,::-1]
         im2 = np.transpose(im2, (1, 2, 0))[:,:,::-1]
