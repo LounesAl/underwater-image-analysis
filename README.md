@@ -9,6 +9,10 @@ Python 3.x
 Bibliothèques Python : Detectron2, PySide2, etc.
 
 ## Installation
+### Application executable : 
+A venir ...
+
+### Conda
 1. Créer un nouveau environnement conda et activer le
 2. Clonez le projet sur votre environnement en utilisant la commande suivante :
 
