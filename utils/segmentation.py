@@ -60,7 +60,7 @@ def center_of_gravity_distance(index_mask):
         
 
 def visualiser(outputs, cfg, im):
-    v = Visualizer(im[:, :, ::-1], MetadataCatalog.get(cfg.DATASETS.TEST[0]), scale=1)
+    v = Visualizer(im[:, :, ::-1], MetadataCatalog.get(cfg.DATASETS.TEST[0]), scale=1) #["PFE", "Actinia fermee", "Actinia ouverte", "Gibbula"]  set(thing_classes=["balloon"] # 
     v = v.draw_instance_predictions(outputs["instances"].to("cpu"))
     return v.get_image()[:, :, ::-1]
     
@@ -84,7 +84,7 @@ def inference(predictor, cfg,  im):
     # Remplacer les entiers par les chaînes de caractères correspondantes
     # new_pred_classes = [CLASSES_DICT[x] for x in outputs['instances'].pred_classes.cpu().numpy()]
     # outputs['instances'].pred_classes = torch.tensor(new_pred_classes, device='cuda:0') #.to(device='cuda:0')
-    im_seg = visualiser(outputs, cfg, im)
+    im_seg = visualiser(outputs, cfg, im) # , class_names=list(CLASSES_DICT.values())
     
     return outputs, im_seg
 
