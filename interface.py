@@ -299,11 +299,11 @@ class tracking_window(QWidget):
     def __init__(self):
         super(tracking_window, self).__init__()
         
-        self.setGeometry(650, 400, 800, 400)
+        self.setGeometry(650, 400, 600, 600)
         self.setWindowTitle("Tracking")
         
         # Default path
-        self.folder_path1 = 'data/imgs_c1'
+        self.folder_path1 = './data/video_c0/camera_0.MP4'
         output_folder = "./data/outputs"
         
         # Create labels to display "Sélectionner un dossier 1" and "Sélectionner un dossier 2"
@@ -311,11 +311,10 @@ class tracking_window(QWidget):
         
         # Create the browse buttons
         self.browse_button1 = QPushButton('Parcourir', self)
-        self.browse_button1.clicked.connect(lambda: browse_folder(self, 1))
+        self.browse_button1.clicked.connect(lambda: browse_file(self, 1))
         
         self.calib_button = QPushButton('Demarrer', self)
-        self.calib_button.clicked.connect(lambda: track(path_video=self.folder_path1, N=1, output_folder=output_folder, num_espece=0,text_edit=self.text_edit, seuil_couleur = 10))
-        
+        self.calib_button.clicked.connect(lambda: track(self.folder_path1, 1, output_folder, 0,self, 10))
         # Create a grid layout
         self.grid = QGridLayout()
         self.grid.setSpacing(10)
@@ -323,12 +322,12 @@ class tracking_window(QWidget):
         # Add the label and button to the grid layout
         self.grid.addWidget(self.label1, 0, 0)
         self.grid.addWidget(self.browse_button1, 0, 1)
-        self.grid.addWidget(self.calib_button, 1, 0, 1, 0, QtCore.Qt.AlignCenter)
+        self.grid.addWidget(self.calib_button, 1, 0, 1, 2, QtCore.Qt.AlignCenter)
         
+        # self.setCentralWidget(self.text_edit)
         self.text_edit = QTextEdit(self)
         self.text_edit.setReadOnly(True)
         self.text_edit.setGeometry(100, 200, 400, 100)
-        # self.setCentralWidget(self.text_edit)
         
         # Create a vertical layout
         self.layout = QVBoxLayout(self)

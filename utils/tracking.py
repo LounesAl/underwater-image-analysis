@@ -89,7 +89,9 @@ def convert_rgb_to_names(rgb_tuple):
 
 
 
-def track(path_video, N, output_folder, num_espece,text_edit, seuil_couleur = 10) : 
+def track(path_video, N, output_folder, num_espece,self, seuil_couleur = 10) : 
+    
+    self.text_edit.append("Initialisation de l'algorithme du tracking")
 
     chemin_img = extract_images(path_video, output_folder, N)
 
@@ -112,8 +114,6 @@ def track(path_video, N, output_folder, num_espece,text_edit, seuil_couleur = 10
     nbr_classe = 4#len(class_dict)                           #recuperer le nbr de classe à detecter 
     #num_files_npy = len(chemin_npy)                             #recuperer le nbr d'image à traiter 
     classe_tot = []
-    
-    text_edit.append("Initialisation de l'algorithme du tracking")
     
     for i in range(num_files) : 
         #chargement de l'image :
@@ -154,9 +154,10 @@ def track(path_video, N, output_folder, num_espece,text_edit, seuil_couleur = 10
             if (int(classe) != 0 ) : 
                 # print("l'image " , j , ":")
                 if (nbr_classe_[int(classe)] != 0) : 
-                    print ("l'espece" , nom , "a ete detectee" ,  nbr_classe_[int(classe)] , "fois")
+                    self.text_edit.append(f"l'espece {nom} a ete detectee {nbr_classe_[int(classe)]} fois")
+                    print(f"l'espece {nom} a ete detectee {nbr_classe_[int(classe)]} fois")
                 else : 
-                    print ("l'espece" , nom , "n'a pas ete detectee")
+                    self.text_edit.append(f"l'espece {nom} n'a pas ete detectee")
         
         ################
     ##############
@@ -170,7 +171,7 @@ def track(path_video, N, output_folder, num_espece,text_edit, seuil_couleur = 10
     print (f"la couleur de l'espece choisis au debut est {color}")
 
     color_tot = convert_rgb_to_names(rgb)
-    temps = 0
+    temps = []
 
     for i in range (0,num_files-1) :
 
@@ -187,7 +188,7 @@ def track(path_video, N, output_folder, num_espece,text_edit, seuil_couleur = 10
             color = convert_rgb_to_names(rgb)
             color_tot.append(color)
             #affichage de la couleur
-            print (f"lespece devient {color} à l'instant {i*N} secondes:")
+            self.text_edit.append(f"lespece devient {color} à l'instant {i*N} secondes:")
             
             
     
@@ -210,15 +211,6 @@ def track(path_video, N, output_folder, num_espece,text_edit, seuil_couleur = 10
 
     for classe, nom in class_dict.items():
             if (int(classe) != 0 ) : 
-                 ("l'espece" , nom , "a ete detectee en moyenne" ,  moy_classe[int(classe)] , "fois")
+                self.text_edit.append(f"l'espece {nom} a ete detectee en moyenne {moy_classe[int(classe)]} fois")
     
     #return (color_1) 
-
-
-
-# if __name__ == "__main__":
-#     # path_img = glob('data/outputs/*.jpg')
-#     path_vid = './data/video_c0/camera_0.MP4'
-#     output_folder = './data/outputs'
-#     track(path_vid, N=1, output_folder=output_folder, num_espece=0, seuil_couleur = 10)
-
