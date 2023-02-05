@@ -49,8 +49,6 @@ def one_only_camera(
     screenshot = src1.lower().startswith('screen')
     if is_url and is_file:
         src1 = check_file(src1)  # download
-        
-    progress_bar.setValue(10)
 
     # Directories
     save_dir = increment_path(Path(project) / name, exist_ok=exist_ok)  # increment run
@@ -69,8 +67,6 @@ def one_only_camera(
         sys.exit()
     else:
         dataset = LoadImages(src1, img_size=imgsz)
-        
-    progress_bar.setValue(20)
     
     assert len(dataset) > 0, 'no file was found .'
     
@@ -81,14 +77,14 @@ def one_only_camera(
     
     predictor, cfg = init_config(str(weights), SCORE_THRESH_TEST = conf_thres)
     
-    progress_bar.setValue(40)
     # dataset = tqdm(zip(dataset_1, dataset_2), \
     #                    total=len(dataset_1) if dataset_1.mode=='image' else dataset_1.frames, \
     #                    desc=f'Detection of characteristics ')
     for (path, im, im0s, vid_cap, s)  in dataset:
         # , unit='%', total=len(dataset_1), bar_format='{percentage:3.0f}%|{bar}|'
         
-        progress_bar.setValue(100 * dataset.frame / dataset.frames)
+        
+        progress_bar.setValue(100 * dataset.count / dataset.nf if dataset.model == 'image' else 100 * dataset.frame / dataset.frames)
         
         im = np.transpose(im, (1, 2, 0))[:,:,::-1]
                 
@@ -127,9 +123,7 @@ def one_only_camera(
                     save_path = str(Path(save_path).with_suffix('.mp4'))  # force *.mp4 suffix on results videos
                     vid_writer = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
                 vid_writer.write(im0s) 
-                  
-    progress_bar.setValue(100)         
-    
+                
 
 def parse_opt():
     parser = argparse.ArgumentParser()
