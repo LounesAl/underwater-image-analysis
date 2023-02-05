@@ -5,32 +5,34 @@ Ce projet est une application python qui inclut la bibliothèque Detectron2 et u
 
 ## Pré-requis
 Python 3.x
+
 Bibliothèques Python : Detectron2, PySide2, etc.
 
 ## Installation
-1. Clonez le projet sur votre ordinateur en utilisant la commande suivante :
+1. Créer un nouveau environnement conda et activer le
+2. Clonez le projet sur votre environnement en utilisant la commande suivante :
 
-'''
+```
 git clone https://github.com/LounesAl/underwater-image-analysis.git
-'''
+```
 
 2. Installez les bibliothèques requises en utilisant la commande suivante :
-'''
+```
 pip install -r requirements_gpu.txt
-'''
+```
 
 ou
 
-'''
+```
 pip install -r requirements_cpu.txt
-'''
+```
 
 ## Utilisation
 1. Ouvrez un terminal et accédez au répertoire du projet.
 2. Exécutez le fichier Interface.py avec la commande suivante :
-'''
+```
 python Interface.py
-'''
+```
 3. Utilisez l'interface graphique pour interagir avec les données.
 
 ## Contribuer
