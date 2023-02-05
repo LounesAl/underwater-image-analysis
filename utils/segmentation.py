@@ -233,7 +233,7 @@ def seg_img(self, SCORE_THRESH_TEST = 0.8, show_inf = False, show_3d = False, sh
 
     calib_cam = 'settings/camera_parameters/stereo_params.pkl'
 
-    mtx1, mtx2, R, T = load_calibration(calib_cam)
+    mtx1, mtx2, R, T, ret = load_calibration(calib_cam)
 
     # Calculate the projection martrix
     P1, P2 = get_projection_matrix(mtx1, mtx2, R, T)

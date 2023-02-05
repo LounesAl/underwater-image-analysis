@@ -23,7 +23,7 @@ from utils.dataloaders import (IMG_FORMATS, VID_FORMATS, check_file, increment_p
 
 
 
-def run(progress_bar,                                                               # peogress bar for application
+def run(#progress_bar,                                                               # peogress bar for application
         weights=ROOT / 'models/model_final.pth',                                    # model path or triton URL
         save_rest=True,                                                             # save inference images
         src1=ROOT / 'data/imgs_c1',                                                 # file/dir/URL/glob/screen/0(webcam)
@@ -74,7 +74,7 @@ def run(progress_bar,                                                           
     
     vid_path, vid_writer = None, None         
     
-    mtx1, mtx2, R, T, _ = load_calibration(calib_cam)
+    mtx1, mtx2, R, T, ret = load_calibration(calib_cam)
     # Calculate the projection martrix
     P1, P2 = get_projection_matrix(mtx1, mtx2, R, T)
     
@@ -89,7 +89,7 @@ def run(progress_bar,                                                           
     for (path1, im1, im0s1, vid_cap1, s1), (path2, im2, im0s2, vid_cap2, s2) in zip(dataset_1, dataset_2):
         # , unit='%', total=len(dataset_1), bar_format='{percentage:3.0f}%|{bar}|'
         
-        progress_bar.setValue(100 * dataset_1.frame / dataset_1.frames)
+        # progress_bar.setValue(100 * dataset_1.frame / dataset_1.frames)
         
         im1 = np.transpose(im1, (1, 2, 0))[:,:,::-1]
         im2 = np.transpose(im2, (1, 2, 0))[:,:,::-1]
@@ -164,7 +164,7 @@ def run(progress_bar,                                                           
                     temp_dist = sorted(temp_dist, reverse=True)
                     height = np.mean(temp_dist[:int(0.7*len(temp_dist))]) * 2 
                     width = np.mean(temp_dist[int(0.7*len(temp_dist)):]) * 2
-                    draw_text(img=im0s1, text="{} W : {:.1f} cm L : {:.1f} cm".format(CLASSES_DICT[str(classes1[arg1].item())], width, height), 
+                    draw_text(img=im0s1, text="{} W : {:.1f} cm L : {:.1f} cm".format(CLASSES_DICT[classes1[arg1].item()], width, height), 
                               pos=tuple(sub_cam1[0]), font_scale=1, font_thickness=1, text_color=(255, 255, 255), text_color_bg=(0, 0, 0))
             
         # s1 += '%gx%g ' % im0s1.shape[2:]
