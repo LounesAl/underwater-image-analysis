@@ -84,7 +84,7 @@ def one_only_camera(
         # , unit='%', total=len(dataset_1), bar_format='{percentage:3.0f}%|{bar}|'
         
         
-        progress_bar.setValue(100 * dataset.count / dataset.nf if dataset.model == 'image' else 100 * dataset.frame / dataset.frames)
+        progress_bar.setValue(100 * dataset.count / dataset.nf if dataset.mode == 'image' else 100 * dataset.frame / dataset.frames)
         
         im = np.transpose(im, (1, 2, 0))[:,:,::-1]
                 
