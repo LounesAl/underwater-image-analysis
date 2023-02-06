@@ -141,6 +141,7 @@ def track(path_video, N, output_folder, num_espece, self, seuil_couleur = 10) :
         intensite = [image[y, x] for y, x in indices]  #recuperer les intensité des pixel d'interet 
         #vecteur de la couleur moyenne de chaque image
         moy_couleur = np.empty((np.shape(intensite)[1],1))  
+        # --------------------- #
         moy_tot_couleur.append(moy_couleur)
 
         ############# 

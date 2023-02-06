@@ -303,7 +303,7 @@ class tracking_window(QWidget):
         self.setWindowTitle("Tracking")
         
         # Default path
-        self.folder_path1 = './videos/Actinia/actinia2-.mp4'
+        self.path1 = './videos/Actinia/actinia2-.mp4'
         output_folder = './data/outputs'
         
         # Create labels to display "Sélectionner un dossier 1" and "Sélectionner un dossier 2"
@@ -321,7 +321,7 @@ class tracking_window(QWidget):
         self.progress_bar.setValue(0)
         
         self.calib_button = QPushButton('Demarrer', self)
-        self.calib_button.clicked.connect(lambda: track(self.folder_path1, 
+        self.calib_button.clicked.connect(lambda: track(self.path1, 
                                                         self.checkerboard_box_size_scale_box.value(), 
                                                         output_folder, 
                                                         int(self.checkerboard_box.value()),
