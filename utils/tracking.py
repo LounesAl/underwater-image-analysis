@@ -13,15 +13,6 @@ from scipy.spatial import KDTree
 import cv2
 import numpy as np
 import os 
-import logging
-
-CURRENT_PATH = os.path.dirname(os.path.abspath('__file__'))
-
-logging.basicConfig(level=logging.DEBUG, 
-                    filename=os.path.join(CURRENT_PATH, 'tackinglogFile.log'),
-                    filemode='w',
-                    format='%(asctime)s - %(levelname)s - %(message)s')
-
 
 def extract_images(video_path, output_folder, n_seconds):
     # Ouvrir la vidéo
