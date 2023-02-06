@@ -308,7 +308,9 @@ class tracking_window(QWidget):
         
         # Create labels to display "Sélectionner un dossier 1" and "Sélectionner un dossier 2"
         self.label1 = QLabel("Sélectionner la video")
-        self.label2 = QLabel("Numero de l'espèces à suivre")
+        self.label2 = QLabel("Choisir le temps entre deux frames (s)")
+        self.label3 = QLabel("Numero de l'espèces à suivre")
+        self.label4 = QLabel("Seuil de detection de couleur")
         
         # Create the browse buttons
         self.browse_button1 = QPushButton('Parcourir', self)
@@ -319,7 +321,24 @@ class tracking_window(QWidget):
         self.progress_bar.setValue(0)
         
         self.calib_button = QPushButton('Demarrer', self)
-        self.calib_button.clicked.connect(lambda: track(self.folder_path1, 1, output_folder, 0,self, 10))
+        self.calib_button.clicked.connect(lambda: track(self.folder_path1, 
+                                                        self.checkerboard_box_size_scale_box.value(), 
+                                                        output_folder, 
+                                                        int(self.checkerboard_box.value()),
+                                                        self, 
+                                                        int(self.checkerboard.value())  ))
+        
+        self.checkerboard_box_size_scale_box = QDoubleSpinBox()
+        self.checkerboard_box_size_scale_box.setSingleStep(0.1)
+        self.checkerboard_box_size_scale_box.setValue(1)
+        
+        self.checkerboard_box = QDoubleSpinBox()
+        self.checkerboard_box.setSingleStep(1)
+        self.checkerboard_box.setValue(1)
+        
+        self.checkerboard = QDoubleSpinBox()
+        self.checkerboard.setSingleStep(1)
+        self.checkerboard.setValue(10)
         # Create a grid layout
         self.grid = QGridLayout()
         self.grid.setSpacing(10)
@@ -327,14 +346,20 @@ class tracking_window(QWidget):
         # Add the label and button to the grid layout
         self.grid.addWidget(self.label1, 0, 0)
         self.grid.addWidget(self.browse_button1, 0, 1)
-        self.grid.addWidget(self.calib_button, 1, 0, 1, 2, QtCore.Qt.AlignCenter)
-        self.grid.addWidget(self.progress_bar, 2, 0, 1, 2, QtCore.Qt.AlignCenter)
+        self.grid.addWidget(self.label2, 1, 0)
+        self.grid.addWidget(self.checkerboard_box_size_scale_box, 1, 1)
+        self.grid.addWidget(self.label3, 2, 0)
+        self.grid.addWidget(self.checkerboard_box, 2, 1)
+        self.grid.addWidget(self.label4, 3, 0)
+        self.grid.addWidget(self.checkerboard, 3, 1)
+        self.grid.addWidget(self.calib_button, 4, 0, 1, 2, QtCore.Qt.AlignCenter)
+        self.grid.addWidget(self.progress_bar, 5, 0, 1, 2, QtCore.Qt.AlignCenter)
         
         
         # self.setCentralWidget(self.text_edit)
         self.text_edit = QTextEdit(self)
         self.text_edit.setReadOnly(True)
-        self.text_edit.setGeometry(100, 200, 400, 100)
+        self.text_edit.setGeometry(100, 300, 400, 130)
         
         # Create a vertical layout
         self.layout = QVBoxLayout(self)
