@@ -123,6 +123,7 @@ def track(path_video, N, output_folder, num_espece, self, seuil_couleur = 10) :
     for i in range(num_files) : 
         if (i*100/num_files) > 10 and (i*100/num_files) < 80:
             self.progress_bar.setValue(i*100/num_files)
+            
         #chargement de l'image :
         image = cv2.imread(chemin_img[i])
         #recuperer tous les pixel de l'espèce souhaitée 
@@ -134,11 +135,15 @@ def track(path_video, N, output_folder, num_espece, self, seuil_couleur = 10) :
         ################
 
         #récupération des intensité
+        cnt = get_segmentation(mask_seg)
+        
+        taille_cnt = len(cnt) 
+
         intensite = []
-        # for mask in mask_seg :
-        indices = np.column_stack(np.where(mask_seg[num_espece] == True))       
-        # Get the intensity values of the pixels in the mask
-        intensite = [image[y, x] for y, x in indices]  #recuperer les intensité des pixel d'interet 
+
+        for x, y in cnt[0] : 
+
+            intensite.append(image[y, x])  #recuperer les intensité des pixel d'interet 
         #vecteur de la couleur moyenne de chaque image
         moy_couleur = np.empty((np.shape(intensite)[1],1))  
         # --------------------- #

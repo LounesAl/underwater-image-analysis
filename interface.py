@@ -334,7 +334,7 @@ class tracking_window(QWidget):
         
         self.checkerboard_box = QDoubleSpinBox()
         self.checkerboard_box.setSingleStep(1)
-        self.checkerboard_box.setValue(1)
+        self.checkerboard_box.setValue(0)
         
         self.checkerboard = QDoubleSpinBox()
         self.checkerboard.setSingleStep(1)
