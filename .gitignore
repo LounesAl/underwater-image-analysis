@@ -26,3 +26,5 @@ rapport/Rapport.pdf
 /test.ipynb
 __pycache__/
 /models/model_final_1.pth
+/build/
+/dist

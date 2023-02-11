@@ -10,6 +10,60 @@ from PySide2.QtWidgets import *
 import random
 import glob
 
+import yaml
+import numpy as np
+from scipy import linalg
+import pickle
+import cv2
+import matplotlib.pyplot as plt
+
+import os
+import contextlib
+import logging
+import urllib
+import platform
+import IPython
+import time
+import re
+import math
+import pkg_resources as pkg
+import inspect
+
+from urllib.parse import urlparse
+from threading import Thread
+from typing import Optional
+from datetime import datetime
+from subprocess import check_output
+from pathlib import Path
+
+from detectron2.engine import DefaultPredictor
+from detectron2.config import get_cfg
+from detectron2.utils.visualizer import Visualizer
+from detectron2.data import MetadataCatalog
+from detectron2 import model_zoo
+import torch
+import imutils
+
+from webcolors import rgb_to_hex
+from webcolors import (
+    CSS3_HEX_TO_NAMES,
+    hex_to_rgb,
+)
+from scipy.spatial import KDTree
+
+import logging
+logging.info(f"model initialisation in progress ...")
+
+
+import os
+import platform
+from pathlib import Path
+import sys
+from tqdm import tqdm
+import argparse
+import pandas as pd
+from copy import deepcopy
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -390,7 +444,6 @@ class param_windows(QWidget):
         path_model, _ = QFileDialog.getOpenFileName(self, 'Sélectionner un fichier', '', "Modèles PyTorch (*.pth)")
         if path_model:
             other.path_model = path_model
-
 
 class img_seg_window(QWidget):
     def __init__(self):
