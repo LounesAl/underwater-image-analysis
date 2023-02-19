@@ -2,13 +2,12 @@ import os
 import sys
 import logging
 from utils.calibration import parse_calibration_settings_file
-import cv2
-import glob
-import numpy as np
-import pickle
+from cv2 import imread, TERM_CRITERIA_EPS, TERM_CRITERIA_MAX_ITER, cvtColor, COLOR_BGR2GRAY, findChessboardCorners, cornerSubPix, calibrateCamera, CALIB_FIX_INTRINSIC, stereoCalibrate
+from numpy import zeros, mgrid, float32, int32, eye, array
+from pickle import dump
 from pathlib import Path
 from tqdm import tqdm
-import imutils
+from imutils import resize
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # UNDERWATER-IMAGE-ANALYSIS root directory
@@ -27,19 +26,19 @@ def calibrate_camera_for_intrinsic_parameters(checkerboard_box_size_scale, check
                                                                                             ".JPG", ".JPEG", ".PNG", ".GIF", ".BMP", ".TIFF"})
 
     #read all frames
-    images = [imutils.resize(cv2.imread(imname, 1), width=640, height=640) for imname in images_names]
+    images = [resize(imread(imname, 1), width=640, height=640) for imname in images_names]
     
     #criteria used by checkerboard pattern detector.
     #Change this if the code can't find the checkerboard. 
-    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.001)
+    criteria = (TERM_CRITERIA_EPS + TERM_CRITERIA_MAX_ITER, 100, 0.001)
 
     rows = checkerboard_rows #calibration_settings['checkerboard_rows']
     columns = checkerboard_columns #calibration_settings['checkerboard_columns']
     world_scaling = checkerboard_box_size_scale# calibration_settings['checkerboard_box_size_scale'] #this will change to user defined length scale
 
     #coordinates of squares in the checkerboard world space
-    objp = np.zeros((rows*columns,3), np.float32)
-    objp[:,:2] = np.mgrid[0:rows,0:columns].T.reshape(-1,2)
+    objp = zeros((rows*columns,3), float32)
+    objp[:,:2] = mgrid[0:rows,0:columns].T.reshape(-1,2)
     objp = world_scaling* objp
 
     #frame dimensions. Frames should be the same size.
@@ -54,22 +53,22 @@ def calibrate_camera_for_intrinsic_parameters(checkerboard_box_size_scale, check
 
 
     for i, frame in tqdm(enumerate(images), total=len(images), desc = f"Calibration Of The {Path(path_image).name.capitalize()}"):
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        gray = cvtColor(frame, COLOR_BGR2GRAY)
 
         #find the checkerboard
-        ret, corners = cv2.findChessboardCorners(gray, (rows, columns), None)
+        ret, corners = findChessboardCorners(gray, (rows, columns), None)
         
         if ret == True:
             #Convolution size used to improve corner detection. Don't make this too large.
             conv_size = (11, 11)
 
             #opencv2 can attempt to improve the checkerboard coordinates
-            corners = cv2.cornerSubPix(gray, corners, conv_size, (-1, -1), criteria)
+            corners = cornerSubPix(gray, corners, conv_size, (-1, -1), criteria)
         
             objpoints.append(objp)
             imgpoints.append(corners)
 
-    ret, cmtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, (width, height), None, None)
+    ret, cmtx, dist, rvecs, tvecs = calibrateCamera(objpoints, imgpoints, (width, height), None, None)
     logging.info(f'rmse: {ret}')
     logging.info(f'camera matrix:\n {cmtx}')
     logging.info(f'distortion coeffs: {dist}')
@@ -104,11 +103,11 @@ def stereo_calibrate(checkerboard_box_size_scale, checkerboard_rows, checkerboar
                                                                                                      ".JPG", ".JPEG", ".PNG", ".GIF", ".BMP", ".TIFF"})
 
     #open images
-    c0_images = [imutils.resize(cv2.imread(imname, 1), width=640, height=640) for imname in c0_images_names]
-    c1_images = [imutils.resize(cv2.imread(imname, 1), width=640, height=640) for imname in c1_images_names]
+    c0_images = [resize(imread(imname, 1), width=640, height=640) for imname in c0_images_names]
+    c1_images = [resize(imread(imname, 1), width=640, height=640) for imname in c1_images_names]
     
     #change this if stereo calibration not good.
-    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.001)
+    criteria = (TERM_CRITERIA_EPS + TERM_CRITERIA_MAX_ITER, 100, 0.001)
 
     #calibration pattern settings
     rows = checkerboard_rows # calibration_settings['checkerboard_rows']
@@ -116,8 +115,8 @@ def stereo_calibrate(checkerboard_box_size_scale, checkerboard_rows, checkerboar
     world_scaling = checkerboard_box_size_scale # calibration_settings['checkerboard_box_size_scale']
 
     #coordinates of squares in the checkerboard world space
-    objp = np.zeros((rows*columns,3), np.float32)
-    objp[:,:2] = np.mgrid[0:rows,0:columns].T.reshape(-1,2)
+    objp = zeros((rows*columns,3), float32)
+    objp[:,:2] = mgrid[0:rows,0:columns].T.reshape(-1,2)
     objp = world_scaling* objp
 
     #frame dimensions. Frames should be the same size.
@@ -132,25 +131,25 @@ def stereo_calibrate(checkerboard_box_size_scale, checkerboard_rows, checkerboar
     objpoints = [] # 3d point in real world space
 
     for frame0, frame1 in tqdm(zip(c0_images, c1_images), total=len(c0_images), desc = f'Stereo Calibration'):
-        gray1 = cv2.cvtColor(frame0, cv2.COLOR_BGR2GRAY)
-        gray2 = cv2.cvtColor(frame1, cv2.COLOR_BGR2GRAY)
-        c_ret1, corners1 = cv2.findChessboardCorners(gray1, (rows, columns), None)
-        c_ret2, corners2 = cv2.findChessboardCorners(gray2, (rows, columns), None)
+        gray1 = cvtColor(frame0, COLOR_BGR2GRAY)
+        gray2 = cvtColor(frame1, COLOR_BGR2GRAY)
+        c_ret1, corners1 = findChessboardCorners(gray1, (rows, columns), None)
+        c_ret2, corners2 = findChessboardCorners(gray2, (rows, columns), None)
 
         if c_ret1 == True and c_ret2 == True:
 
-            corners1 = cv2.cornerSubPix(gray1, corners1, (11, 11), (-1, -1), criteria)
-            corners2 = cv2.cornerSubPix(gray2, corners2, (11, 11), (-1, -1), criteria)
+            corners1 = cornerSubPix(gray1, corners1, (11, 11), (-1, -1), criteria)
+            corners2 = cornerSubPix(gray2, corners2, (11, 11), (-1, -1), criteria)
 
-            p0_c1 = corners1[0,0].astype(np.int32)
-            p0_c2 = corners2[0,0].astype(np.int32)
+            p0_c1 = corners1[0,0].astype(int32)
+            p0_c2 = corners2[0,0].astype(int32)
 
             objpoints.append(objp)
             imgpoints_left.append(corners1)
             imgpoints_right.append(corners2)
 
-    stereocalibration_flags = cv2.CALIB_FIX_INTRINSIC
-    ret, CM1, dist0, CM2, dist1, R, T, E, F = cv2.stereoCalibrate(objpoints, imgpoints_left, imgpoints_right, mtx0, dist0,
+    stereocalibration_flags = CALIB_FIX_INTRINSIC
+    ret, CM1, dist0, CM2, dist1, R, T, E, F = stereoCalibrate(objpoints, imgpoints_left, imgpoints_right, mtx0, dist0,
                                                                  mtx1, dist1, (width, height), criteria = criteria, flags = stereocalibration_flags)
 
     logging.info(f'rmse: {ret}')
@@ -225,7 +224,7 @@ def main(progress_bar, rmse, path_folder_cam1, path_folder_cam2, checkerboard_bo
         # Open a file to save the dictionary contane cmtx, dist and ret to disk in pkl file
         with open(os.path.join(save_path, 'mono_params.pkl'), 'wb') as f:
             # Save the dictionary to the file
-            pickle.dump({'cmtx0': cmtx0, 'cmtx1': cmtx1, 'dist0': dist0, 'dist1': dist1, 'ret0': ret0, 'ret1': ret1}, f)
+            dump({'cmtx0': cmtx0, 'cmtx1': cmtx1, 'dist0': dist0, 'dist1': dist1, 'ret0': ret0, 'ret1': ret1}, f)
 
         """Step2. Use paired calibration pattern frames to obtain camera0 to camera1 rotation and translation"""
         R, T, ret = stereo_calibrate(checkerboard_box_size_scale, checkerboard_rows, checkerboard_columns, cmtx0, dist0, cmtx1, dist1, path_folder_cam1, path_folder_cam2)
@@ -233,8 +232,8 @@ def main(progress_bar, rmse, path_folder_cam1, path_folder_cam2, checkerboard_bo
         progress_bar.setValue(percentage)
         """Step3. Save calibration data where camera0 defines the world space origin."""
         #camera0 rotation and translation is identity matrix and zeros vector
-        R0 = np.eye(3, dtype=np.float32)
-        T0 = np.array([0., 0., 0.]).reshape((3, 1))
+        R0 = eye(3, dtype=float32)
+        T0 = array([0., 0., 0.]).reshape((3, 1))
 
         save_extrinsic_calibration_parameters(R0, T0, R, T, save_path) #this will write R and T to disk
         R1 = R; T1 = T #to avoid confusion, camera1 R and T are labeled R1 and T1
@@ -242,7 +241,7 @@ def main(progress_bar, rmse, path_folder_cam1, path_folder_cam2, checkerboard_bo
         # Open a file to save the dictionary contane cmtx, dist and ret to disk in pkl file
         with open(os.path.join(save_path, 'stereo_params.pkl'), 'wb') as f:
             # Save the dictionary to the file
-            pickle.dump({'cmtx0': cmtx0, 'cmtx1': cmtx1, 'R': R, 'T': T, 'ret': ret}, f)
+            dump({'cmtx0': cmtx0, 'cmtx1': cmtx1, 'R': R, 'T': T, 'ret': ret}, f)
         progress_bar.setValue(100)
         rmse.setText("Erreur de calibration : {:.2f}".format(ret))
         
