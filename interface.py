@@ -11,7 +11,7 @@ from utils.segmentation import seg_img
 from utils.tracking import track
 from detect_copy import run
 from one_only_camera import one_only_camera
-from PySide2.QtWidgets import QMainWindow, QDoubleSpinBox, QProgressBar, QTextEdit, QCheckBox
+from PySide2.QtWidgets import QMainWindow, QDoubleSpinBox, QProgressBar, QTextEdit, QCheckBox, QWidget, QLabel, QPushButton, QAction, QToolBar, QMenu, QToolButton, QGridLayout, QVBoxLayout
 from random import choice
 from glob import glob
 
