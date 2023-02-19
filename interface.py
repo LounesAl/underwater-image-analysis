@@ -1,72 +1,25 @@
-import os
-os.environ['QT_PLUGIN_PATH'] = '/home/lounes/py-envs/detectron/lib/python3.8/site-packages/PySide2/Qt/plugins/platforms'
+from os import environ
+environ['QT_PLUGIN_PATH'] = '/home/lounes/py-envs/detectron/lib/python3.8/site-packages/PySide2/Qt/plugins/platforms'
 import sys
 from PySide2 import QtCore, QtGui
+from PySide2.QtGui import QPixmap
+from PySide2.QtCore import QRect
+from PySide2.QtCore import Qt
 from calib import main
 from utils.ui_fonctions import *
 from utils.segmentation import seg_img
 from utils.tracking import track
 from detect_copy import run
 from one_only_camera import one_only_camera
-from PySide2.QtWidgets import *
-import random
-import glob
+from PySide2.QtWidgets import QMainWindow, QDoubleSpinBox, QProgressBar, QTextEdit, QCheckBox
+from random import choice
+from glob import glob
 
-import yaml
-import numpy as np
-from scipy import linalg
-import pickle
-import cv2
-import matplotlib.pyplot as plt
+from logging import info
 
-import contextlib
-import logging
-import urllib
-import platform
-import IPython
-import time
-import re
-import math
-import pkg_resources as pkg
-import inspect
+info(f"model initialisation in progress ...")
 
-from urllib.parse import urlparse
-from threading import Thread
-from typing import Optional
-from datetime import datetime
-from subprocess import check_output
-from pathlib import Path
-
-from detectron2.engine import DefaultPredictor
-from detectron2.config import get_cfg
-from detectron2.utils.visualizer import Visualizer
-from detectron2.data import MetadataCatalog
-from detectron2 import model_zoo
-import torch
-import imutils
-
-from webcolors import rgb_to_hex
-from webcolors import (
-    CSS3_HEX_TO_NAMES,
-    hex_to_rgb,
-)
-from scipy.spatial import KDTree
-
-# Définir QT_QPA_PLATFORM à "wayland"
-os.environ["QT_QPA_PLATFORM"] = 'xcb'
-
-import logging
-logging.info(f"model initialisation in progress ...")
-
-
-import os
-import platform
-from pathlib import Path
 import sys
-from tqdm import tqdm
-import argparse
-import pandas as pd
-from copy import deepcopy
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -77,7 +30,7 @@ class MainWindow(QMainWindow):
         self.setGeometry(550, 200, 512, 512)
         # Ajouter le logo pour l'application comme une icône
         icons = ["./data/logo/logo.ico", "./data/logo/logo1.ico"]
-        icon = random.choice(icons)
+        icon = choice(icons)
         ico = QtGui.QIcon(icon)
         self.setWindowIcon(ico)
         
@@ -85,40 +38,40 @@ class MainWindow(QMainWindow):
         self.path_model = './models/model_final.pth'
 
         self.label = QLabel(self)
-        self.label.setAlignment(QtCore.Qt.AlignCenter)
-        self.images = glob.glob("./data/fond_ecran/*.jpeg")
+        self.label.setAlignment(Qt.AlignCenter)
+        self.images = glob("./data/fond_ecran/*.jpeg")
         self.current_image = 0
         self.change_image()
         self.setCentralWidget(self.label)
 
         # Ajouter un rectangle gris transparent pour le texte de bienvenue
         self.welcome_rect = QLabel(self)
-        self.welcome_rect.setAlignment(QtCore.Qt.AlignCenter)
-        self.welcome_rect.setGeometry(QtCore.QRect(self.width()/2 - 50, 0, 340, 70))
+        self.welcome_rect.setAlignment(Qt.AlignCenter)
+        self.welcome_rect.setGeometry(QRect(self.width()/2 - 50, 0, 340, 70))
         self.welcome_rect.setStyleSheet("background-color: rgba(60, 60, 60, 0.9); border-radius:15px;")
 
         # Ajouter le texte de bienvenue
         self.welcome_label = QLabel("Bienvenue sur UnderSea", self)
         self.welcome_label.setStyleSheet("font: bold 20px; color: rgba(255, 255, 255, 0.97);")
-        self.welcome_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.welcome_label.setAlignment(Qt.AlignCenter)
         self.welcome_label.setGeometry(self.width()/2 - 125, 0, 500, 100)
         
         # Ajouter un rectangle gris transparent pour le texte de bienvenue
         self.button_rect_g = QLabel(self)
-        self.button_rect_g.setAlignment(QtCore.Qt.AlignCenter)
-        self.button_rect_g.setGeometry(QtCore.QRect(self.width()/2 - 125, 350, 500, 350))
+        self.button_rect_g.setAlignment(Qt.AlignCenter)
+        self.button_rect_g.setGeometry(QRect(self.width()/2 - 125, 350, 500, 350))
         self.button_rect_g.setStyleSheet("background-color: rgba(60, 60, 60, 0.9); border-radius:15px;")
         
         # Ajouter le texte de que voullez vous faire
         self.welcome_label = QLabel("Menu principal", self)
         self.welcome_label.setStyleSheet("font: bold 15px; color: rgba(255, 255, 255, 0.9);")
-        self.welcome_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.welcome_label.setAlignment(Qt.AlignCenter)
         self.welcome_label.setGeometry(self.width()/2 - 125, 230, 500, 300)
     
         # Ajouter le texte de une camera
         self.unecamera_label = QLabel("Vous avez une seule camera ?", self)
         self.unecamera_label.setStyleSheet("font: bold 15px; color: rgba(255, 255, 255, 0.9);")
-        self.unecamera_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.unecamera_label.setAlignment(Qt.AlignCenter)
         self.unecamera_label.setGeometry(self.width()/2 - 125, 440, 500, 300)
         
         # Ajouter les boutons d'action
@@ -229,7 +182,7 @@ class MainWindow(QMainWindow):
             
     def change_image(self):
         # Créer un QPixmap à partir de l'image
-        pixmap = QtGui.QPixmap(self.images[self.current_image])
+        pixmap = QPixmap(self.images[self.current_image])
         self.label.setPixmap(pixmap)
         # Planifier l'appel de la fonction de changement d'image suivante après un délai de 1000ms
         QtCore.QTimer.singleShot(3000, self.next_image)
@@ -344,9 +297,9 @@ class calib_window(QWidget):
         self.grid.addWidget(self.checkerboard_rows_box, 3, 1)
         self.grid.addWidget(self.label5, 4, 0)
         self.grid.addWidget(self.checkerboard_columns_box, 4, 1)
-        self.grid.addWidget(self.calib_button, 5, 0, 1, 2, QtCore.Qt.AlignCenter)
-        self.grid.addWidget(self.progress_bar, 6, 0, 1, 2, QtCore.Qt.AlignCenter)
-        self.grid.addWidget(self.rmse, 7, 0, 1, 2, QtCore.Qt.AlignCenter)
+        self.grid.addWidget(self.calib_button, 5, 0, 1, 2, Qt.AlignCenter)
+        self.grid.addWidget(self.progress_bar, 6, 0, 1, 2, Qt.AlignCenter)
+        self.grid.addWidget(self.rmse, 7, 0, 1, 2, Qt.AlignCenter)
         
         # Create a vertical layout
         self.layout = QVBoxLayout(self)
@@ -410,8 +363,8 @@ class tracking_window(QWidget):
         self.grid.addWidget(self.checkerboard_box, 2, 1)
         self.grid.addWidget(self.label4, 3, 0)
         self.grid.addWidget(self.checkerboard, 3, 1)
-        self.grid.addWidget(self.calib_button, 4, 0, 1, 2, QtCore.Qt.AlignCenter)
-        self.grid.addWidget(self.progress_bar, 5, 0, 1, 2, QtCore.Qt.AlignCenter)
+        self.grid.addWidget(self.calib_button, 4, 0, 1, 2, Qt.AlignCenter)
+        self.grid.addWidget(self.progress_bar, 5, 0, 1, 2, Qt.AlignCenter)
         
         
         # self.setCentralWidget(self.text_edit)
@@ -514,8 +467,8 @@ class img_seg_window(QWidget):
         self.grid.addWidget(self.checkbox1, 4, 1)
         self.grid.addWidget(self.label6, 5, 0)
         self.grid.addWidget(self.checkbox2, 5, 1)
-        self.grid.addWidget(self.seg_button, 6, 0, 1, 2, QtCore.Qt.AlignCenter)
-        self.grid.addWidget(self.progress_bar, 7, 0, 1, 2, QtCore.Qt.AlignCenter)
+        self.grid.addWidget(self.seg_button, 6, 0, 1, 2, Qt.AlignCenter)
+        self.grid.addWidget(self.progress_bar, 7, 0, 1, 2, Qt.AlignCenter)
 
         # Create a vertical layout
         self.layout = QVBoxLayout(self)
@@ -607,8 +560,8 @@ class vid_seg_window(QWidget):
         self.grid.addWidget(self.checkbox1, 4, 1)
         # self.grid.addWidget(self.label6, 5, 0)
         # self.grid.addWidget(self.checkbox2, 5, 1)
-        self.grid.addWidget(self.seg_button, 5, 0, 1, 2, QtCore.Qt.AlignCenter)
-        self.grid.addWidget(self.progress_bar, 6, 0, 1, 2, QtCore.Qt.AlignCenter)
+        self.grid.addWidget(self.seg_button, 5, 0, 1, 2, Qt.AlignCenter)
+        self.grid.addWidget(self.progress_bar, 6, 0, 1, 2, Qt.AlignCenter)
 
         # Create a vertical layout
         self.layout = QVBoxLayout(self)
@@ -692,8 +645,8 @@ class one_camera_window(QWidget):
         self.grid.addWidget(self.checkbox1, 3, 1)
         # self.grid.addWidget(self.label6, 5, 0)
         # self.grid.addWidget(self.checkbox2, 5, 1)
-        self.grid.addWidget(self.seg_button, 4, 0, 1, 2, QtCore.Qt.AlignCenter)
-        self.grid.addWidget(self.progress_bar, 5, 0, 1, 2, QtCore.Qt.AlignCenter)
+        self.grid.addWidget(self.seg_button, 4, 0, 1, 2, Qt.AlignCenter)
+        self.grid.addWidget(self.progress_bar, 5, 0, 1, 2, Qt.AlignCenter)
 
         # Create a vertical layout
         self.layout = QVBoxLayout(self)
