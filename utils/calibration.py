@@ -1,18 +1,18 @@
 import os
-import yaml
-import logging
+from yaml import safe_load
+from logging import info, error
 import sys
-import numpy as np
-from scipy import linalg
-import pickle
-import cv2
+from numpy import array, eye, concatenate, linalg
+from scipy import linalg as linalg_scipy
+from pickle import load
+from cv2 import FONT_HERSHEY_COMPLEX, getTextSize, putText, EVENT_LBUTTONDOWN, imread, namedWindow, setMouseCallback, imshow, waitKey, destroyAllWindows
 import matplotlib.pyplot as plt
 
 def start_message(image, text):
 
     # Définir les propriétés du texte
-    font = cv2.FONT_HERSHEY_COMPLEX
-    text_size = cv2.getTextSize(text, font, 1, 2)[0]
+    font = FONT_HERSHEY_COMPLEX
+    text_size = getTextSize(text, font, 1, 2)[0]
     text_x = (image.shape[1] - text_size[0]) // 2
     text_y = (image.shape[0] + text_size[1]) // 2
 
@@ -22,27 +22,27 @@ def start_message(image, text):
     shadow_y_offset = 2
 
     # Ajouter l'ombre du texte à l'image
-    cv2.putText(image, text, (text_x+shadow_x_offset, text_y+shadow_y_offset), font, 1, shadow_color, 2)
+    putText(image, text, (text_x+shadow_x_offset, text_y+shadow_y_offset), font, 1, shadow_color, 2)
 
     # Ajouter le texte à l'image
-    cv2.putText(image, text, (text_x, text_y), font, 1, (255, 255, 255), 3)
+    putText(image, text, (text_x, text_y), font, 1, (255, 255, 255), 3)
     return image
 
 
 # Open and load the calibration_settings.yaml file
 def parse_calibration_settings_file(filename):
     if not os.path.exists(filename):
-        logging.error(f'File does not exist: {filename}')
+        error(f'File does not exist: {filename}')
         sys.exit()
     
-    logging.info(f'Using for calibration settings: {filename}')
+    info(f'Using for calibration settings: {filename}')
 
     with open(filename) as f:
-        calibration_settings = yaml.safe_load(f)
+        calibration_settings = safe_load(f)
 
     # rudimentray check to make sure correct file was loaded
     if 'camera0' not in calibration_settings.keys():
-        logging.error(f'camera0 key was not found in the settings file. Check if correct {filename} file was passed')
+        error(f'camera0 key was not found in the settings file. Check if correct {filename} file was passed')
         sys.exit()
         
     return calibration_settings
@@ -55,10 +55,10 @@ def DLT(P1, P2, point1, point2):
          point2[1]*P2[2,:] - P2[1,:],
          P2[0,:] - point2[0]*P2[2,:]
         ]
-    A = np.array(A).reshape((4,4))
+    A = array(A).reshape((4,4))
 
     B = A.transpose() @ A
-    U, s, Vh = linalg.svd(B, full_matrices = False)
+    U, s, Vh = linalg_scipy.svd(B, full_matrices = False)
     
     return Vh[3,0:3]/Vh[3,3]
 
@@ -71,7 +71,7 @@ def transforme_to_3D(P1, P2, uvs1, uvs2):
             for u1, u2 in zip(uv1, uv2):
                 p3d = DLT(P1, P2, u1, u2)
                 p3ds.append(p3d)
-            p3ds = np.array(p3ds)
+            p3ds = array(p3ds)
             p3dss.append(p3ds)
         # au total on renvoie 8 points, dans le cas où on a 2 especes detectées
         return p3dss
@@ -79,10 +79,10 @@ def transforme_to_3D(P1, P2, uvs1, uvs2):
     
 def get_projection_matrix(mtx1, mtx2, R, T):
         # RT matrix for C1 is identity.
-        RT1 = np.concatenate([np.eye(3), [[0],[0],[0]]], axis = -1)
+        RT1 = concatenate([eye(3), [[0],[0],[0]]], axis = -1)
         P1 = mtx1 @ RT1 #projection matrix for C1
         # RT matrix for C2 is the R and T obtained from stereo calibration.
-        RT2 = np.concatenate([R, T], axis = -1)
+        RT2 = concatenate([R, T], axis = -1)
         P2 = mtx2 @ RT2 #projection matrix for C2
         return  P1, P2  
 
@@ -107,7 +107,7 @@ def get_3D_distances(p3dss,
         for _c in connections:
             point1 = p3ds[_c[0]]
             point2 = p3ds[_c[1]]
-            dist = np.linalg.norm(point2 - point1) # Euclidian default
+            dist = linalg.norm(point2 - point1) # Euclidian default
             dists.append(dist)
         distances.append(dists)
             
@@ -125,7 +125,7 @@ def show_scatter_3D(p3dss,
         for _c in connections:
             point1 = p3ds[_c[0]]
             point2 = p3ds[_c[1]]
-            distance = np.linalg.norm(point2 - point1) # Euclidian default
+            distance = linalg.norm(point2 - point1) # Euclidian default
             print("Distance entre les points {} et {}: {:.2f} cm".format(_c[0],_c[1], distance))
             mid_point = (point1 + point2)/2
             ax.text(mid_point[0], mid_point[1], mid_point[2], "Distance: {:.2f} cm".format(distance))
@@ -139,22 +139,22 @@ def show_scatter_3D(p3dss,
 def get_points_mouse(img_path):
         points = []
         def on_mouse(event, x, y, flags, param):
-                if event == cv2.EVENT_LBUTTONDOWN:
+                if event == EVENT_LBUTTONDOWN:
                         points.append((x, y))
-        img = cv2.imread(img_path)
-        cv2.namedWindow("image")
-        cv2.setMouseCallback("image", on_mouse)
+        img = imread(img_path)
+        namedWindow("image")
+        setMouseCallback("image", on_mouse)
         while True:
-                cv2.imshow("image", img)
-                if cv2.waitKey(1) & 0xFF == ord("q"):
+                imshow("image", img)
+                if waitKey(1) & 0xFF == ord("q"):
                         break
-        cv2.destroyAllWindows()
-        return np.array(points), img
+        destroyAllWindows()
+        return array(points), img
     
 def load_calibration(path_calib):
     # Open the file containing the saved dictionary
     with open(path_calib, "rb") as f:
         # Load the dictionary from the file
-        loaded_data = pickle.load(f)
+        loaded_data = load(f)
     mtx1, mtx2, R, T, ret = loaded_data['cmtx0'], loaded_data['cmtx1'], loaded_data['R'], loaded_data['T'], loaded_data['ret']
     return mtx1, mtx2, R, T, ret

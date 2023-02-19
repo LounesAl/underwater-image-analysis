@@ -1,15 +1,12 @@
-import logging
-logging.info(f"model initialisation in progress ...")
+from logging import info
+info(f"model initialisation in progress ...")
 
 
 import os
-import platform
+from platform import system
 from pathlib import Path
 import sys
-from tqdm import tqdm
-import argparse
-import pandas as pd
-from copy import deepcopy
+from argparse import ArgumentParser
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # UNDERWATER-IMAGE-ANALYSIS root directory
@@ -172,7 +169,7 @@ def run(progress_bar,                                                           
         
          # Stream results
         if view_img:
-            if platform.system() == 'Linux' and path1 not in windows:
+            if system() == 'Linux' and path1 not in windows:
                 windows.append(path1)
                 cv2.namedWindow(str(path1), cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)  # allow window resize (Linux)
                 cv2.resizeWindow(str(path1), im0s1.shape[1], im0s1.shape[0])
@@ -224,7 +221,7 @@ def run(progress_bar,                                                           
     
 
 def parse_opt():
-    parser = argparse.ArgumentParser()
+    parser = ArgumentParser()
     parser.add_argument('--weights', nargs='+', type=str, default=ROOT / 'models/model_final.pth', help='model path')
     parser.add_argument('--save-rest', action='store_false', help='save results of inference')    
     parser.add_argument('--src1', type=str, default=ROOT / 'data/video_c0', help='file/dir/')

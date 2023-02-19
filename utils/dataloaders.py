@@ -1,11 +1,9 @@
 import os
-import contextlib
-import logging
-import urllib
+from contextlib import ContextDecorator
 import torch
-import glob
+from glob import glob
 import sys
-import platform
+from platform import python_version
 import cv2
 import IPython
 import numpy as np
@@ -15,7 +13,7 @@ import math
 import pkg_resources as pkg
 import inspect
 
-from urllib.parse import urlparse
+from urllib.parse import urlparse, unquote
 from threading import Thread
 from typing import Optional
 from datetime import datetime
@@ -55,7 +53,7 @@ def check_file(file, suffix=''):
         return file
     elif file.startswith(('http:/', 'https:/')):  # download
         url = file  # warning: Pathlib turns :// -> :/
-        file = Path(urllib.parse.unquote(file).split('?')[0]).name  # '%2F' to '/', split https://url.com/file.txt?auth
+        file = Path(unquote(file).split('?')[0]).name  # '%2F' to '/', split https://url.com/file.txt?auth
         if os.path.isfile(file):
             # LOGGER.info(f'Found {url} locally at {file}')  # file already exists
             print(f'Found {url} locally at {file}')
@@ -71,7 +69,7 @@ def check_file(file, suffix=''):
     else:  # search
         files = []
         for d in 'data', 'models', 'utils':  # search directories
-            files.extend(glob.glob(str(ROOT / d / '**' / file), recursive=True))  # find file
+            files.extend(glob(str(ROOT / d / '**' / file), recursive=True))  # find file
         assert len(files), f'File not found: {file}'  # assert file was found
         assert len(files) == 1, f"Multiple files match '{file}', specify exact path: {files}"  # assert unique
         return files[0]  # return file
@@ -111,7 +109,7 @@ def file_date(path=__file__):
     
 def select_device(device='', batch_size=0, newline=True):
     # device = None or 'cpu' or 0 or '0' or '0,1,2,3'
-    s = f'PFEg4 🚀 {git_describe() or file_date()} Python-{platform.python_version()} torch-{torch.__version__} '
+    s = f'PFEg4 🚀 {git_describe() or file_date()} Python-{python_version()} torch-{torch.__version__} '
     device = str(device).strip().lower().replace('cuda:', '').replace('none', '')  # to string, 'cuda:0' to '0'
     cpu = device == 'cpu'
     mps = device == 'mps'  # Apple Metal Performance Shaders (MPS)
@@ -238,7 +236,7 @@ def is_kaggle():
 
 def check_python(minimum='3.7.0'):
     # Check current python version vs. required python version
-    check_version(platform.python_version(), minimum, name='Python ', hard=True)
+    check_version(python_version(), minimum, name='Python ', hard=True)
 
 def colorstr(*input):
     # Colors a string https://en.wikipedia.org/wiki/ANSI_escape_code, i.e.  colorstr('blue', 'hello world')
@@ -288,9 +286,9 @@ class LoadImages:
         for p in sorted(path) if isinstance(path, (list, tuple)) else [path]:
             p = str(Path(p).resolve())
             if '*' in p:
-                files.extend(sorted(glob.glob(p, recursive=True)))  # glob
+                files.extend(sorted(glob(p, recursive=True)))  # glob
             elif os.path.isdir(p):
-                files.extend(sorted(glob.glob(os.path.join(p, '*.*'))))  # dir
+                files.extend(sorted(glob(os.path.join(p, '*.*'))))  # dir
             elif os.path.isfile(p):
                 files.append(p)  # files
             else:
@@ -521,7 +519,7 @@ class LoadScreenshots:
 
 
 
-class Profile(contextlib.ContextDecorator):
+class Profile(ContextDecorator):
     # YOLOv5 Profile class. Usage: @Profile() decorator or 'with Profile():' context manager
     def __init__(self, t=0.0):
         self.t = t

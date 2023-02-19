@@ -1,6 +1,6 @@
 from os import environ
 environ['QT_PLUGIN_PATH'] = '/home/lounes/py-envs/detectron/lib/python3.8/site-packages/PySide2/Qt/plugins/platforms'
-import sys
+from sys import argv, exit
 from PySide2 import QtCore, QtGui
 from PySide2.QtGui import QPixmap
 from PySide2.QtCore import QRect
@@ -18,8 +18,6 @@ from glob import glob
 from logging import info
 
 info(f"model initialisation in progress ...")
-
-import sys
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -673,7 +671,7 @@ class one_camera_window(QWidget):
                 
                 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
+    app = QApplication(argv)
     window = MainWindow()
     window.show()
-    sys.exit(app.exec_())
+    exit(app.exec_())
