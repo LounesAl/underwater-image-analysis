@@ -1,8 +1,4 @@
-import sys
-from PySide2 import QtCore, QtGui
-
-from PySide2.QtWidgets import (QApplication, QMainWindow, QAction, QToolBar, QGridLayout,
-                               QHBoxLayout, QVBoxLayout, QPushButton, QLabel, QMenu, QToolButton, QFileDialog, QWidget, QMessageBox, QFileDialog)
+from PySide2.QtWidgets import QApplication, QFileDialog, QMessageBox, QFileDialog
 
     
 def browse_folder(self, button_id):

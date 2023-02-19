@@ -7,7 +7,7 @@ from detectron2.data import MetadataCatalog
 from detectron2 import model_zoo
 import torch
 from utils.calibration import *
-import imutils
+from imutils import resize
 
 
 COLORS = [ (255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255), (0, 255, 255),
@@ -226,8 +226,8 @@ def seg_img(self, SCORE_THRESH_TEST = 0.8, show_inf = False, show_3d = False, sh
     percentage = (1 * 100) / iterations
     self.progress_bar.setValue(percentage)
     
-    im1 = imutils.resize(im1, width=640, height=640)
-    im2 = imutils.resize(im2, width=640, height=640)
+    im1 = resize(im1, width=640, height=640)
+    im2 = resize(im2, width=640, height=640)
 
     weights = 'models/model_final.pth'
 
