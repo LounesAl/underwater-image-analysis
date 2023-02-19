@@ -1,6 +1,6 @@
 import os 
 import sys
-import logging
+from logging import info
 from utils.calibration import parse_calibration_settings_file
 from cv2 import imread, TERM_CRITERIA_EPS, TERM_CRITERIA_MAX_ITER, cvtColor, COLOR_BGR2GRAY, findChessboardCorners, cornerSubPix, calibrateCamera, CALIB_FIX_INTRINSIC, stereoCalibrate
 from numpy import zeros, mgrid, float32, int32, eye, array
@@ -69,9 +69,9 @@ def calibrate_camera_for_intrinsic_parameters(checkerboard_box_size_scale, check
             imgpoints.append(corners)
 
     ret, cmtx, dist, rvecs, tvecs = calibrateCamera(objpoints, imgpoints, (width, height), None, None)
-    logging.info(f'rmse: {ret}')
-    logging.info(f'camera matrix:\n {cmtx}')
-    logging.info(f'distortion coeffs: {dist}')
+    info(f'rmse: {ret}')
+    info(f'camera matrix:\n {cmtx}')
+    info(f'distortion coeffs: {dist}')
 
     return cmtx, dist, ret
 
@@ -152,7 +152,7 @@ def stereo_calibrate(checkerboard_box_size_scale, checkerboard_rows, checkerboar
     ret, CM1, dist0, CM2, dist1, R, T, E, F = stereoCalibrate(objpoints, imgpoints_left, imgpoints_right, mtx0, dist0,
                                                                  mtx1, dist1, (width, height), criteria = criteria, flags = stereocalibration_flags)
 
-    logging.info(f'rmse: {ret}')
+    info(f'rmse: {ret}')
     return R, T, ret
 
 
