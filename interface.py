@@ -1,3 +1,5 @@
+import os
+os.environ['QT_PLUGIN_PATH'] = '/home/lounes/py-envs/detectron/lib/python3.8/site-packages/PySide2/Qt/plugins/platforms'
 import sys
 from PySide2 import QtCore, QtGui
 from calib import main
@@ -17,7 +19,6 @@ import pickle
 import cv2
 import matplotlib.pyplot as plt
 
-import os
 import contextlib
 import logging
 import urllib
@@ -50,6 +51,9 @@ from webcolors import (
     hex_to_rgb,
 )
 from scipy.spatial import KDTree
+
+# Définir QT_QPA_PLATFORM à "wayland"
+os.environ["QT_QPA_PLATFORM"] = 'xcb'
 
 import logging
 logging.info(f"model initialisation in progress ...")
