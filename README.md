@@ -1,52 +1,51 @@
 # Underwater-image-analysis
 Portal of numerical methods for the analysis of underwater temporal sequences
 
-Ce projet est une application python qui inclut la bibliothèque Detectron2 et une interface graphique. L'objectif de ce projet est de d'extraire les caracteristiques de certaines especes sous marines et de suivre leurs evolution dans le temps. Ce projet à pour but de permettre à tous les utilisateurs, même ceux qui ne connaissent pas la programmation, d'utiliser l'interface.
+This project is a python application that includes the Detectron2 library and a graphical interface. The objective of this project is to extract the characteristics of some underwater species and to follow their evolution in time. This project aims to allow all users, even those who do not know programming, to use the interface.
 
-## Pré-requis
+## Prerequisites
 Python 3.x
-
-Bibliothèques Python : Detectron2, PySide2, etc.
+Python libraries: Detectron2, PySide2, etc.
 
 ## Installation
 ### Application executable : 
-A venir ...
+To come ...
 
 ### Conda
-1. Créer un nouveau environnement conda et activer le
-2. Clonez le projet sur votre environnement en utilisant la commande suivante :
+1. Create a new conda environment and activate the
+2. Clone the project on your environment using the following command:
 
 ```
 git clone https://github.com/LounesAl/underwater-image-analysis.git
 ```
 
-2. Installez les bibliothèques requises en utilisant la commande suivante :
+2. Install the required libraries using the following command:
 ```
 pip install -r requirements_gpu.txt
 ```
 
-ou
+or
 
 ```
 pip install -r requirements_cpu.txt
 ```
 
-## Utilisation
-1. Ouvrez un terminal et accédez au répertoire du projet.
-2. Exécutez le fichier Interface.py avec la commande suivante :
+## Usage
+1. Open a terminal and access the project directory.
+2. Run the Interface.py file with the following command:
 ```
 python interface.py
 ```
-3. Utilisez l'interface graphique pour interagir avec les données.
+3. Use the graphical interface to interact with the data.
 
-## Contribuer
-Nous sommes ouverts aux contributions pour améliorer ce projet. Veuillez vous référer à notre guide de contribution pour plus d'informations.
+## Contribute
+We welcome contributions to improve this project. Please refer to our contribution guide for more information.
 
-Licence
-Veuillez vous référer au fichier de licence pour plus d'informations.
+License
+Please refer to the license file for more information.
 
 
-## Exemples de résultats
+## Sample results
 
 ### Detection and segmentation of the underwater species ACTINIA
 https://user-images.githubusercontent.com/84065830/236916655-9a73bdfe-2332-4326-ab7e-5349436e94f3.mp4
