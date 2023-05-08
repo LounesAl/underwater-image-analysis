@@ -44,3 +44,7 @@ Nous sommes ouverts aux contributions pour améliorer ce projet. Veuillez vous r
 
 Licence
 Veuillez vous référer au fichier de licence pour plus d'informations.
+
+
+### Exemples de résultat
+<iframe width="560" height="315" src="https://youtu.be/hJuah_wBAQY" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
