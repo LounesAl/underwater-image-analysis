@@ -2,16 +2,19 @@
 Portal of numerical methods for the analysis of underwater temporal sequences
 
 This project is a python application that includes the Detectron2 library and a graphical interface. The objective of this project is to extract the characteristics of some underwater species and to follow their evolution in time. This project aims to allow all users, even those who do not know programming, to use the interface.
+
 <p align="center">
   <img src="docs/interface.jpg" width="350" title="Interface">
 </p>
-## Prerequisites
+
+## Prérequis
 Python 3.x
 Python libraries: Detectron2, PySide2, etc.
 
 ## Installation
 ### Application executable : 
-To come ...
+Linux ubuntu 22.04
+Windows coming soon ...
 
 ### Conda
 1. Create a new conda environment and activate the
